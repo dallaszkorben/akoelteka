@@ -6,6 +6,7 @@
 body {
     background-color: black;
     font-family: "Comic Sans MS", "Comic Sans", "Times New Roman", Times, serif;
+    padding: 10px;
 }
 
 #title {
@@ -22,7 +23,9 @@ body {
     vertical-align: middle;
     horizontal-align:left;
     padding: 5px;
-    background-color: red;
+    padding-right: 20px;
+    padding-left: 20px;
+    background-color: gray;
 }
 .movie_box {
     display: block;
@@ -37,18 +40,34 @@ body {
     border-width: 1px;
     border-color: white;
 }
+
+.movie_box_picture .bla{
+    width: 160px;
+    height: 160px;
+}
 .movie_box_picture {
     display: inline-block;
-    vertical-align: top;
-
+    
     background-color: black;
     
     border-style: solid;
     border-width: 1px;
     border-color: white;
-    width: 160px;
-    height: 160px;
+#    width: 160px;
+#    height: 160px;
 }
+.movie_box_picture img{
+    width: 160px;
+}
+
+.bla {    
+    display: table-cell;
+    text-align: center;
+#    width: 160px;
+#    height: 160px;
+    vertical-align: middle;
+}
+
 .movie_box_info {
     display: inline-block;
     vertical-align: top;
@@ -67,8 +86,6 @@ body {
     padding-left: 0px;
 }
 
-
-
 </style>
 
     <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
@@ -77,22 +94,28 @@ body {
 
         // Read positional parameters from the previous page
         var language = new URLSearchParams(window.location.search).get("language");
-        var type = new URLSearchParams(window.location.search).get("type");
-		var pageTitle = "title_"+type;
-        var dict = {};
-
+        var f_key = new URLSearchParams(window.location.search).get("key");
+        var f_value = new URLSearchParams(window.location.search).get("value");
+        var f_key_dict_prefix = new URLSearchParams(window.location.search).get("key_dict_prefix");
+        var f_value_dict_prefix = new URLSearchParams(window.location.search).get("value_dict_prefix");
+        var f_search = new URLSearchParams(window.location.search).get("search");
+        var f_show_value = new URLSearchParams(window.location.search).get("show_value");
+        f_value_dict_prefix = (f_value_dict_prefix == "null") ? null : f_value_dict_prefix;
+        
         function dic( word ){	    
-            trans = dict[ word ]
+            //trans = dict[ word ]
+            trans = $.i18n.map[word]
             if( trans == undefined ){
                 trans = "[" + word + "]";
             }	    
             return trans
 	    }
 	    
-		function request(data) {
+		function collectCards(app, param) {
             $.ajax({
-                url: data,
-                method: 'GET',
+                url: app,
+                data: param,
+ //               method: 'GET',
                 contentType: 'application/json',
                 dataType : "json",
                 success: function(data) {
@@ -111,7 +134,7 @@ body {
             content = "";
             content += "<div class='movie_box'>";
             content += "    <div class='movie_box_picture'>";
-            content += "        <img src='' />";
+            content += "        <div class='bla'><img src='./media/films/b/image.jpeg'' /></div>";
             content += "    </div>";
             content += "    <div class='movie_box_info'>";
             content += "        <div class='movie_box_info_title'>" + value.title[language] + " - " + value.year + "</div>";
@@ -172,11 +195,6 @@ body {
             $("#movie_box_container").append(content);
         }
 		
-	    jQuery(document).ready(function() {
-            readTranslation(language);
-            request("cgi-bin/read_films.py");
-	    });
-	    
 	    function readTranslation(l){	    
 		$.i18n.properties({ 
 		    name: 'resources', 
@@ -186,62 +204,29 @@ body {
 		    async: true,
 		    callback: function() {
 
-                $("#title").text($.i18n.prop(pageTitle)); 
-
-                dict['title_director'] = $.i18n.prop('title_director');
-                dict['title_length'] = $.i18n.prop('title_length');
-                dict['title_sound'] = $.i18n.prop('title_sound');
-                dict['title_sub'] = $.i18n.prop('title_sub'); 
-                dict['title_genre'] = $.i18n.prop('title_genre'); 
-                dict['title_theme'] = $.i18n.prop('title_theme'); 
-                dict['title_actor'] = $.i18n.prop('title_actor');
-                dict['title_best'] = $.i18n.prop('title_best'); 
-                dict['title_new'] = $.i18n.prop('title_new');
-                dict['title_imdb'] = $.i18n.prop('title_imdb');
-                
-                dict['genre_action'] = $.i18n.prop('genre_action');
-                dict['genre_western'] = $.i18n.prop('genre_western');
-                dict['genre_crime'] = $.i18n.prop('genre_crime');
-                dict['genre_drama'] = $.i18n.prop('genre_drama');
-                dict['genre_comedy'] = $.i18n.prop('genre_comedy'); 
-                dict['genre_fantasy'] = $.i18n.prop('genre_fantasy'); 
-                
-                dict['theme_revenge'] = $.i18n.prop('theme_revenge'); 
-                dict['theme_love'] = $.i18n.prop('theme_love'); 
-                dict['theme_evil'] = $.i18n.prop('theme_evil');
-                dict['theme_statepower'] = $.i18n.prop('theme_statepower'); 
-                dict['theme_drog'] = $.i18n.prop('theme_drog'); 
-                dict['theme_new_old_world'] = $.i18n.prop('theme_new_old_world'); 
-
-                dict['lang_hu'] = $.i18n.prop('lang_hu'); 
-                dict['lang_en'] = $.i18n.prop('lang_en'); 
-                dict['lang_sv'] = $.i18n.prop('lang_sv'); 
-
-
-                 
-                
+                // Show Main Title
+                $("#title").text( ($.i18n.prop( f_key_dict_prefix + f_key )) + ( ( f_show_value != "n" ) ? ": " + f_value : "" ) );                 
 
 		    }
 		 });
-
 	    };
-
+	    
+   	    jQuery(document).ready(function() {
+            readTranslation(language);
+            collectCards(
+                "cgi-bin/read_films.py", 
+                { 
+                    "key" : f_key, 
+                    "value" : f_value,
+                    "search" : f_search
+                });
+	    });
+	    
 	</script>
     </HEAD>
 
     <BODY>
-
         <div id="title"></div>
-
-        <div style="margin-left: 20px; margin-bottom: 20px;" id="langBox">
-            Language:
-            <select id="lang" onchange="readTranslation(this.value)">
-                <option value="en">en</option>
-                <option value="hu" selected >hu</option>
-                <option value="se">se</option>
-            </select>
-        </div>
-
         <div id="movie_box_container">
         </div>
     </BODY>

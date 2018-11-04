@@ -6,12 +6,13 @@ import sys
 import json
 import re
 import configparser
+import cgi, cgitb
 
 #root_dir="/home/akoel/Projects/python/akoelteka/media/"
 #for filename in glob.iglob(root_dir + '**/*', recursive=True):
 #     print(filename)
 
-def folder_investigation( actual_dir, json_list ):
+def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
     
     for dirpath, dirnames, filenames in os.walk(actual_dir):
 
@@ -19,11 +20,11 @@ def folder_investigation( actual_dir, json_list ):
         subfolder = False
         for name in dirnames:
             subfolder_path_os = os.path.join(actual_dir, name)            
-            folder_investigation( subfolder_path_os, json_list )
+            folder_investigation( subfolder_path_os, json_list, f_key, f_value, f_search )
             
             subfolder = True
 
-        # if there is/are any sub-folder in the folder, then I media/card should not be there 
+        # if there is/are any sub-folder in the folder, then media/card should not be there 
         if subfolder:
             return
 
@@ -47,9 +48,6 @@ def folder_investigation( actual_dir, json_list ):
                 title_json_list['hu'] = parser.get("titles", "title_hu")
                 title_json_list['en'] = parser.get("titles", "title_en")
                 data['title'] = title_json_list
-                
-                #data['title_en'] = parser.get("titles", "title_en")
-                #data['title_hu'] = parser.get("titles", "title_hu")
                 
                 data['year'] = parser.get("general", "year")
                 
@@ -100,8 +98,12 @@ def folder_investigation( actual_dir, json_list ):
                 data['links'] = links
                 
             except (configparser.NoSectionError, configparser.NoOptionError):
-                data['title.en'] = parser.get("titles", "title.en")
-                data['title.hu'] = parser.get("titles", "title.hu")
+                
+                # TODO It could be more sophisticated, depending what field failed
+                title_json_list = {}
+                title_json_list['hu'] = media_name
+                title_json_list['en'] = media_name
+                data['title'] = title_json_list
                 
                 data['year'] = ""
                 data['director'] = json.loads('[]')
@@ -118,29 +120,36 @@ def folder_investigation( actual_dir, json_list ):
                                         
                 data['links'] = {}
            
+           
+            if f_search == 'v':
+                if data[f_key] != f_value:
+                    return
+            elif f_search == 'a':
+                 if f_value not in data[f_key]:
+                    return
             json_list.append(data)
 
+
+
+# Get the Parameters from Ajax
+data = cgi.FieldStorage()
+f_key = data["key"].value
+f_value = data["value"].value
+f_search = data["search"].value
 
 pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv)$")
 pattern_card = re.compile("card.ini$")
 rootdir = "."
 #rootdir = "../media"
 
-
-#data["title.en"] = "angol";
-
 media_list = json.loads('[]')
 #media_list = json.loads('[{"starting":"value"}]')
 #data ={}
-#data["els"]="elem"
 #data["elem"]="masodik"
 #media_list.append(data)
 
 
-
-
-
-folder_investigation(rootdir, media_list)
+folder_investigation(rootdir, media_list, f_key, f_value, f_search)
 
 print('Content-Type: application/json')
 print()

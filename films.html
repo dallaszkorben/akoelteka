@@ -36,7 +36,7 @@ body {
 #films_box_director {
     background: #b2e1ff;
 }
-#films_box_artist {
+#films_box_actor {
     background: #b2e1ff;
 }
 #films_box_best {
@@ -60,7 +60,6 @@ body {
 </style>
     <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
     <script type="text/javascript" src="js/jquery.i18n.properties-min-1.0.9.js"></script>
-
 	<script type="text/javascript">
 
         var language = new URLSearchParams(window.location.search).get("language");
@@ -79,20 +78,16 @@ body {
 		    async: true,
 		    callback: function() { 
 
-			$("#title").text($.i18n.prop('title_films')); 
+                $("#title").text($.i18n.prop('title_films')); 
 
-			$("#films_box_genre").text($.i18n.prop('title_genre')); 
-			$("#films_box_theme").text($.i18n.prop('title_theme')); 
-			$("#films_box_director").text($.i18n.prop('title_director')); 
-			$("#films_box_artist").text($.i18n.prop('title_artist')); 
-			$("#films_box_best").text($.i18n.prop('title_best')); 
-			$("#films_box_new").text($.i18n.prop('title_new')); 
-			$("#films_box_favorite").text($.i18n.prop('title_favorite')); 
-            $("#films_box_all").text($.i18n.prop('title_all')); 
-			
-//			$.i18n.prop('title_films'); 
-//			$.i18n.prop('title_series'); 
-//			$.i18n.prop('title_podcast'); 
+                $("#films_box_genre").text($.i18n.prop('title_genre')); 
+                $("#films_box_theme").text($.i18n.prop('title_theme')); 
+                $("#films_box_director").text($.i18n.prop('title_director')); 
+                $("#films_box_actor").text($.i18n.prop('title_actor')); 
+                $("#films_box_best").text($.i18n.prop('title_best')); 
+                $("#films_box_new").text($.i18n.prop('title_new')); 
+                $("#films_box_favorite").text($.i18n.prop('title_favorite')); 
+                $("#films_box_all").text($.i18n.prop('title_all')); 			
 		    }
 		 });
 
@@ -103,7 +98,7 @@ body {
 
     <BODY>
  
-    <div id="title"></div>
+        <div id="title"></div>
 
         <div style="margin-left: 20px; margin-bottom: 20px;" id="langBox">
             Language:
@@ -115,14 +110,14 @@ body {
         </div>
 
 	<div id="films_container">
-		<a href="javascript:self.location.href='list.html?type=genre&language=' + language"><div id="films_box_genre" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=theme&language=' + language"><div id="films_box_theme" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=director&language=' + language"><div id="films_box_director" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=artist&language=' + language"><div id="films_box_artist" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=best&language=' + language"><div id="films_box_best" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=new&language=' + language"><div id="films_box_new" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=favorite&language=' + language"><div id="films_box_favorite" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?type=all&language=' + language"><div id="films_box_all" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=genre&value=crime&key_dict_prefix=title_&value_dict_prefix=genre_&search=a&show_value=y&language=' + language"><div id="films_box_genre" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=theme&value=revenge&key_dict_prefix=title_&value_dict_prefix=_theme&serch=a&show_value=y&language=' + language"><div id="films_box_theme" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=director&value=Sergio Leone&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language"><div id="films_box_director" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=actor&value=Cameron Diaz&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language"><div id="films_box_actor" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=best&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language"><div id="films_box_best" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=new&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language"><div id="films_box_new" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=favorite&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language"><div id="films_box_favorite" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?key=all&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=*&show_value=n&language=' + language"><div id="films_box_all" class="films_box"></div></a>
 	</div>
     </BODY>
 </html>
