@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <HEAD>
+
+<style> 
+body {
+    background-color: black;
+    font-family: "Comic Sans MS", "Comic Sans", "Times New Roman", Times, serif;
+}
+
+#title {
+    text-align: center; 
+    color:#777;
+    font-size: 36px;
+    font-weight: bold;
+    horizontal-align: center;
+}
+.films_box {
+    border-radius: 25px;
+    padding: 20px; 
+    width: 200px;
+    height: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 100px;
+    display: inline-block;
+}
+#films_box_genre {
+    background: #b2ffb2;
+}
+#films_box_theme {
+    background: #d8b2ff;
+}
+#films_box_director {
+    background: #b2e1ff;
+}
+#films_box_artist {
+    background: #b2e1ff;
+}
+#films_box_best {
+    background: #b2e1ff;
+}
+#films_box_new {
+    background: #b2e1ff;
+}
+#films_box_favorite {
+    background: #b2e1ff;
+}
+#films_box_all {
+    background: #b2e1ff;
+}
+#films_container {
+    width: 100%;
+    text-align: center;
+    border: 0px solid green;
+}
+
+</style>
+    <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+    <script type="text/javascript" src="js/jquery.i18n.properties-min-1.0.9.js"></script>
+
+	<script type="text/javascript">
+
+        var language = new URLSearchParams(window.location.search).get("language");
+         
+	    jQuery(document).ready(function() {
+            readTranslation(language);
+	    });
+
+	    function readTranslation(l){
+	    language = l;
+		$.i18n.properties({ 
+		    name: 'resources', 
+		    path: 'bundle/',
+		    mode: 'both', 
+		    language: l, 
+		    async: true,
+		    callback: function() { 
+
+			$("#title").text($.i18n.prop('title_films')); 
+
+			$("#films_box_genre").text($.i18n.prop('title_genre')); 
+			$("#films_box_theme").text($.i18n.prop('title_theme')); 
+			$("#films_box_director").text($.i18n.prop('title_director')); 
+			$("#films_box_artist").text($.i18n.prop('title_artist')); 
+			$("#films_box_best").text($.i18n.prop('title_best')); 
+			$("#films_box_new").text($.i18n.prop('title_new')); 
+			$("#films_box_favorite").text($.i18n.prop('title_favorite')); 
+            $("#films_box_all").text($.i18n.prop('title_all')); 
+			
+//			$.i18n.prop('title_films'); 
+//			$.i18n.prop('title_series'); 
+//			$.i18n.prop('title_podcast'); 
+		    }
+		 });
+
+	    };
+
+	</script>
+    </HEAD>
+
+    <BODY>
+ 
+    <div id="title"></div>
+
+        <div style="margin-left: 20px; margin-bottom: 20px;" id="langBox">
+            Language:
+            <select id="lang" onchange="readTranslation(this.value)">
+                <option value="en">en</option>
+                <option value="hu" selected >hu</option>
+                <option value="se">se</option>
+            </select>
+        </div>
+
+	<div id="films_container">
+		<a href="javascript:self.location.href='list.html?type=genre&language=' + language"><div id="films_box_genre" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=theme&language=' + language"><div id="films_box_theme" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=director&language=' + language"><div id="films_box_director" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=artist&language=' + language"><div id="films_box_artist" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=best&language=' + language"><div id="films_box_best" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=new&language=' + language"><div id="films_box_new" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=favorite&language=' + language"><div id="films_box_favorite" class="films_box"></div></a>
+		<a href="javascript:self.location.href='list.html?type=all&language=' + language"><div id="films_box_all" class="films_box"></div></a>
+	</div>
+    </BODY>
+</html>
