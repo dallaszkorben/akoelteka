@@ -205,7 +205,7 @@ body {
 		    callback: function() {
 
                 // Show Main Title
-                $("#title").text( ($.i18n.prop( f_key_dict_prefix + f_key )) + ( ( f_show_value != "n" ) ? ": " + f_value : "" ) );                 
+                $("#title").text( ($.i18n.prop( f_key_dict_prefix + f_key )) + ( ( f_show_value != "n" ) ? ": " + ((f_value_dict_prefix != null) ? $.i18n.prop( f_value_dict_prefix + f_value ):f_value) : "" ) );                 
 
 		    }
 		 });
