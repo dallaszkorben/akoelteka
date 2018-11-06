@@ -15,46 +15,85 @@ body {
     font-weight: bold;
     horizontal-align: center;
 }
-.films_box {
-    border-radius: 25px;
-    padding: 20px; 
-    width: 200px;
-    height: 100px;
-    font-size: 36px;
-    font-weight: bold;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 100px;
-    display: inline-block;
-}
+
 #films_box_genre {
-    background: #b2ffb2;
+    //background: #b2ffb2;
 }
 #films_box_theme {
-    background: #d8b2ff;
+    //background: #d8b2ff;
 }
 #films_box_director {
-    background: #b2e1ff;
+    //background: #b2e1ff;
 }
 #films_box_actor {
-    background: #b2e1ff;
+    //background: #b2e1ff;
 }
 #films_box_best {
-    background: #b2e1ff;
+    //background: #b2e1ff;
 }
 #films_box_new {
-    background: #b2e1ff;
+    //background: #b2e1ff;
 }
 #films_box_favorite {
-    background: #b2e1ff;
+    //background: #b2e1ff;
 }
 #films_box_all {
-    background: #b2e1ff;
+    //background: #b2e1ff;
 }
 #films_container {
-    width: 100%;
-    text-align: center;
-    border: 0px solid green;
+//    width: 100%;
+//    text-align: center;
+//    border: 0px solid green;
+}
+
+.dropdown{
+    font-family: "Comic Sans MS", "Comic Sans", "Times New Roman", Times, serif;
+    font-size: 12px;
+}
+
+    
+.categorybox {
+  background : red;
+  padding: 0px;
+  border: 0px;
+  width: 170px;
+  height: 100px;
+  border: 2px solid darkgray;
+} 
+ 
+
+.upper-button {
+  background : lightgray;
+  height: 100%;
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  color:black;
+  line-height: 100px;
+}
+
+.dropdown {
+  background : lightgray;
+  width:100%;
+  //vertical-align: middle;
+  position:relative;
+  top:-100px;
+  left:0px;
+  border: 0px;
+  align: center;
+} 
+
+.dropdown-wrapper {
+    padding-right: 5px;
+    padding-left: 5px;
+} 
+
+table{border-spacing:0;}
+
+table td { padding:2px;}
+
+a {
+    text-decoration: none;
 }
 
 </style>
@@ -109,15 +148,129 @@ body {
             </select>
         </div>
 
-	<div id="films_container">
-		<a href="javascript:self.location.href='list.html?key=genre&value=crime&key_dict_prefix=title_&value_dict_prefix=genre_&search=a&show_value=y&language=' + language"><div id="films_box_genre" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=theme&value=revenge&key_dict_prefix=title_&value_dict_prefix=_theme&serch=a&show_value=y&language=' + language"><div id="films_box_theme" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=director&value=Sergio Leone&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language"><div id="films_box_director" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=actor&value=Cameron Diaz&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language"><div id="films_box_actor" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=best&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language"><div id="films_box_best" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=new&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language"><div id="films_box_new" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=favorite&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language"><div id="films_box_favorite" class="films_box"></div></a>
-		<a href="javascript:self.location.href='list.html?key=all&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=*&show_value=n&language=' + language"><div id="films_box_all" class="films_box"></div></a>
-	</div>
+        <div id="films_container">
+        
+        
+        
+        
+      
+        
+   
+        <table ALIGN="CENTER">
+            
+            <tr>
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=genre&value=crime&key_dict_prefix=title_&value_dict_prefix=genre_&search=a&show_value=y&language=' + language">
+                            <div id="films_box_genre" class="upper-button">
+                            </div>                
+                        </a> 
+                        <div class="dropdown-wrapper">
+                            <select id=films-dropdown" class="dropdown" >
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                        </div>
+                    </div>                
+                </td>
+                
+                
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=theme&value=evil&key_dict_prefix=title_&value_dict_prefix=theme_&search=a&show_value=y&language=' + language">
+                            <div id="films_box_theme" class="upper-button">
+                            </div>                
+                        </a> 
+                        <div class="dropdown-wrapper">
+                            <select id=theme-dropdown" class="dropdown" >
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                        </div>
+                    </div>                
+                </td>
+
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=director&value=Sergio Leone&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language">
+                            <div id="films_box_director" class="upper-button">            
+                            </div>                
+                        </a> 
+                        <div class="dropdown-wrapper">
+                            <select id=director-dropdown" class="dropdown" >
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                        </div>
+                    </div>                
+                </td>
+
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=actor&value=Cameron Diaz&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language">
+                            <div id="films_box_actor" class="upper-button">
+                            </div>                
+                        </a> 
+                        <div class="dropdown-wrapper">
+                            <select id=actor-dropdown" class="dropdown" >
+                                <option value="volvo">Volvo</option>
+                                <option value="saab">Saab</option>
+                                <option value="mercedes">Mercedes</option>
+                                <option value="audi">Audi</option>
+                            </select>
+                        </div>
+                    </div>                
+                </td>
+            </tr>
+            
+                       
+
+            <tr>
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=all&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=*&show_value=n&language=' + language">
+                            <div id="films_box_all" class="upper-button">
+                            </div>                
+                        </a> 
+                    </div>                
+                </td>
+
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=best&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
+                            <div id="films_box_best" class="upper-button">
+                            </div>                
+                        </a> 
+                    </div>                
+                </td>
+                
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=new&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
+                            <div id="films_box_new" class="upper-button">
+                            </div>                
+                        </a> 
+                    </div>                
+                </td>
+
+                <td>
+                    <div class="categorybox">
+                        <a href="javascript:self.location.href='list.html?key=favorite&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
+                            <div id="films_box_favorite" class="upper-button">                                
+                            </div>                
+                        </a> 
+                    </div>                
+                </td>
+                
+            </tr>           
+            
+        
+       </div>
     </BODY>
 </html>
