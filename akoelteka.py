@@ -6,7 +6,8 @@ import sys
 
 app = QApplication(sys.argv) 
 browser = QWebEngineView()
-browser.load(QUrl("index.html"))
+browser.load(QUrl("http://localhost:8000/index.html"))
+
 browser.show()
 sys.exit(app.exec_()) 
 

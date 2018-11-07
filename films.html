@@ -50,7 +50,6 @@ body {
     font-family: "Comic Sans MS", "Comic Sans", "Times New Roman", Times, serif;
     font-size: 12px;
 }
-
     
 .categorybox {
   background : red;
@@ -59,8 +58,7 @@ body {
   width: 170px;
   height: 100px;
   border: 2px solid darkgray;
-} 
- 
+}  
 
 .upper-button {
   background : lightgray;
@@ -94,6 +92,7 @@ table td { padding:2px;}
 
 a {
     text-decoration: none;
+    cursor:pointer;
 }
 
 </style>
@@ -105,8 +104,110 @@ a {
          
 	    jQuery(document).ready(function() {
             readTranslation(language);
+            fillUpDropdowns( "cgi-bin/collect_category.py" )
 	    });
 
+	    function fillUpDropdowns( app ){
+            
+            //
+            // genre
+            //
+            $.ajax({
+                url: app,
+                data: {
+                    "section":"general",
+                    "key": "genre",
+                    "search": "a"
+                },
+ //               method: 'GET',
+                contentType: 'application/json',
+                dataType : "json",
+                success: function(data) {
+                
+                    $.each(data, function(i, value) {
+                        $("#dropdown-genre").append('<option value="' + value + '">' + ((value) ? $.i18n.prop('genre_'+value): value) + '</option>');
+                    })
+                },
+                error: function(data,status,req){
+                    alert("error: " + req);
+                }
+            });
+            
+            //
+            // theme
+            //
+            $.ajax({
+                url: app,
+                data: {
+                    "section":"general",
+                    "key": "theme",
+                    "search": "a"
+                },
+ //               method: 'GET',
+                contentType: 'application/json',
+                dataType : "json",
+                success: function(data) {
+                
+                    $.each(data, function(i, value) {
+                        $("#dropdown-theme").append('<option value="' + value + '">' + ((value) ? $.i18n.prop('theme_'+value): value) + '</option>');
+                    })
+                },
+                error: function(data,status,req){
+                    alert("error: " + req);
+                }
+            });
+
+            //
+            // director
+            //
+            $.ajax({
+                url: app,
+                data: {
+                    "section":"general",
+                    "key": "director",
+                    "search": "a"
+                },
+ //               method: 'GET',
+                contentType: 'application/json',
+                dataType : "json",
+                success: function(data) {
+                
+                    $.each(data, function(i, value) {
+                        $("#dropdown-director").append('<option value="' + value + '">' + value + '</option>');
+                    })
+                },
+                error: function(data,status,req){
+                    alert("error: " + req);
+                }
+            });
+
+            //
+            // actor
+            //
+            $.ajax({
+                url: app,
+                data: {
+                    "section":"general",
+                    "key": "actor",
+                    "search": "a"
+                },
+ //               method: 'GET',
+                contentType: 'application/json',
+                dataType : "json",
+                success: function(data) {
+                
+                    $.each(data, function(i, value) {
+                        $("#dropdown-actor").append('<option value="' + value + '">' + value + '</option>');
+                    })
+                },
+                error: function(data,status,req){
+                    alert("error: " + req);
+                }
+            });
+            
+            
+	    }
+	    	    
 	    function readTranslation(l){
 	    language = l;
 		$.i18n.properties({ 
@@ -132,6 +233,15 @@ a {
 
 	    };
 
+   	    function clickCategory(category, key_dict_prefix, value_dict_prefix){
+            selectedCategory = $('#dropdown-' + category).find(":selected").val();
+            if( selectedCategory && selectedCategory != "" ){
+                window.location.href="list.html?key=" + category + "&value=" + selectedCategory + "&key_dict_prefix=" + key_dict_prefix+ "&value_dict_prefix=" + value_dict_prefix + "&search=a&show_value=y&language=" + language
+            }
+        }
+            
+       
+        
 	</script>
     </HEAD>
 
@@ -153,24 +263,19 @@ a {
         
         
         
-      
-        
+    
    
         <table ALIGN="CENTER">
             
             <tr>
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=genre&value=crime&key_dict_prefix=title_&value_dict_prefix=genre_&search=a&show_value=y&language=' + language">
+                        <a onclick="clickCategory('genre', 'title_', 'genre_')">
                             <div id="films_box_genre" class="upper-button">
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id=films-dropdown" class="dropdown" >
-                                <option value="volvo">Volvo</option>
-                                <option value="saab">Saab</option>
-                                <option value="mercedes">Mercedes</option>
-                                <option value="audi">Audi</option>
+                            <select id="dropdown-genre" class="dropdown" >                              
                             </select>
                         </div>
                     </div>                
@@ -179,16 +284,12 @@ a {
                 
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=theme&value=evil&key_dict_prefix=title_&value_dict_prefix=theme_&search=a&show_value=y&language=' + language">
+                        <a onclick="clickCategory('theme', 'title_', 'theme_')">
                             <div id="films_box_theme" class="upper-button">
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id=theme-dropdown" class="dropdown" >
-                                <option value="volvo">Volvo</option>
-                                <option value="saab">Saab</option>
-                                <option value="mercedes">Mercedes</option>
-                                <option value="audi">Audi</option>
+                            <select id="dropdown-theme" class="dropdown" >
                             </select>
                         </div>
                     </div>                
@@ -196,16 +297,12 @@ a {
 
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=director&value=Sergio Leone&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language">
+                        <a onclick="clickCategory('director', 'title_', 'null')">
                             <div id="films_box_director" class="upper-button">            
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id=director-dropdown" class="dropdown" >
-                                <option value="volvo">Volvo</option>
-                                <option value="saab">Saab</option>
-                                <option value="mercedes">Mercedes</option>
-                                <option value="audi">Audi</option>
+                            <select id="dropdown-director" class="dropdown" >
                             </select>
                         </div>
                     </div>                
@@ -213,16 +310,12 @@ a {
 
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=actor&value=Cameron Diaz&key_dict_prefix=title_&value_dict_prefix=null&search=a&show_value=y&language=' + language">
+                        <a onclick="clickCategory('actor', 'title_', 'null')"> 
                             <div id="films_box_actor" class="upper-button">
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id=actor-dropdown" class="dropdown" >
-                                <option value="volvo">Volvo</option>
-                                <option value="saab">Saab</option>
-                                <option value="mercedes">Mercedes</option>
-                                <option value="audi">Audi</option>
+                            <select id="dropdown-actor" class="dropdown" >
                             </select>
                         </div>
                     </div>                
