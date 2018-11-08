@@ -119,7 +119,7 @@ body {
                 contentType: 'application/json',
                 dataType : "json",
                 success: function(data) {
-                    $('#list').append(data);
+//                     //$('#list').append(data);
                     $.each(data, function(i, value) {
                         fill_up_one_card(i, value)
                     })
@@ -134,7 +134,7 @@ body {
             content = "";
             content += "<div class='movie_box'>";
             content += "    <div class='movie_box_picture'>";
-            content += "        <div class='bla'><img src='./media/films/b/image.jpeg'' /></div>";
+            content += "        <div class='bla'><img " + ((value.image) ? "src='" + value.image + "'" : "") + " /></div>";
             content += "    </div>";
             content += "    <div class='movie_box_info'>";
             content += "        <div class='movie_box_info_title'>" + value.title[language] + " - " + value.year + "</div>";

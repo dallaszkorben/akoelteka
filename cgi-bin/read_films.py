@@ -30,12 +30,15 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
 
         card_path_os = None
         media_path_http = None
+        image_path_http = None
         for name in filenames:
             if pattern_card.match( name ):
                 card_path_os = os.path.join(actual_dir, name)
             if pattern_media.match(name):
                 media_path_http = actual_dir+ "/" + name
                 media_name = name
+            if pattern_image.match( name ):
+                image_path_http = actual_dir+ "/" + name
     
         # if there are card and media in the folder
         if card_path_os and media_path_http:
@@ -44,6 +47,8 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
             parser = configparser.RawConfigParser()
             parser.read(card_path_os)
             try:
+                data['image'] = image_path_http
+                
                 title_json_list = {}
                 title_json_list['hu'] = parser.get("titles", "title_hu")
                 title_json_list['en'] = parser.get("titles", "title_en")
@@ -100,6 +105,8 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
             except (configparser.NoSectionError, configparser.NoOptionError):
                 
                 # TODO It could be more sophisticated, depending what field failed
+                
+                data['image'] = ""
                 title_json_list = {}
                 title_json_list['hu'] = media_name
                 title_json_list['en'] = media_name
@@ -139,6 +146,7 @@ f_search = data["search"].value
 
 pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv)$")
 pattern_card = re.compile("card.ini$")
+pattern_image = re.compile( "^image[.]jp(eg|g)$" )
 rootdir = "."
 #rootdir = "../media"
 

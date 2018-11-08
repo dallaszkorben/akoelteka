@@ -75,15 +75,15 @@ body {
   width:100%;
   //vertical-align: middle;
   position:relative;
-  top:-100px;
+  top:-105px;
   left:0px;
   border: 0px;
   align: center;
 } 
 
 .dropdown-wrapper {
-    padding-right: 5px;
-    padding-left: 5px;
+    padding-right: 0px;
+    padding-left: 0px;
 } 
 
 table{border-spacing:0;}
@@ -107,130 +107,108 @@ a {
             fillUpDropdowns( "cgi-bin/collect_category.py" )
 	    });
 
-	    function fillUpDropdowns( app ){
+	    function fillUpDropdowns( app ){            
             
-            //
-            // genre
-            //
-            $.ajax({
-                url: app,
-                data: {
+            fillUpDropdown( app,
+                {
                     "section":"general",
                     "key": "genre",
                     "search": "a"
-                },
- //               method: 'GET',
-                contentType: 'application/json',
-                dataType : "json",
-                success: function(data) {
-                
-                    $.each(data, function(i, value) {
-                        $("#dropdown-genre").append('<option value="' + value + '">' + ((value) ? $.i18n.prop('genre_'+value): value) + '</option>');
-                    })
-                },
-                error: function(data,status,req){
-                    alert("error: " + req);
-                }
-            });
-            
-            //
-            // theme
-            //
-            $.ajax({
-                url: app,
-                data: {
+                }, 'genre_' );
+
+            fillUpDropdown( app,
+                {
                     "section":"general",
                     "key": "theme",
                     "search": "a"
-                },
- //               method: 'GET',
-                contentType: 'application/json',
-                dataType : "json",
-                success: function(data) {
-                
-                    $.each(data, function(i, value) {
-                        $("#dropdown-theme").append('<option value="' + value + '">' + ((value) ? $.i18n.prop('theme_'+value): value) + '</option>');
-                    })
-                },
-                error: function(data,status,req){
-                    alert("error: " + req);
-                }
-            });
+                }, 'theme_' );
 
-            //
-            // director
-            //
-            $.ajax({
-                url: app,
-                data: {
+            fillUpDropdown( app,
+                {
                     "section":"general",
                     "key": "director",
                     "search": "a"
-                },
- //               method: 'GET',
-                contentType: 'application/json',
-                dataType : "json",
-                success: function(data) {
-                
-                    $.each(data, function(i, value) {
-                        $("#dropdown-director").append('<option value="' + value + '">' + value + '</option>');
-                    })
-                },
-                error: function(data,status,req){
-                    alert("error: " + req);
-                }
-            });
+                }, null );
 
-            //
-            // actor
-            //
-            $.ajax({
-                url: app,
-                data: {
+            fillUpDropdown( app,
+                {
                     "section":"general",
                     "key": "actor",
                     "search": "a"
-                },
+                }, null );
+        }
+        
+  	    function fillUpDropdown( app, data, dict_key ){
+
+            $.ajax({
+                url: app,
+                data: data,
  //               method: 'GET',
                 contentType: 'application/json',
                 dataType : "json",
-                success: function(data) {
+                success: function(list) {
                 
-                    $.each(data, function(i, value) {
-                        $("#dropdown-actor").append('<option value="' + value + '">' + value + '</option>');
-                    })
+                    $.each(list, function(i, value) {
+                        transl = (dict_key && value) ? $.i18n.prop( dict_key + value) : value 
+                        $("#dropdown-" + data['key'] ).append('<option value="' + value + '">' + transl + '</option>');
+                    });
+                    
+                    sortMeBy("select#dropdown-" + data['key'], "option", "asc");
+                     $("#dropdown-" + data['key'])[0].selectedIndex = 0;
                 },
-                error: function(data,status,req){
-                    alert("error: " + req);
+                error: function(list,status,req){
+                    ;alert("error: " + req);
                 }
             });
-            
-            
-	    }
-	    	    
+        }
+	    	 
+        function sortMeBy(sel, elem, order) {
+                var $selector = $(sel),
+                $element = $selector.children(elem);
+                $element.sort(function(a, b) {
+                        //var an = parseInt(a.getAttribute(arg)),
+                        //bn = parseInt(b.getAttribute(arg));
+                        var an = a.text;
+                        bn = b.text;
+
+                        if (order == "asc") {
+                                if (an > bn)
+                                return 1;
+                                if (an < bn)
+                                return -1;
+                        } else if (order == "desc") {
+                                if (an < bn)
+                                return 1;
+                                if (an > bn)
+                                return -1;
+                        }
+                        return 0;
+                });
+                $element.detach().appendTo($selector);
+        }	    	 
+	    	 
 	    function readTranslation(l){
-	    language = l;
-		$.i18n.properties({ 
-		    name: 'resources', 
-		    path: 'bundle/',
-		    mode: 'both', 
-		    language: l, 
-		    async: true,
-		    callback: function() { 
+            language = l;
+            $.i18n.properties({ 
+                name: 'resources', 
+                path: 'bundle/',
+                mode: 'both', 
+                language: l, 
+                async: true,
+                callback: function() { 
 
-                $("#title").text($.i18n.prop('title_films')); 
+                    $("#title").text($.i18n.prop('title_films')); 
 
-                $("#films_box_genre").text($.i18n.prop('title_genre')); 
-                $("#films_box_theme").text($.i18n.prop('title_theme')); 
-                $("#films_box_director").text($.i18n.prop('title_director')); 
-                $("#films_box_actor").text($.i18n.prop('title_actor')); 
-                $("#films_box_best").text($.i18n.prop('title_best')); 
-                $("#films_box_new").text($.i18n.prop('title_new')); 
-                $("#films_box_favorite").text($.i18n.prop('title_favorite')); 
-                $("#films_box_all").text($.i18n.prop('title_all')); 			
-		    }
-		 });
-
+                    $("#films_box_genre").text($.i18n.prop('title_genre')); 
+                    $("#films_box_theme").text($.i18n.prop('title_theme')); 
+                    $("#films_box_director").text($.i18n.prop('title_director')); 
+                    $("#films_box_actor").text($.i18n.prop('title_actor')); 
+                    $("#films_box_best").text($.i18n.prop('title_best')); 
+                    $("#films_box_new").text($.i18n.prop('title_new')); 
+                    $("#films_box_favorite").text($.i18n.prop('title_favorite')); 
+                    $("#films_box_all").text($.i18n.prop('title_all')); 			
+                }
+            });
 	    };
 
    	    function clickCategory(category, key_dict_prefix, value_dict_prefix){
