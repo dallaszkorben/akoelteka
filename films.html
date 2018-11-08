@@ -149,7 +149,7 @@ a {
                 success: function(list) {
                 
                     $.each(list, function(i, value) {
-                        transl = (dict_key && value) ? $.i18n.prop( dict_key + value) : value 
+                        transl = (dict_key && value) ? $.i18n.prop( dict_key + value) : value;
                         $("#dropdown-" + data['key'] ).append('<option value="' + value + '">' + transl + '</option>');
                     });
                     
@@ -157,7 +157,7 @@ a {
                      $("#dropdown-" + data['key'])[0].selectedIndex = 0;
                 },
                 error: function(list,status,req){
-                    ;alert("error: " + req);
+                    alert(data['key'] + " error: " + status + "\n" + req + "\n" + list + "\nHat ez baj");
                 }
             });
         }
@@ -218,7 +218,13 @@ a {
             }
         }
             
-       
+        function fireClickOnA(selection, event, linkId){
+            if( selection != 0 ){
+                //clickCategory(category, key_dict_prefix, value_dict_prefix)
+                //$( linkId ).trigger('click');
+                $( linkId ).click();                
+            }
+        }       
         
 	</script>
     </HEAD>
@@ -248,12 +254,12 @@ a {
             <tr>
                 <td>
                     <div class="categorybox">
-                        <a onclick="clickCategory('genre', 'title_', 'genre_')">
+                        <a id="a-genre" onclick="clickCategory('genre', 'title_', 'genre_')">
                             <div id="films_box_genre" class="upper-button">
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id="dropdown-genre" class="dropdown" >                              
+                            <select id="dropdown-genre" class="dropdown" onchange="fireClickOnA(this, event, '#a-genre')">
                             </select>
                         </div>
                     </div>                
@@ -262,12 +268,12 @@ a {
                 
                 <td>
                     <div class="categorybox">
-                        <a onclick="clickCategory('theme', 'title_', 'theme_')">
+                        <a id="a-theme" onclick="clickCategory('theme', 'title_', 'theme_')">
                             <div id="films_box_theme" class="upper-button">
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id="dropdown-theme" class="dropdown" >
+                            <select id="dropdown-theme" class="dropdown" onchange="fireClickOnA(this, event, '#a-theme' )">
                             </select>
                         </div>
                     </div>                
@@ -275,12 +281,12 @@ a {
 
                 <td>
                     <div class="categorybox">
-                        <a onclick="clickCategory('director', 'title_', 'null')">
+                        <a id="a-director" onclick="clickCategory('director', 'title_', 'null')">
                             <div id="films_box_director" class="upper-button">            
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id="dropdown-director" class="dropdown" >
+                            <select id="dropdown-director" class="dropdown" onchange="fireClickOnA(this, event, '#a-director')">
                             </select>
                         </div>
                     </div>                
@@ -288,12 +294,12 @@ a {
 
                 <td>
                     <div class="categorybox">
-                        <a onclick="clickCategory('actor', 'title_', 'null')"> 
+                        <a id="a-actor" onclick="clickCategory('actor', 'title_', 'null')"> 
                             <div id="films_box_actor" class="upper-button">
                             </div>                
                         </a> 
                         <div class="dropdown-wrapper">
-                            <select id="dropdown-actor" class="dropdown" >
+                            <select id="dropdown-actor" class="dropdown" onchange="fireClickOnA(this, event, '#a-actor')">
                             </select>
                         </div>
                     </div>                
@@ -305,7 +311,7 @@ a {
             <tr>
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=all&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=*&show_value=n&language=' + language">
+                        <a id="a-all" href="javascript:self.location.href='list.html?key=all&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=*&show_value=n&language=' + language">
                             <div id="films_box_all" class="upper-button">
                             </div>                
                         </a> 
@@ -314,7 +320,7 @@ a {
 
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=best&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
+                        <a id="a-best" href="javascript:self.location.href='list.html?key=best&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
                             <div id="films_box_best" class="upper-button">
                             </div>                
                         </a> 
@@ -323,7 +329,7 @@ a {
                 
                 <td>
                     <div class="categorybox">
-                        <a href="javascript:self.location.href='list.html?key=new&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
+                        <a id="a-new" href="javascript:self.location.href='list.html?key=new&value=y&key_dict_prefix=title_&value_dict_prefix=null&search=v&show_value=n&language=' + language">
                             <div id="films_box_new" class="upper-button">
                             </div>                
                         </a> 
