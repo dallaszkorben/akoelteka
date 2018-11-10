@@ -36,6 +36,7 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
                 card_path_os = os.path.join(actual_dir, name)
             if pattern_media.match(name):
                 media_path_http = actual_dir+ "/" + name
+                media_path_os = os.path.join(actual_dir, name)
                 media_name = name
             if pattern_image.match( name ):
                 image_path_http = actual_dir+ "/" + name
@@ -48,6 +49,7 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
             parser.read(card_path_os)
             try:
                 data['image'] = image_path_http
+                data['media'] = media_path_os
                 
                 title_json_list = {}
                 title_json_list['hu'] = parser.get("titles", "title_hu")
@@ -107,6 +109,7 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
                 # TODO It could be more sophisticated, depending what field failed
                 
                 data['image'] = ""
+                data['media'] = ""
                 title_json_list = {}
                 title_json_list['hu'] = media_name
                 title_json_list['en'] = media_name

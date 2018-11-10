@@ -53,6 +53,7 @@ body {
     border-style: solid;
     border-width: 1px;
     border-color: white;
+    cursor:pointer;
 #    width: 160px;
 #    height: 160px;
 }
@@ -133,7 +134,7 @@ body {
         function fill_up_one_card(i, value){
             content = "";
             content += "<div class='movie_box'>";
-            content += "    <div class='movie_box_picture'>";
+            content += "    <div class='movie_box_picture' onclick='playMedia(\"" + value.media + "\")' >";
             content += "        <div class='bla'><img " + ((value.image) ? "src='" + value.image + "'" : "") + " /></div>";
             content += "    </div>";
             content += "    <div class='movie_box_info'>";
@@ -193,6 +194,19 @@ body {
             content += "    </div>";
             content += "</div>";
             $("#movie_box_container").append(content);
+        }
+        
+        function playMedia(media){
+        "cgi-bin/read_films.py", 
+            $.ajax({
+                url: "cgi-bin/play_video.py",
+                data: {
+                    "media" : media
+                },
+ //               method: 'GET',
+                contentType: 'application/json',
+                dataType : "json"
+            });
         }
 		
 	    function readTranslation(l){	    
