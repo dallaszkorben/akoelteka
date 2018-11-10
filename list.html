@@ -17,75 +17,65 @@ body {
     horizontal-align: center;
 }
 
-#movie_box_container {
+
+#movie_card_container {
     font-size: 12px;
     font-weight: normal;
     vertical-align: middle;
     horizontal-align:left;
-    padding: 5px;
+    padding: 3px;
     padding-right: 20px;
     padding-left: 20px;
     background-color: gray;
+    
 }
-.movie_box {
-    display: block;
-    width: auto;
-    text-align: left;
-    padding: 3px;
-    margin: 3px;
 
-    background-color: lightgray;
+.movie_card_table {
+    padding: 3px;                   //to decrease the image and info to not to overlap the rounding;    
+    margin-top:3px;                 //distance from the other cards;
+    margin-bottom:3px;    
     border-radius: 5px;
     border-style: solid;
     border-width: 1px;
-    border-color: white;
+    border-color: white;    
+    background-color: lightgray;
 }
 
-.movie_box_picture .bla{
-    width: 160px;
-    height: 160px;
-}
-.movie_box_picture {
-    display: inline-block;
-    
-    background-color: black;
-    
-    border-style: solid;
-    border-width: 1px;
-    border-color: white;
-    cursor:pointer;
-#    width: 160px;
-#    height: 160px;
-}
-.movie_box_picture img{
-    width: 160px;
+.movie_card_table_row {
+    display: table-row; 
 }
 
-.bla {    
-    display: table-cell;
+.movie_card_image {
+    display: table-cell;     
+    background-color: yellow;
+    padding: 0px;
+    
     text-align: center;
-#    width: 160px;
-#    height: 160px;
     vertical-align: middle;
+    height: 160px;
+    background-color: black;
+    cursor:pointer;
 }
 
-.movie_box_info {
-    display: inline-block;
-    vertical-align: top;
-
-    margin-left: 6px;
-    
-    border-style: solid;
-    border-width: 1px;
-    border-color: white;
+.movie_card_image img{
+    width: 160px;
 }
-.movie_box_info_title {
+
+.movie_card_info {
+    display: table-cell;     
+    width: 100%;
+    padding: 10px;    
+    background-color: lightgray;
+}
+
+.movie_card_info_title {
     font-size: 20px;
     font-weight: bold;
 }
-.movie_box_info_details {
+.movie_card_info_details {
     padding-left: 0px;
 }
+
 
 </style>
 
@@ -147,17 +137,24 @@ body {
 
         function fill_up_one_card(i, value){
             content = "";
-            content += "<div class='movie_box'>";
-            content += "    <div class='movie_box_picture' onclick='playMedia(\"" + value.media + "\")' >";
-            content += "        <div class='bla'><img " + ((value.image) ? "src='" + value.image + "'" : "") + " /></div>";
-            content += "    </div>";
-            content += "    <div class='movie_box_info'>";
-            content += "        <div class='movie_box_info_title'>" + value.title[language] + " - " + value.year + "</div>";
-            content += "        <div class='movie_box_info_details'>";
+            //content += "<div class='movie_card_container'>  ";
+            content += "    <div class='movie_card_table'>";
+            content += "        <div class='movie_card_table_row'>";
+                                    // picture container
+            content += "            <div class='movie_card_image' onclick='playMedia(\"" + value.media + "\")'>";
+            content += "                <img " + ((value.image) ? "src='" + value.image + "'" : "") + " />";
+            content += "            </div>";
+                                    // info container
+            content += "            <div class='movie_card_info'>";
+            
+            content += "        <div class='movie_card_info_title'>" + value.title[language] + " - " + value.year + "</div>";
+            content += "        <div class='movie_card_info_details'>";
+            
             content += "            " + dic('title_length') + ": " + value.length + "<br>";
             content += "            " + dic('title_director') + ": ";            
             first = true;
-            value.director.forEach( function(item){
+           
+           value.director.forEach( function(item){
                 content += (first ? '' :', ') + item;
                 first = false;
             });
@@ -203,11 +200,15 @@ body {
             });
             content += "<br>";
             
-            content += "            <a href='" + value.links.imdb + "'>imdb</a>";            
+            content += "            <a href='" + value.links.imdb + "'>imdb</a>"; 
+            
+            content += "            </div>";
             content += "        </div>";
             content += "    </div>";
-            content += "</div>";
-            $("#movie_box_container").append(content);
+            //content += "</div>";
+
+   
+            $("#movie_card_container").append(content);
         }
         
         function playMedia(media){
@@ -245,7 +246,7 @@ body {
 
     <BODY>
         <div id="title"></div>
-        <div id="movie_box_container">
+        <div id="movie_card_container">
         </div>
     </BODY>
 </html>
