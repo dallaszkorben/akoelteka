@@ -171,7 +171,8 @@ body {
             content += "            " + dic('title_sound') + ": ";
             first = true;
             value.sound.forEach( function(item){
-                content += (first ? '' :', ') + dic('lang_' + item);
+                sndlng = ( item ) ? dic('lang_' + item) : ""
+                content += (first ? '' :', ') + sndlng;
                 first = false;
             });
             content += "<br>";
@@ -179,7 +180,8 @@ body {
             content += "            " + dic('title_sub') + ": ";
             first = true;
             value.sub.forEach( function(item){
-                content += (first ? '' :', ') + dic('lang_' + item);
+                sublng = (item) ? dic('lang_' + item) : ""
+                content += (first ? '' :', ') + sublng;
                 first = false;
             });
             content += "<br>";
