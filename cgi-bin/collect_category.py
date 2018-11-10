@@ -49,6 +49,7 @@ data = cgi.FieldStorage()
 f_section=data["section"].value
 f_key = data["key"].value
 f_search = data["search"].value
+rootdir = data["root-dir"].value
 
 
 #f_section="general"
@@ -57,7 +58,6 @@ f_search = data["search"].value
 
 
 pattern_card = re.compile("card.ini$")
-rootdir = "."
 #rootdir = "../media"
 
 hit_list=set()

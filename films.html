@@ -16,36 +16,6 @@ body {
     horizontal-align: center;
 }
 
-#films_box_genre {
-    //background: #b2ffb2;
-}
-#films_box_theme {
-    //background: #d8b2ff;
-}
-#films_box_director {
-    //background: #b2e1ff;
-}
-#films_box_actor {
-    //background: #b2e1ff;
-}
-#films_box_best {
-    //background: #b2e1ff;
-}
-#films_box_new {
-    //background: #b2e1ff;
-}
-#films_box_favorite {
-    //background: #b2e1ff;
-}
-#films_box_all {
-    //background: #b2e1ff;
-}
-#films_container {
-//    width: 100%;
-//    text-align: center;
-//    border: 0px solid green;
-}
-
 .dropdown{
     font-family: "Comic Sans MS", "Comic Sans", "Times New Roman", Times, serif;
     font-size: 14px;
@@ -98,9 +68,10 @@ a {
 </style>
     <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
     <script type="text/javascript" src="js/jquery.i18n.properties-min-1.0.9.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
 	<script type="text/javascript">
 
-        var language = new URLSearchParams(window.location.search).get("language");
+   	    readConfigFile();
          
 	    jQuery(document).ready(function() {
             readTranslation(language);
@@ -111,6 +82,7 @@ a {
             
             fillUpDropdown( app,
                 {
+                    "root-dir": pathFilm,
                     "section":"general",
                     "key": "genre",
                     "search": "a"
@@ -118,6 +90,7 @@ a {
 
             fillUpDropdown( app,
                 {
+                    "root-dir": pathFilm,
                     "section":"general",
                     "key": "theme",
                     "search": "a"
@@ -125,6 +98,7 @@ a {
 
             fillUpDropdown( app,
                 {
+                    "root-dir": pathFilm,
                     "section":"general",
                     "key": "director",
                     "search": "a"
@@ -132,6 +106,7 @@ a {
 
             fillUpDropdown( app,
                 {
+                    "root-dir": pathFilm,
                     "section":"general",
                     "key": "actor",
                     "search": "a"
@@ -143,8 +118,8 @@ a {
             $.ajax({
                 url: app,
                 data: data,
- //               method: 'GET',
-                contentType: 'application/json',
+                method: 'GET',
+                contentType: 'json',
                 dataType : "json",
                 success: function(list) {
                 
@@ -157,7 +132,7 @@ a {
                      $("#dropdown-" + data['key'])[0].selectedIndex = 0;
                 },
                 error: function(list,status,req){
-                    alert(data['key'] + " error: " + status + "\n" + req + "\n" + list + "\nHat ez baj");
+                    alert("source:  films.html/fillUpDropdown(app, data, dict_key);\n"  + " error: " + status + "\n" + req);
                 }
             });
         }
@@ -191,7 +166,7 @@ a {
             language = l;
             $.i18n.properties({ 
                 name: 'resources', 
-                path: 'bundle/',
+                path: 'translation/',
                 mode: 'both', 
                 language: l, 
                 async: true,
@@ -220,8 +195,6 @@ a {
             
         function fireClickOnA(selection, event, linkId){
             if( selection != 0 ){
-                //clickCategory(category, key_dict_prefix, value_dict_prefix)
-                //$( linkId ).trigger('click');
                 $( linkId ).click();                
             }
         }       
@@ -233,24 +206,9 @@ a {
  
         <div id="title"></div>
 
-        <div style="margin-left: 20px; margin-bottom: 20px;" id="langBox">
-            Language:
-            <select id="lang" onchange="readTranslation(this.value)">
-                <option value="en">en</option>
-                <option value="hu" selected >hu</option>
-                <option value="se">se</option>
-            </select>
-        </div>
-
         <div id="films_container">
-        
-        
-        
-        
-    
    
-        <table ALIGN="CENTER">
-            
+            <table ALIGN="CENTER">            
             <tr>
                 <td>
                     <div class="categorybox">
@@ -343,10 +301,9 @@ a {
                             </div>                
                         </a> 
                     </div>                
-                </td>
-                
+                </td>                
             </tr>           
-            
+            </table>
         
        </div>
     </BODY>

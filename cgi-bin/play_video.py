@@ -1,19 +1,30 @@
 #!/usr/bin/python3
 
 #import glob
-import os
-import sys
-import json
-import re
-import configparser
+#import os
+#import sys
+#import json
+#import re
+#import configparser
 import cgi, cgitb
 from subprocess import call
 
 # Get the Parameters from Ajax
 data = cgi.FieldStorage()
+player = data["player"].value
+try:
+    param = data["param"].value
+except KeyError:
+    param = ""
 media = data["media"].value
 
-#media = "../media/films/a/OnceUpponATimeInWest.avi"
+switch_list = param.split(" ")
 
-call(["mplayer", media])
-#os.system("mplayer " + media)
+param_list = []
+param_list.append(player)
+param_list += switch_list
+param_list.append(media)
+
+#print("param: ", param_list, file=sys.stderr)
+
+call( param_list )

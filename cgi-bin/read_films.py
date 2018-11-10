@@ -146,11 +146,12 @@ data = cgi.FieldStorage()
 f_key = data["key"].value
 f_value = data["value"].value
 f_search = data["search"].value
+rootdir = data["root-dir"].value
+
 
 pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv)$")
 pattern_card = re.compile("card.ini$")
 pattern_image = re.compile( "^image[.]jp(eg|g)$" )
-rootdir = "."
 #rootdir = "../media"
 
 media_list = json.loads('[]')

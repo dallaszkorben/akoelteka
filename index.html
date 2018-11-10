@@ -48,34 +48,30 @@ body {
 
     <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
     <script type="text/javascript" src="js/jquery.i18n.properties-min-1.0.9.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
 
 	<script type="text/javascript">
 
-	    var language = 'hu';
+	    readConfigFile();
 
 	    jQuery(document).ready(function() {
-            readTranslation(language);
+            readTranslation();
 	    });
 
-	    function readTranslation(l){
-          language = l;
+	    function readTranslation(){
           $.i18n.properties({ 
 		    name: 'resources', 
-		    path: 'bundle/',
+		    path: 'translation/',
 		    mode: 'both', 
-		    language: l, 
+		    language: language, 
 		    async: true,
 		    callback: function() { 
 
-			$("#title").text($.i18n.prop('title_media')); 
+                $("#title").text($.i18n.prop('title_media')); 
 
-			$("#media_box_films").text($.i18n.prop('title_films')); 
-			$("#media_box_series").text($.i18n.prop('title_series')); 
-			$("#media_box_podcast").text($.i18n.prop('title_podcast')); 
-
-//			$.i18n.prop('title_films'); 
-//			$.i18n.prop('title_series'); 
-//			$.i18n.prop('title_podcast'); 
+                $("#media_box_films").text($.i18n.prop('title_films')); 
+                $("#media_box_series").text($.i18n.prop('title_series')); 
+                $("#media_box_podcast").text($.i18n.prop('title_podcast')); 
 		    }
 		 });
 	    };
@@ -85,8 +81,8 @@ body {
 
     <BODY>
 
+<!--
 	<div id="title" ></div>
-
         <div style="margin-left: 20px; margin-bottom: 20px;" id="langBox">
             Language:
             <select id="lang" onchange="readTranslation(this.value)">
@@ -95,11 +91,12 @@ body {
                 <option value="se">se</option>
             </select>
         </div>
-
+-->
 	<div id="media_container">
-		<a href="javascript:self.location.href='films.html?language=' + language" ><div id="media_box_films" class="media_box"></div></a>
+		<a href="javascript:self.location.href='films.html'" ><div id="media_box_films" class="media_box"></div></a>
 		<a href="series.html"><div id="media_box_series" class="media_box"></div></a>
 		<a href="podcast.html"><div id="media_box_podcast" class="media_box"></div></a>
 	</div>
+
     </BODY>
 </html>

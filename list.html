@@ -91,10 +91,11 @@ body {
 
     <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
     <script type="text/javascript" src="js/jquery.i18n.properties-min-1.0.9.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+
 	<script type="text/javascript">
 
         // Read positional parameters from the previous page
-        var language = new URLSearchParams(window.location.search).get("language");
         var f_key = new URLSearchParams(window.location.search).get("key");
         var f_value = new URLSearchParams(window.location.search).get("value");
         var f_key_dict_prefix = new URLSearchParams(window.location.search).get("key_dict_prefix");
@@ -103,6 +104,20 @@ body {
         var f_show_value = new URLSearchParams(window.location.search).get("show_value");
         f_value_dict_prefix = (f_value_dict_prefix == "null") ? null : f_value_dict_prefix;
         
+        readConfigFile();
+        
+        jQuery(document).ready(function() {
+            readTranslation();
+            collectCards(
+                "cgi-bin/read_films.py", 
+                { 
+                    "root-dir" : pathFilm,
+                    "key" : f_key, 
+                    "value" : f_value,
+                    "search" : f_search
+                });
+	    });
+	    
         function dic( word ){	    
             //trans = dict[ word ]
             trans = $.i18n.map[word]
@@ -116,17 +131,16 @@ body {
             $.ajax({
                 url: app,
                 data: param,
- //               method: 'GET',
-                contentType: 'application/json',
+                method: 'GET',
+                contentType: 'json',
                 dataType : "json",
                 success: function(data) {
-//                     //$('#list').append(data);
                     $.each(data, function(i, value) {
                         fill_up_one_card(i, value)
                     })
                 },
                 error: function(data,status,req){
-                    alert("error: " + req + "\n Hello");
+                    alert("source: list.html/collectCards(app, param)\n" + "error: " + req );
                 }
             });
         }
@@ -197,44 +211,34 @@ body {
         }
         
         function playMedia(media){
-        "cgi-bin/read_films.py", 
-            $.ajax({
-                url: "cgi-bin/play_video.py",
-                data: {
-                    "media" : media
-                },
- //               method: 'GET',
-                contentType: 'application/json',
-                dataType : "json"
+            "cgi-bin/read_films.py", 
+                $.ajax({
+                    url: "cgi-bin/play_video.py",
+                    data: {
+                        "player": playerVideo,
+                        "param" : playreVideoParam,
+                        "media" : media
+                    },
+                    method: 'GET',
+                    contentType: 'json',
+                    dataType : "json"
             });
         }
 		
-	    function readTranslation(l){	    
-		$.i18n.properties({ 
-		    name: 'resources', 
-		    path: 'bundle/',
-		    mode: 'both', 
-		    language: l, 
-		    async: true,
-		    callback: function() {
+	    function readTranslation(){	    
+            $.i18n.properties({ 
+                name: 'resources', 
+                path: 'translation/',
+                mode: 'both', 
+                language: language, 
+                async: true,
+                callback: function() {
 
-                // Show Main Title
-                $("#title").text( ($.i18n.prop( f_key_dict_prefix + f_key )) + ( ( f_show_value != "n" ) ? ": " + ((f_value_dict_prefix != null) ? $.i18n.prop( f_value_dict_prefix + f_value ):f_value) : "" ) );                 
-
-		    }
-		 });
+                    // Show Main Title
+                    $("#title").text( ($.i18n.prop( f_key_dict_prefix + f_key )) + ( ( f_show_value != "n" ) ? ": " + ((f_value_dict_prefix != null) ? $.i18n.prop( f_value_dict_prefix + f_value ):f_value) : "" ) );                 
+                }
+            });
 	    };
-	    
-   	    jQuery(document).ready(function() {
-            readTranslation(language);
-            collectCards(
-                "cgi-bin/read_films.py", 
-                { 
-                    "key" : f_key, 
-                    "value" : f_value,
-                    "search" : f_search
-                });
-	    });
 	    
 	</script>
     </HEAD>
