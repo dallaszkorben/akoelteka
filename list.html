@@ -197,7 +197,8 @@ body {
             content += "            " + dic('title_theme') + ": ";
             first = true;
             value.theme.forEach( function(item){
-                content += (first ? '' :', ') + dic('theme_' + item);
+                theme = ( item ) ? dic('theme_' + item) : ""
+                content += (first ? '' :', ') + theme;
                 first = false;
             });
             content += "<br>";
