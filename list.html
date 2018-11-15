@@ -99,7 +99,7 @@ body {
         jQuery(document).ready(function() {
             readTranslation();
             collectCards(
-                "cgi-bin/read_films.py", 
+                "cgi-bin/collect_cards.py", 
                 { 
                     "root-dir" : pathFilm,
                     "key" : f_key, 
@@ -140,11 +140,14 @@ body {
             //content += "<div class='movie_card_container'>  ";
             content += "    <div class='movie_card_table'>";
             content += "        <div class='movie_card_table_row'>";
-                                    // picture container
-            content += "            <div class='movie_card_image' onclick='playMedia(\"" + value.media + "\")'>";
+            // picture container
+            
+            media = ((value.media) ? '"' + value.media + '"'  : value.media );
+            container = (value.container.length) ? "{[" + value.container + "]}" : "{}";
+            content += "            <div class='movie_card_image' onclick='selectMedia(" + media + "," + container + ")'>";
             content += "                <img " + ((value.image) ? "src='" + value.image + "'" : "") + " />";
             content += "            </div>";
-                                    // info container
+            // info container
             content += "            <div class='movie_card_info'>";
             
             content += "        <div class='movie_card_info_title'>" + value.title[language] + " - " + value.year + "</div>";
@@ -164,6 +167,15 @@ body {
             first = true;
             value.actor.forEach( function(item){
                 content += (first ? '' :', ') + item;
+                first = false;
+            });
+            content += "<br>";
+
+            content += " " + dic('title_nationality') + ": ";
+            first = true;
+            value.nationality.forEach( function(item){
+                natlng = ( item ) ? dic('nat_' + item) : ""
+                content += (first ? '' :', ') + natlng;
                 first = false;
             });
             content += "<br>";
@@ -214,8 +226,9 @@ body {
             $("#movie_card_container").append(content);
         }
         
-        function playMedia(media){
-            "cgi-bin/read_films.py", 
+        function selectMedia(media, container){
+            
+            if( media ){
                 $.ajax({
                     url: "cgi-bin/play_video.py",
                     data: {
@@ -226,7 +239,12 @@ body {
                     method: 'GET',
                     contentType: 'json',
                     dataType : "json"
-            });
+                });
+            }else{
+            
+            
+            
+            }
         }
 		
 	    function readTranslation(){	    
