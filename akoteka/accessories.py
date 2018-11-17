@@ -16,7 +16,7 @@ def read_config_file():
     
 
 
-def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
+def folder_investigation( actual_dir, json_list, f_key, f_value, f_value_store_mode ):
     
     # Collect files and and dirs in the current directory
     file_list = [f for f in os.listdir(actual_dir) if os.path.isfile(os.path.join(actual_dir, f))]
@@ -46,23 +46,21 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
         
         # I collect the data from the card and the image if there is and the folders if there are
         
-        #print( "!!!!!!!!!!    ", card_path_os, "   !!!!!!!!!!!!!!" )
-        
         card = {}            
         parser = configparser.RawConfigParser()
         parser.read(card_path_os)
         try:
             
             # save the http path of the image
-            card['image'] = image_path_http
+            card['image-path'] = image_path_http
 
             # saves the os path of the media - There is no
-            card['media'] = None
+            card['media-path'] = None
             
-            container_json_list = json.loads('[]')
+            child_paths = json.loads('[]')
             for folder in dir_list:
-                container_json_list.append('"' + os.path.join(actual_dir, folder) + '"')
-            card['container'] = container_json_list
+                child_paths.append('"' + os.path.join(actual_dir, folder) + '"')
+            card['child-paths'] = child_paths
                 
             title_json_list = {}
             title_json_list['hu'] = parser.get("titles", "title_hu")
@@ -129,11 +127,12 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
                 print(configparser.NoOptionError)
                 # TODO It could be more sophisticated, depending what field failed
                 
-                card['image'] = ""
-                card['media'] = ""
+                card['image-path'] = ""
+                card['media-path'] = ""
                 title_json_list = {}
                 title_json_list['hu'] = media_name
                 title_json_list['en'] = media_name
+                card['child-paths'] = json.loads('[]')
                 card['title'] = title_json_list
                 
                 card['year'] = ""
@@ -154,12 +153,12 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
            
 
         # if the filter is for value
-        if f_search == 'v':
+        if f_value_store_mode == 'v':
             if card[f_key] != f_value:
                 return
         
         # if the filter is for array
-        elif f_search == 'a':
+        elif f_value_store_mode == 'a':
             if f_value not in card[f_key]:
                 return
         # the card is saved
@@ -175,13 +174,13 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
         try:
             
             # save the http path of the image
-            card['image'] = image_path_http
+            card['image-path'] = image_path_http
 
             # saves the os path of the media
-            card['media'] = media_path_os
+            card['media-path'] = media_path_os
             
-            container_json_list = json.loads('[]')
-            card['container'] = container_json_list
+            child_paths = json.loads('[]')
+            card['child-paths'] = child_paths
                 
             title_json_list = {}
             title_json_list['hu'] = parser.get("titles", "title_hu")
@@ -248,8 +247,9 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
                 print(configparser.NoOptionError)
                 # TODO It could be more sophisticated, depending what field failed
                 
-                card['image'] = ""
-                card['media'] = ""
+                card['image-path'] = ""
+                card['media-path'] = ""
+                card['child-paths'] = json.loads('[]')
                 title_json_list = {}
                 title_json_list['hu'] = media_name
                 title_json_list['en'] = media_name
@@ -273,12 +273,12 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
            
 
         # if the filter is for value
-        if f_search == 'v':
+        if f_value_store_mode == 'v':
             if card[f_key] != f_value:
                 return
         
         # if the filter is for array
-        elif f_search == 'a':
+        elif f_value_store_mode == 'a':
             if f_value not in card[f_key]:
                 return
         # the card is saved
@@ -291,7 +291,7 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
         # so it goes through the subfolders, there is any
         for name in dir_list:
             subfolder_path_os = os.path.join(actual_dir, name)            
-            folder_investigation( subfolder_path_os, json_list, f_key, f_value, f_search )
+            folder_investigation( subfolder_path_os, json_list, f_key, f_value, f_value_store_mode )
 
 
     # and finaly returns
@@ -309,15 +309,15 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_search ):
 #                           theme
 #                           genre
 # value     - String    - the value of the key whose Card you want in the list
-# search    - String    - How the value is stored in the Card file
+# value_store_mode -String    - How the value is stored in the Card file
 #                       - a: array
 #                       - v: value
 #                       - *: there will not be comparision, every card will be loaded
 #
-def collect_cards( rootdir=None, key=None, value=None, search=None ):
+def collect_cards( rootdir=None, key=None, value=None, value_store_mode=None ):
 
     media_list = json.loads('[]')
-    folder_investigation(rootdir, media_list, key, value, search)
+    folder_investigation(rootdir, media_list, key, value, value_store_mode)
 
     #print(json.dumps(media_list, sort_keys=True, indent=4) )
     return media_list

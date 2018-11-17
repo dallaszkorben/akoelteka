@@ -23,7 +23,7 @@ class GuiAkoTeka(QWidget):
         box_layout.addWidget(scroll)
         scroll.setWidgetResizable(True)
         scroll_content = QWidget(scroll)
-#        scroll_content.setStyleSheet('background: black')  
+        scroll_content.setStyleSheet('background: black')  
 
         # layout of the content with margins
         scroll_layout = QVBoxLayout(scroll_content)
@@ -34,11 +34,10 @@ class GuiAkoTeka(QWidget):
         scroll_layout.setContentsMargins(0,0,0,0)
         scroll_content.setLayout(scroll_layout)
 
-        card_holder = CardHolder()
-        scroll_layout.addWidget(card_holder)
-        
-        card_holder.remove_cards()
-       
+        self.card_holder = CardHolder()
+        scroll_layout.addWidget(self.card_holder)
+        self.card_holder.setHidden(True)
+#        self.card_holder.setHidden(False)
         
         # --- Window ---
         self.setWindowTitle('akoTeka')    
@@ -53,11 +52,28 @@ class GuiAkoTeka(QWidget):
         cp=QDesktopWidget().availableGeometry().center()
         fg.moveCenter(cp)
         self.move(fg.topLeft())
+        
+    def show_card_holder(self):
+
+        self.card_holder.fill_up(
+            {
+                "key" : "all",
+                "value" : "",
+                "value-store-mode" : "*",
+                "paths" : [
+                    "/media/akoel/Movies/Final/Films"
+                ]                
+            }
+        )
+
+        self.card_holder.setHidden(False)
+
 
         
 def main():    
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
+    ex.show_card_holder()
     sys.exit(app.exec_())
     
     

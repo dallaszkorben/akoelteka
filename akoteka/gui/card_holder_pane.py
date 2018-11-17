@@ -1,5 +1,7 @@
 import sys
 import os
+import json
+from subprocess import call
 
 from pkg_resources import resource_string, resource_filename
 
@@ -7,6 +9,11 @@ from akoteka.accessories import collect_cards
 
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
+
+from akoteka.gui.glob import media_path_film
+from akoteka.gui.glob import media_player_video
+from akoteka.gui.glob import media_player_video_param
+
 #from akoteka.gui.glob import language
 
 PICTURE_WIDTH = 190
@@ -38,7 +45,7 @@ class Card(QLabel):
         # gap between the card, an the elements of the card - horizontal gap
         card_layout.setSpacing(10)
 
-        self.card_image = Card_Image()
+        self.card_image = CardImage()
         card_layout.addWidget( self.card_image )
         self.card_information = Card_Information()
         card_layout.addWidget( self.card_information )
@@ -46,9 +53,35 @@ class Card(QLabel):
         self.setStyleSheet('background: lightgray') 
         
         #self.setMinimumHeight(PICTURE_HEIGHT)
+       
+    def mousePressEvent(self, event):
         
+        if self.get_media_path():
+            
+            switch_list = media_player_video_param.split(" ")
+            param_list = []
+            param_list.append(media_player_video)
+            param_list += switch_list
+            param_list.append(self.get_media_path())
+
+            call( param_list )
+            
+        print(self.get_child_paths())
+       
     def set_image_path( self, image_path ):
         self.card_image.set_image_path( image_path )
+        
+    def set_media_path( self, media_path ):
+        self.card_image.set_media_path( media_path )
+
+    def get_media_path( self ):
+        return self.card_image.get_media_path( )
+    
+    def set_child_paths( self, child_paths ):
+        self.card_image.set_child_paths( child_paths )
+        
+    def get_child_paths( self ):
+        return self.card_image.get_child_paths()
         
     def set_title(self, title):
         self.card_information.set_title(title)
@@ -78,9 +111,6 @@ class CardHolder( QWidget ):
         inner_canvas.setStyleSheet('background: gray')   
 
         holder_layout.addWidget(inner_canvas)
-         
-    
-         
 
         # -------------
         #
@@ -94,38 +124,7 @@ class CardHolder( QWidget ):
         #scroll_layout.addWidget( header )
         self.inner_layout.addWidget( header )
         
-        # -------------
-        #
-        # Cards
-        #
-        # ------------
-
- 
-        ret = collect_cards( "/media/akoel/Movies/Final/Films", key="all", value="", search="*" )
-        for crd in ret:
-            
-            #scrollLayout.addWidget( QPushButton(str(i)) )
-            card = Card()
-            card.set_image_path( crd["image"] )
-            card.set_title( crd["title"][language] )
-            card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
-            card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
-            card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
-            card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
-
-            card.add_element_to_collector_line( _("title_year"), crd["year"])
-            card.add_element_to_collector_line( _("title_length"), crd["length"])
-            card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
-            
-            #scroll_layout.addWidget( card )
-            self.inner_layout.addWidget( card )
-        # add after the last card
-        #scroll_layout.addStretch(1)
-        
         self.stretchie = QSpacerItem(10,10,QSizePolicy.Minimum,QSizePolicy.Expanding)
-        self.inner_layout.addItem(self.stretchie)
-#        self.inner_layout.addStretch(1)
-        #scroll.setWidget(scroll_content)
   
     def remove_cards(self):
         self.inner_layout.removeItem(self.stretchie)
@@ -137,6 +136,46 @@ class CardHolder( QWidget ):
             
             # remove it from the gui
             widgetToRemove.setParent(None)
+            
+    def fill_up(self, root_json):
+        self.remove_cards()
+
+        key = root_json[ "key" ]
+        value = root_json[ "value" ]
+        value_store_mode = root_json[ "value-store-mode" ]
+        
+        for path in root_json["paths"]:
+        
+            card_list = collect_cards( path, key=key, value=value, value_store_mode=value_store_mode )
+            for crd in card_list:
+            
+                #scrollLayout.addWidget( QPushButton(str(i)) )
+                card = Card()
+                card.set_image_path( crd["image-path"] )
+                card.set_child_paths( crd["child-paths"] )
+                card.set_media_path( crd["media-path"] )
+                card.set_title( crd["title"][language] )
+                card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
+                card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
+                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
+                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
+
+                card.add_element_to_collector_line( _("title_year"), crd["year"])
+                card.add_element_to_collector_line( _("title_length"), crd["length"])
+                card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
+            
+                #scroll_layout.addWidget( card )
+                self.inner_layout.addWidget( card )
+            
+            # add after the last card
+            #scroll_layout.addStretch(1)        
+            
+        self.inner_layout.addItem(self.stretchie)
+#        self.inner_layout.addStretch(1)
+        #scroll.setWidget(scroll_content)        
+        
+        
+        
 
 class QHLine(QFrame):
     def __init__(self):
@@ -251,7 +290,7 @@ class Card_Information(QWidget):
     def add_element_to_collector_line( self, label, value ):
         self.card_info_collector_line.add_element( label, value )
 
-class Card_Image(QLabel):
+class CardImage(QLabel):
     def __init__(self):
         super().__init__()
         
@@ -264,29 +303,21 @@ class Card_Image(QLabel):
         #self.setPalette(p)
         self.setStyleSheet('background: black')
        
-        #pixmap = QPixmap( "/media/akoel/Movies/Final/Films/A.Profi-1981/image.jpeg" )
-        #smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
-        ##smaller_pixmap = pixmap.scaled(160, 160, Qt.KeepAspectRatio, Qt.FastTransformation)
-        #self.setPixmap(smaller_pixmap)
+        self.media_path = None
+        self.child_paths = json.loads('[]')
         
         self.setMinimumWidth(PICTURE_WIDTH)
         self.setMaximumWidth(PICTURE_WIDTH)
 
     def enterEvent(self, event):
         self.update()
+        QApplication.setOverrideCursor(Qt.PointingHandCursor)
 
     def leaveEvent(self, event):
         self.update()
+        QApplication.restoreOverrideCursor()
     
     def paintEvent(self, event):
-        #pix = self.pixmap_hover if self.underMouse() else self.pixmap
-        #pix = self.pixmap_hover if self.hasFocus() else self.pixmap
-        #pix = self.pixmap_hover if self.underMouse() else self.pixmap_focus if self.hasFocus() else self.pixmap
-        #if self.isDown():
-        #    pix = self.pixmap_pressed
-        #painter = QPainter(self)
-        #painter.drawPixmap(event.rect(), self.pixmap)    
-        
         if self.underMouse():                       
             self.setStyleSheet('background: gray')
         else:
@@ -299,7 +330,15 @@ class Card_Image(QLabel):
         smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
         #smaller_pixmap = pixmap.scaled(160, 160, Qt.KeepAspectRatio, Qt.FastTransformation)
         self.setPixmap(smaller_pixmap)        
-   
+
+    def set_media_path( self, media_path ):
+        self.media_path = media_path
      
+    def get_media_path( self ):
+        return self.media_path
 
+    def set_child_paths( self, child_paths ):
+        self.child_paths = child_paths
 
+    def get_child_paths( self ):
+        return self.child_paths
