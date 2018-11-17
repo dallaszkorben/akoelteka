@@ -29,8 +29,10 @@ PICTURE_HEIGHT = 160
 #
 class Card(QLabel):
     
-    def __init__(self):
+    def __init__(self, card_holder):
         super().__init__()
+        
+        self.card_holder = card_holder
         
         card_layout = QHBoxLayout(self)
         # control the gap between the card, and its contents
@@ -66,7 +68,10 @@ class Card(QLabel):
 
             call( param_list )
             
-        print(self.get_child_paths())
+        else:
+            self.card_holder.go_deeper(self.get_child_paths() )
+   
+   
        
     def set_image_path( self, image_path ):
         self.card_image.set_image_path( image_path )
@@ -94,8 +99,11 @@ class Card(QLabel):
 
 
 class CardHolder( QWidget ):
-    def __init__(self):
+    def __init__(self, parent, previous_holder, target):
         super().__init__()
+
+        self.parent = parent
+        self.previous_holder = previous_holder
 
         holder_layout = QVBoxLayout(self)
         self.setLayout(holder_layout)
@@ -122,35 +130,26 @@ class CardHolder( QWidget ):
         header.setAlignment(Qt.AlignVCenter)
         header.setText("Filter")
         #scroll_layout.addWidget( header )
-        self.inner_layout.addWidget( header )
+        self.inner_layout.addWidget( header )        
         
-        self.stretchie = QSpacerItem(10,10,QSizePolicy.Minimum,QSizePolicy.Expanding)
-  
-    def remove_cards(self):
-        self.inner_layout.removeItem(self.stretchie)
-        for i in reversed(range(self.inner_layout.count())): 
-            widgetToRemove = self.inner_layout.itemAt(i).widget()
-        
-            # remove it from the layout list
-            self.inner_layout.removeWidget(widgetToRemove)
-            
-            # remove it from the gui
-            widgetToRemove.setParent(None)
-            
-    def fill_up(self, root_json):
-        self.remove_cards()
+        # -------------
+        #
+        # Cards
+        #
+        # ------------
+        #self.remove_cards()
 
-        key = root_json[ "key" ]
-        value = root_json[ "value" ]
-        value_store_mode = root_json[ "value-store-mode" ]
+        key = target[ "key" ]
+        value = target[ "value" ]
+        value_store_mode = target[ "value-store-mode" ]
         
-        for path in root_json["paths"]:
+        for path in target["paths"]:
         
             card_list = collect_cards( path, key=key, value=value, value_store_mode=value_store_mode )
             for crd in card_list:
             
                 #scrollLayout.addWidget( QPushButton(str(i)) )
-                card = Card()
+                card = Card(self)
                 card.set_image_path( crd["image-path"] )
                 card.set_child_paths( crd["child-paths"] )
                 card.set_media_path( crd["media-path"] )
@@ -169,12 +168,36 @@ class CardHolder( QWidget ):
             
             # add after the last card
             #scroll_layout.addStretch(1)        
-            
+
+        self.stretchie = QSpacerItem(10,10,QSizePolicy.Minimum,QSizePolicy.Expanding)
         self.inner_layout.addItem(self.stretchie)
-#        self.inner_layout.addStretch(1)
-        #scroll.setWidget(scroll_content)        
+  
+    def remove_cards(self):
+        self.inner_layout.removeItem(self.stretchie)
+        for i in reversed(range(self.inner_layout.count())): 
+            widgetToRemove = self.inner_layout.itemAt(i).widget()
+        
+            # remove it from the layout list
+            self.inner_layout.removeWidget(widgetToRemove)
+            
+            # remove it from the gui
+            widgetToRemove.setParent(None)
+            
+    def go_deeper(self, child_paths):
         
         
+        deeper_card_holder = CardHolder(self.parent, self, 
+            {
+                "key" : "all",
+                "value" : "",
+                "value-store-mode" : "*",
+                "paths" : child_paths        
+            }                                        
+        )
+        self.parent.add_new_holder(self, deeper_card_holder)
+        
+    def go_back(self):
+        self.parent.restore_previous_holder(self.previous_holder, self)      
         
 
 class QHLine(QFrame):

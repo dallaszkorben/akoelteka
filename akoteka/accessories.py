@@ -59,7 +59,7 @@ def folder_investigation( actual_dir, json_list, f_key, f_value, f_value_store_m
             
             child_paths = json.loads('[]')
             for folder in dir_list:
-                child_paths.append('"' + os.path.join(actual_dir, folder) + '"')
+                child_paths.append( os.path.join(actual_dir, folder) )
             card['child-paths'] = child_paths
                 
             title_json_list = {}

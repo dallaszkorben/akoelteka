@@ -26,18 +26,18 @@ class GuiAkoTeka(QWidget):
         scroll_content.setStyleSheet('background: black')  
 
         # layout of the content with margins
-        scroll_layout = QVBoxLayout(scroll_content)
+        self.scroll_layout = QVBoxLayout(scroll_content)
         scroll.setWidget(scroll_content)
         # vertical distance between cards - Vertical
-        scroll_layout.setSpacing(0)
+        self.scroll_layout.setSpacing(0)
         # spaces between the added Widget and this top, right, bottom, left side
-        scroll_layout.setContentsMargins(0,0,0,0)
-        scroll_content.setLayout(scroll_layout)
+        self.scroll_layout.setContentsMargins(0,0,0,0)
+        scroll_content.setLayout(self.scroll_layout)
 
-        self.card_holder = CardHolder()
-        scroll_layout.addWidget(self.card_holder)
-        self.card_holder.setHidden(True)
-#        self.card_holder.setHidden(False)
+#        self.card_holder = CardHolder()
+#        self.scroll_layout.addWidget(self.card_holder)
+#        self.card_holder.setHidden(True)
+##        self.card_holder.setHidden(False)
         
         # --- Window ---
         self.setWindowTitle('akoTeka')    
@@ -53,9 +53,32 @@ class GuiAkoTeka(QWidget):
         fg.moveCenter(cp)
         self.move(fg.topLeft())
         
-    def show_card_holder(self):
+    def add_new_holder(self, previous_holder, new_holder):
 
-        self.card_holder.fill_up(
+        print(previous_holder)
+        # if there was previous holder
+        if previous_holder:
+
+            # then hide it
+            previous_holder.setHidden(True)
+
+        # add the new holder
+        self.scroll_layout.addWidget(new_holder)
+        
+    def restore_previous_holder(self, previous_holder, actual_holder):
+        
+        self.inner_layout.removeWidget(actual_holder)
+        actual_holder.setParent(None)
+        
+        previous_holder.setHidden(False)
+        
+        
+    def start_card_holder(self):
+
+        previous_holder = None
+        card_holder=CardHolder(
+            self,
+            previous_holder,
             {
                 "key" : "all",
                 "value" : "",
@@ -66,14 +89,14 @@ class GuiAkoTeka(QWidget):
             }
         )
 
-        self.card_holder.setHidden(False)
+        self.add_new_holder(previous_holder, card_holder)
 
 
         
 def main():    
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
-    ex.show_card_holder()
+    ex.start_card_holder()
     sys.exit(app.exec_())
     
     

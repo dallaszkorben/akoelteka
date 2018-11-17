@@ -1,3 +1,4 @@
 /env
 /media/Films
 **/*.kate-swp
+**/__pycache__
