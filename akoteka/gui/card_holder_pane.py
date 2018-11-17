@@ -108,31 +108,35 @@ class CardHolder( QWidget ):
             card = Card()
             card.set_image_path( crd["image"] )
             card.set_title( crd["title"][language] )
-            card.add_info_line( dic._("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
-            card.add_info_line( dic._("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
-            card.add_info_line( dic._("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
-            card.add_info_line( dic._("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
+            card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
+            card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
+            card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
+            card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
 
-            card.add_element_to_collector_line( dic._("title_year"), crd["year"])
-            card.add_element_to_collector_line( dic._("title_length"), crd["length"])
-            card.add_element_to_collector_line( dic._("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
+            card.add_element_to_collector_line( _("title_year"), crd["year"])
+            card.add_element_to_collector_line( _("title_length"), crd["length"])
+            card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
             
             #scroll_layout.addWidget( card )
             self.inner_layout.addWidget( card )
         # add after the last card
         #scroll_layout.addStretch(1)
-        self.inner_layout.addStretch(1)
+        
+        self.stretchie = QSpacerItem(10,10,QSizePolicy.Minimum,QSizePolicy.Expanding)
+        self.inner_layout.addItem(self.stretchie)
+#        self.inner_layout.addStretch(1)
         #scroll.setWidget(scroll_content)
   
     def remove_cards(self):
+        self.inner_layout.removeItem(self.stretchie)
         for i in reversed(range(self.inner_layout.count())): 
             widgetToRemove = self.inner_layout.itemAt(i).widget()
-            widgetToRemove.setParent(None)
         
             # remove it from the layout list
             self.inner_layout.removeWidget(widgetToRemove)
-            # remove it from the gui
             
+            # remove it from the gui
+            widgetToRemove.setParent(None)
 
 class QHLine(QFrame):
     def __init__(self):

@@ -123,7 +123,7 @@ class Dict( Property ):
         return self.get(self.__class__.DICT_SECTION, key,  "[" + key + "]")
 
 
-class Config_Ini( Property ):
+class ConfigIni( Property ):
     INI_FILE_NAME="config.ini"
 
     # (section, key, default)
@@ -146,7 +146,7 @@ class Config_Ini( Property ):
         return inst
         
     def __init__(self):
-        file = os.path.join(os.getcwd(), Config_Ini.INI_FILE_NAME)
+        file = os.path.join(os.getcwd(), ConfigIni.INI_FILE_NAME)
         super().__init__( file )
 
 

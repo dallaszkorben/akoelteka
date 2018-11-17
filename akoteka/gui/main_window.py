@@ -37,7 +37,7 @@ class GuiAkoTeka(QWidget):
         card_holder = CardHolder()
         scroll_layout.addWidget(card_holder)
         
-#        card_holder.remove_cards()
+        card_holder.remove_cards()
        
         
         # --- Window ---
@@ -59,3 +59,5 @@ def main():
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
     sys.exit(app.exec_())
+    
+    

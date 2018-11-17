@@ -1,6 +1,6 @@
 import sys
-from akoteka import gui
+from akoteka.gui import main_window
 
 if __name__ == "__main__":
 
-    gui.main()
+    main_window.main()

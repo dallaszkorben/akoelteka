@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import QDesktopWidget
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QFrame
+from PyQt5.QtWidgets import QSpacerItem
+from PyQt5.QtWidgets import QSizePolicy
 
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QColor
