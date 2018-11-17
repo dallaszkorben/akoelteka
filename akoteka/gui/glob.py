@@ -15,10 +15,13 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtGui import QPalette
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
+from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QCursor
 
 from PyQt5 import QtCore
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QSize
 
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict

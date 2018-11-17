@@ -2,7 +2,7 @@ import sys
 import os
 import json
 from subprocess import call
-
+from threading import Thread
 from pkg_resources import resource_string, resource_filename
 
 from akoteka.accessories import collect_cards
@@ -66,7 +66,10 @@ class Card(QLabel):
             param_list += switch_list
             param_list.append(self.get_media_path())
 
-            call( param_list )
+
+            thread = Thread(target = call, args = (param_list, ))
+            thread.start()
+            #call( param_list )
             
         else:
             self.card_holder.go_deeper(self.get_child_paths() )
@@ -105,32 +108,32 @@ class CardHolder( QWidget ):
         self.parent = parent
         self.previous_holder = previous_holder
 
-        holder_layout = QVBoxLayout(self)
-        self.setLayout(holder_layout)
+        self_layout = QVBoxLayout(self)
+        self.setLayout(self_layout)
         # controls the distance between the MainWindow and the added container: scrollContent
-        holder_layout.setContentsMargins(12,12,12,12)     
-        holder_layout.setSpacing(0)
+        self_layout.setContentsMargins(12,12,12,12)     
+        self_layout.setSpacing(0)
         
-        inner_canvas = QWidget()
-        self.inner_layout = QVBoxLayout(inner_canvas)
-        inner_canvas.setLayout(self.inner_layout)
-        self.inner_layout.setContentsMargins(12,12,12,12)  
-        self.inner_layout.setSpacing(5)
-        inner_canvas.setStyleSheet('background: gray')   
+        card_holder_canvas = QWidget()
+        self.card_holder_layout = QVBoxLayout(card_holder_canvas)
+        card_holder_canvas.setLayout(self.card_holder_layout)
+        self.card_holder_layout.setContentsMargins(12,12,12,12)  
+        self.card_holder_layout.setSpacing(5)
+        card_holder_canvas.setStyleSheet('background: gray')   
 
-        holder_layout.addWidget(inner_canvas)
+        self_layout.addWidget(card_holder_canvas)
 
         # -------------
         #
         # Header
         #
         # ------------
-        header = QLabel()
-        header.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
-        header.setAlignment(Qt.AlignVCenter)
-        header.setText("Filter")
-        #scroll_layout.addWidget( header )
-        self.inner_layout.addWidget( header )        
+#        header = QLabel()
+#        header.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
+#        header.setAlignment(Qt.AlignVCenter)
+#        header.setText("Filter")
+#        #scroll_layout.addWidget( header )
+#        self.card_holder_layout.addWidget( header )        
         
         # -------------
         #
@@ -139,13 +142,13 @@ class CardHolder( QWidget ):
         # ------------
         #self.remove_cards()
 
-        key = target[ "key" ]
-        value = target[ "value" ]
-        value_store_mode = target[ "value-store-mode" ]
+        self.key = target[ "key" ]
+        self.value = target[ "value" ]
+        self.value_store_mode = target[ "value-store-mode" ]
         
         for path in target["paths"]:
         
-            card_list = collect_cards( path, key=key, value=value, value_store_mode=value_store_mode )
+            card_list = collect_cards( path, key=self.key, value=self.value, value_store_mode=self.value_store_mode )
             for crd in card_list:
             
                 #scrollLayout.addWidget( QPushButton(str(i)) )
@@ -164,40 +167,41 @@ class CardHolder( QWidget ):
                 card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
             
                 #scroll_layout.addWidget( card )
-                self.inner_layout.addWidget( card )
+                self.card_holder_layout.addWidget( card )
             
             # add after the last card
             #scroll_layout.addStretch(1)        
 
         self.stretchie = QSpacerItem(10,10,QSizePolicy.Minimum,QSizePolicy.Expanding)
-        self.inner_layout.addItem(self.stretchie)
+        self.card_holder_layout.addItem(self.stretchie)
+        
+        self.parent.set_back_button_listener(self)
   
     def remove_cards(self):
-        self.inner_layout.removeItem(self.stretchie)
-        for i in reversed(range(self.inner_layout.count())): 
-            widgetToRemove = self.inner_layout.itemAt(i).widget()
+        self.card_holder_layout.removeItem(self.stretchie)
+        for i in reversed(range(self.card_holder_layout.count())): 
+            widgetToRemove = self.card_holder_layout.itemAt(i).widget()
         
             # remove it from the layout list
-            self.inner_layout.removeWidget(widgetToRemove)
+            self.card_holder_layout.removeWidget(widgetToRemove)
             
             # remove it from the gui
             widgetToRemove.setParent(None)
             
     def go_deeper(self, child_paths):
-        
-        
         deeper_card_holder = CardHolder(self.parent, self, 
             {
-                "key" : "all",
-                "value" : "",
-                "value-store-mode" : "*",
+                "key" : self.key,
+                "value" : self.value,
+                "value-store-mode" : self.value_store_mode,
                 "paths" : child_paths        
             }                                        
         )
         self.parent.add_new_holder(self, deeper_card_holder)
         
     def go_back(self):
-        self.parent.restore_previous_holder(self.previous_holder, self)      
+        self.parent.restore_previous_holder(self.previous_holder, self)
+        self.parent.set_back_button_listener(self.previous_holder)
         
 
 class QHLine(QFrame):

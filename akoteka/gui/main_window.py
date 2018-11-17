@@ -7,6 +7,38 @@ from akoteka.gui.card_holder_pane import CardHolder
     
 from akoteka.gui.glob import *
 
+class ControlPanel(QWidget):
+    def __init__(self):
+        super().__init__()        
+        
+        self_layout = QHBoxLayout(self)
+        self.setLayout(self_layout)
+        
+        # controls the distance between the MainWindow and the added container: scrollContent
+        self_layout.setContentsMargins(3, 3, 3, 3)
+        self_layout.setSpacing(5)
+        
+        back_button = QPushButton()
+        back_button.clicked.connect(self.back_button_on_click)
+        
+        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", "back-button.jpg")) ))
+        back_button.setIconSize(QSize(32,32))
+        back_button.setCursor(QCursor(Qt.PointingHandCursor))
+        back_button.setStyleSheet("background:transparent; border:none") 
+
+        self_layout.addWidget( back_button )
+
+        self_layout.addStretch(1)
+        
+        self.back_button_listener = None
+
+    def set_back_button_listener(self, listener):
+        self.back_button_listener = listener
+        
+    def back_button_on_click(self):
+        if self.back_button_listener:
+            self.back_button_listener.go_back()
+
 class GuiAkoTeka(QWidget):
     
     def __init__(self):
@@ -17,6 +49,11 @@ class GuiAkoTeka(QWidget):
         self.setLayout(box_layout)
         # controls the distance between the MainWindow and the added container: scrollContent
         box_layout.setContentsMargins(0, 0, 0, 0)
+        box_layout.setSpacing(0)
+    
+        # control line
+        self.control_panel = ControlPanel()
+        box_layout.addWidget( self.control_panel)
     
         # scroll_content where you can add your widgets - has scroll
         scroll = QScrollArea(self)
@@ -34,11 +71,8 @@ class GuiAkoTeka(QWidget):
         self.scroll_layout.setContentsMargins(0,0,0,0)
         scroll_content.setLayout(self.scroll_layout)
 
-#        self.card_holder = CardHolder()
-#        self.scroll_layout.addWidget(self.card_holder)
-#        self.card_holder.setHidden(True)
-##        self.card_holder.setHidden(False)
-        
+        self.back_button_listener = None
+
         # --- Window ---
         self.setWindowTitle('akoTeka')    
         #self.setGeometry(300, 300, 300, 200)
@@ -55,8 +89,7 @@ class GuiAkoTeka(QWidget):
         
     def add_new_holder(self, previous_holder, new_holder):
 
-        print(previous_holder)
-        # if there was previous holder
+        ## if there was previous holder
         if previous_holder:
 
             # then hide it
@@ -67,10 +100,11 @@ class GuiAkoTeka(QWidget):
         
     def restore_previous_holder(self, previous_holder, actual_holder):
         
-        self.inner_layout.removeWidget(actual_holder)
-        actual_holder.setParent(None)
+        if previous_holder:
+            self.scroll_layout.removeWidget(actual_holder)
+            actual_holder.setParent(None)
         
-        previous_holder.setHidden(False)
+            previous_holder.setHidden(False)
         
         
     def start_card_holder(self):
@@ -80,9 +114,9 @@ class GuiAkoTeka(QWidget):
             self,
             previous_holder,
             {
-                "key" : "all",
-                "value" : "",
-                "value-store-mode" : "*",
+                "key" : "genre",
+                "value" : "animation",
+                "value-store-mode" : "a",
                 "paths" : [
                     "/media/akoel/Movies/Final/Films"
                 ]                
@@ -91,7 +125,8 @@ class GuiAkoTeka(QWidget):
 
         self.add_new_holder(previous_holder, card_holder)
 
-
+    def set_back_button_listener(self, listener):
+        self.control_panel.set_back_button_listener(listener)
         
 def main():    
     app = QApplication(sys.argv)

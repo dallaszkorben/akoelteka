@@ -14,19 +14,7 @@ class Property(object):
     update() method is to update a value of a key. If the key is not existing
     then it will be generated with default value
     """
-#    __instance = None
-
-#    def __new__(cls):
-#        if cls.__instance == None:
-#            cls.__instance = super().__new__(cls)
-#        return cls.__instance
-#
-#    @classmethod
-#    def getInstance(cls, file):
-#        inst = cls.__new__(cls)
-#        cls.__init__(cls.__instance, file)     
-#        return inst
-        
+       
     def __init__(self, file, writable=False):
         self.writable = writable
         self.file = file
@@ -86,14 +74,6 @@ class Property(object):
                 self.parser[section]={key: value}
 
         self.__write_file()
-
-#    def __str__(self):
-#        self.parser.read(self.file)
-#        out=[]
-#        for s, vs in self.parser.items():
-#            out += ["[" + s + "]"] + ["  " + k + "=" + v for k, v in vs.items()]
-#        return "\n".join(out)
-
 
 class Dict( Property ):
     
