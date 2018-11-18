@@ -19,6 +19,11 @@ from akoteka.gui.glob import media_player_video_param
 PICTURE_WIDTH = 190
 PICTURE_HEIGHT = 160
 
+COLOR_CARD = "#b3d4c9"
+COLOR_CARD_BORDER_MEDIA = "#b3d4c9"
+COLOR_CARD_BORDER_CONTAINER = "#0e997a"
+COLOR_CARD_HOLDER_CARDS = "#3f6b61"
+COLOR_CARD_HOLDER_MAIN = "#73948d"
 # =========================================
 # 
 # This Class represents a Card of a movie
@@ -33,28 +38,27 @@ class Card(QLabel):
         super().__init__()
         
         self.card_holder = card_holder
+
+        self_layout = QHBoxLayout(self)
+        self_layout.setContentsMargins(8, 8, 8, 8)
+        self.setLayout( self_layout )
+#        self.setStyleSheet('background: blue')
         
-        card_layout = QHBoxLayout(self)
-        # control the gap between the card, and its contents
-        card_layout.setContentsMargins(10, 10, 10, 10)
-        self.setLayout( card_layout )
-        
-        # border
-        self.setFrameShape(QFrame.Panel)
-        self.setFrameShadow(QFrame.Sunken)
-        self.setLineWidth(1)
-        
+        card_holder = QLabel()
+        self_layout.addWidget(card_holder)
+        card_layout = QHBoxLayout(card_holder)
+        card_layout.setContentsMargins(0, 0, 0, 0)
         # gap between the card, an the elements of the card - horizontal gap
         card_layout.setSpacing(10)
+        card_holder.setLayout( card_layout )
+        card_holder.setStyleSheet('background: ' + COLOR_CARD)
 
         self.card_image = CardImage()
         card_layout.addWidget( self.card_image )
-        self.card_information = Card_Information()
+        self.card_information = CardInformation()
         card_layout.addWidget( self.card_information )
-        
-        self.setStyleSheet('background: lightgray') 
-        
-        #self.setMinimumHeight(PICTURE_HEIGHT)
+ 
+        self.borderRadius = 5
        
     def mousePressEvent(self, event):
         
@@ -73,14 +77,18 @@ class Card(QLabel):
             
         else:
             self.card_holder.go_deeper(self.get_child_paths() )
-   
-   
        
     def set_image_path( self, image_path ):
         self.card_image.set_image_path( image_path )
         
     def set_media_path( self, media_path ):
         self.card_image.set_media_path( media_path )
+        
+        # if it is a direct card to a media
+#        if self.card_image.get_media_path():
+#            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_MEDIA)
+#        else:
+#            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_CONTAINER)
 
     def get_media_path( self ):
         return self.card_image.get_media_path( )
@@ -100,8 +108,37 @@ class Card(QLabel):
     def add_element_to_collector_line( self, label, value ):
         self.card_information.add_element_to_collector_line( label, value )
 
+    def paintEvent(self, event):
+        # get current window size
+        s = self.size()
+        qp = QPainter()
+        qp.begin(self)
+        qp.setRenderHint(QPainter.Antialiasing, True)
+        
+        # if it is a direct card to a media
+        if self.card_image.get_media_path():
+            #self.setStyleSheet('background: ' + COLOR_CARD_BORDER_MEDIA)
+            #qp.setPen(self.foregroundColor)
+            qp.setBrush( QColor(COLOR_CARD_BORDER_MEDIA))
 
-class CardHolder( QWidget ):
+        else:
+#            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_CONTAINER)        
+            qp.setBrush( QColor(COLOR_CARD_BORDER_CONTAINER ))
+
+
+        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
+        qp.end()
+        
+# ================================================
+# 
+# This Class represents a Card Holder of the Cards
+#
+# ================================================
+#
+# The title_layer stores the Title and the card_holder_canvas
+# The card_holder_layout stores the Cards
+#
+class CardHolder( QLabel ):
     def __init__(self, parent, previous_holder, target):
         super().__init__()
 
@@ -111,29 +148,37 @@ class CardHolder( QWidget ):
         self_layout = QVBoxLayout(self)
         self.setLayout(self_layout)
         # controls the distance between the MainWindow and the added container: scrollContent
-        self_layout.setContentsMargins(12,12,12,12)     
-        self_layout.setSpacing(0)
+        # order: left, top, right, bottom
+        self_layout.setContentsMargins(9,9,9,9)     
+        self_layout.setSpacing(10)
+        self.setStyleSheet('background: ' + COLOR_CARD_HOLDER_MAIN)   
+
+        # -------------
+        #
+        # Title
+        #
+        # ------------
+        title = QLabel()
+        title.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
+        title.setAlignment(Qt.AlignHCenter)
+        title_text = _("title_list") + "\n" + _( "title_" + target["key"] )
+        translated = _(target["key"] + "_" + target["value"]) if target["key"] == "genre" or target["key"] == "theme" else None
+        nottranslated = target["value"] if not translated and target["key"] != "all" and target["key"] != "best" and target["key"] != "new" and target["key"] != "favorite" else None
+        title_value = translated if translated else nottranslated if nottranslated else None
+        title_text += ( ": " + title_value )  if title_value else ""
+        title.setText(title_text)
+        self_layout.addWidget( title )        
+
         
         card_holder_canvas = QWidget()
         self.card_holder_layout = QVBoxLayout(card_holder_canvas)
         card_holder_canvas.setLayout(self.card_holder_layout)
         self.card_holder_layout.setContentsMargins(12,12,12,12)  
         self.card_holder_layout.setSpacing(5)
-        card_holder_canvas.setStyleSheet('background: gray')   
+        card_holder_canvas.setStyleSheet('background: ' + COLOR_CARD_HOLDER_CARDS)   
 
         self_layout.addWidget(card_holder_canvas)
 
-        # -------------
-        #
-        # Header
-        #
-        # ------------
-#        header = QLabel()
-#        header.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
-#        header.setAlignment(Qt.AlignVCenter)
-#        header.setText("Filter")
-#        #scroll_layout.addWidget( header )
-#        self.card_holder_layout.addWidget( header )        
         
         # -------------
         #
@@ -286,9 +331,7 @@ class Card_Info_Collector_Line(QLabel):
         
         #line_layout.addStretch(1)
 
-
-
-class Card_Information(QWidget):
+class CardInformation(QWidget):
     def __init__(self):
         super().__init__()
         

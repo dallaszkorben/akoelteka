@@ -7,38 +7,6 @@ from akoteka.gui.card_holder_pane import CardHolder
     
 from akoteka.gui.glob import *
 
-class ControlPanel(QWidget):
-    def __init__(self):
-        super().__init__()        
-        
-        self_layout = QHBoxLayout(self)
-        self.setLayout(self_layout)
-        
-        # controls the distance between the MainWindow and the added container: scrollContent
-        self_layout.setContentsMargins(3, 3, 3, 3)
-        self_layout.setSpacing(5)
-        
-        back_button = QPushButton()
-        back_button.clicked.connect(self.back_button_on_click)
-        
-        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", "back-button.jpg")) ))
-        back_button.setIconSize(QSize(32,32))
-        back_button.setCursor(QCursor(Qt.PointingHandCursor))
-        back_button.setStyleSheet("background:transparent; border:none") 
-
-        self_layout.addWidget( back_button )
-
-        self_layout.addStretch(1)
-        
-        self.back_button_listener = None
-
-    def set_back_button_listener(self, listener):
-        self.back_button_listener = listener
-        
-    def back_button_on_click(self):
-        if self.back_button_listener:
-            self.back_button_listener.go_back()
-
 class GuiAkoTeka(QWidget):
     
     def __init__(self):
@@ -68,7 +36,7 @@ class GuiAkoTeka(QWidget):
         # vertical distance between cards - Vertical
         self.scroll_layout.setSpacing(0)
         # spaces between the added Widget and this top, right, bottom, left side
-        self.scroll_layout.setContentsMargins(0,0,0,0)
+        self.scroll_layout.setContentsMargins(10,10,10,10)
         scroll_content.setLayout(self.scroll_layout)
 
         self.back_button_listener = None
@@ -114,9 +82,9 @@ class GuiAkoTeka(QWidget):
             self,
             previous_holder,
             {
-                "key" : "genre",
-                "value" : "animation",
-                "value-store-mode" : "a",
+                "key" : "all",
+                "value" : "",
+                "value-store-mode" : "*",
                 "paths" : [
                     "/media/akoel/Movies/Final/Films"
                 ]                
@@ -127,6 +95,38 @@ class GuiAkoTeka(QWidget):
 
     def set_back_button_listener(self, listener):
         self.control_panel.set_back_button_listener(listener)
+
+class ControlPanel(QWidget):
+    def __init__(self):
+        super().__init__()        
+        
+        self_layout = QHBoxLayout(self)
+        self.setLayout(self_layout)
+        
+        # controls the distance between the MainWindow and the added container: scrollContent
+        self_layout.setContentsMargins(3, 3, 3, 3)
+        self_layout.setSpacing(5)
+        
+        back_button = QPushButton()
+        back_button.clicked.connect(self.back_button_on_click)
+        
+        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", "back-button.jpg")) ))
+        back_button.setIconSize(QSize(32,32))
+        back_button.setCursor(QCursor(Qt.PointingHandCursor))
+        back_button.setStyleSheet("background:transparent; border:none") 
+
+        self_layout.addWidget( back_button )
+
+        self_layout.addStretch(1)
+        
+        self.back_button_listener = None
+
+    def set_back_button_listener(self, listener):
+        self.back_button_listener = listener
+        
+    def back_button_on_click(self):
+        if self.back_button_listener:
+            self.back_button_listener.go_back()
         
 def main():    
     app = QApplication(sys.argv)

@@ -33,6 +33,8 @@ media_path_film = config_ini.get_media_path_film()
 media_player_video = config_ini.get_media_player_video()
 media_player_video_param = config_ini.get_media_player_video_param()
 
+
+
 # Get the dictionary
 dic = Dict.get_instance( language )
 
