@@ -36,7 +36,7 @@ class GuiAkoTeka(QWidget):
         # vertical distance between cards - Vertical
         self.scroll_layout.setSpacing(0)
         # spaces between the added Widget and this top, right, bottom, left side
-        self.scroll_layout.setContentsMargins(10,10,10,10)
+        self.scroll_layout.setContentsMargins(0,0,0,0)
         scroll_content.setLayout(self.scroll_layout)
 
         self.back_button_listener = None
@@ -85,6 +85,7 @@ class GuiAkoTeka(QWidget):
                 "key" : "all",
                 "value" : "",
                 "value-store-mode" : "*",
+                "hierarchy" : "",
                 "paths" : [
                     "/media/akoel/Movies/Final/Films"
                 ]                
