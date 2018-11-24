@@ -6,6 +6,8 @@ from threading import Thread
 from pkg_resources import resource_string, resource_filename
 
 from akoteka.accessories import collect_cards
+from akoteka.accessories import collect_filters
+from akoteka.accessories import filter_key
 
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
@@ -40,6 +42,11 @@ class CardHolder( QLabel ):
 
         self.parent = parent
         self.previous_holder = previous_holder
+
+        
+        thread = Thread(target=self.fill_up_filters, args=(self.parent.get_filter(), target))
+        #thread.daemon = True                            
+        thread.start()                                  
 
         # -------------
         #
@@ -99,7 +106,7 @@ class CardHolder( QLabel ):
 
         self.key = target[ "key" ]
         self.value = target[ "value" ]
-        self.value_store_mode = target[ "value-store-mode" ]
+        self.value_store_mode = filter_key[self.key]
         
         for path in target["paths"]:
         
@@ -160,6 +167,31 @@ class CardHolder( QLabel ):
     def go_back(self):
         self.parent.restore_previous_holder(self.previous_holder, self)
         self.parent.set_back_button_listener(self.previous_holder)
+
+    def fill_up_filters(self, filter_holder, target):
+        
+        hit_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set()        
+        }
+
+        for path in target["paths"]:
+            collect_filters(path, hit_list)
+        
+        for element in hit_list['genre']:
+            filter_holder.add_genre(element)
+        for element in hit_list['theme']:
+            filter_holder.add_theme(element)
+        for element in hit_list['director']:
+            filter_holder.add_director(element)
+        for element in hit_list['actor']:
+            filter_holder.add_actor(element)
+            
+            
+                
+
       
 class CardHolderPanel( QLabel ):
     def __init__(self):
@@ -238,6 +270,7 @@ class Card(QLabel):
        
     def mousePressEvent(self, event):
         
+        # Play media
         if self.get_media_path():
             
             switch_list = media_player_video_param.split(" ")

@@ -6,14 +6,106 @@ import configparser
 import cgi, cgitb
 
 pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv)$")
-pattern_card = re.compile("card.ini$")
 pattern_image = re.compile( "^image[.]jp(eg|g)$" )
+pattern_card = re.compile("^card.ini$")
+
+filter_key = {
+    "all":{
+        "store-mode": "*",
+        "key-dict-prefix": "title_",
+        "value-dict": False        
+    },
+    "best":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False
+    },
+    "new":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False
+    },
+    "favorite":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False
+    },
+    "director":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": False
+    },
+    "actor": {
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": False
+    },
+    "theme":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "theme_"
+    },
+    "genre":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "genre_"        
+    }
+}
 
 
 def read_config_file():
     
     pass
     
+
+#
+# 
+#    hit_list = {
+#        "genre": set(),
+#        "theme": set(),
+#        "director": set(),
+#        "actor": set()        
+#    }
+#
+#
+def collect_filters( actual_dir, hit_list ):
+
+    for dirpath, dirnames, filenames in os.walk(actual_dir):
+
+        for name in filenames:
+            if pattern_card.match( name ):
+                card_path_os = os.path.join(dirpath, name)
+                
+                parser = configparser.RawConfigParser()
+                parser.read(card_path_os)
+            
+                for category, lst in hit_list.items():
+                    fk = filter_key[category]
+
+                    try:
+                
+                        value = parser.get( "general", category )
+
+                        if fk["store-mode"] == 'v':
+
+                            if value:
+                                hit_list[category].add(value.strip())
+                                
+                        elif fk["store-mode"] == 'a':
+                                    
+                            values = value.split(",")            
+                            for value in values:
+                                if value:
+                                    
+                                    hit_list[category].add(value.strip())
+                
+                    except (configparser.NoSectionError, configparser.NoOptionError) as e:
+                        pass
+
+    return hit_list
+
 
 
 def folder_investigation( actual_dir, json_list, f_key, f_value, f_value_store_mode ):

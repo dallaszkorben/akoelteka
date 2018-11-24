@@ -9,6 +9,10 @@ from PyQt5.QtWidgets import QFrame
 from PyQt5.QtWidgets import QSpacerItem
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QStyleFactory
+
 
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QColor
