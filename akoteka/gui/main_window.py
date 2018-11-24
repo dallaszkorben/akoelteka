@@ -303,10 +303,10 @@ class FilterHolder(QWidget):
         self_layout.addWidget(holder_dropdown_da)
 
     def add_genre(self, genre):
-        self.filter_dd_genre.add_element(_("genre_" + genre))
+        self.filter_dd_genre.add_element(genre)
 
     def add_theme(self, theme):
-        self.filter_dd_theme.add_element(_("theme_" + theme))
+        self.filter_dd_theme.add_element(theme)
     
     def add_director(self, director):
         self.filter_dd_director.add_element(director)

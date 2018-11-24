@@ -1,9 +1,12 @@
 import sys
 import os
 import json
+import locale
 from subprocess import call
 from threading import Thread
 from pkg_resources import resource_string, resource_filename
+from functools import cmp_to_key
+
 
 from akoteka.accessories import collect_cards
 from akoteka.accessories import collect_filters
@@ -180,13 +183,13 @@ class CardHolder( QLabel ):
         for path in target["paths"]:
             collect_filters(path, hit_list)
         
-        for element in hit_list['genre']:
+        for element in sorted([_("genre_" + e) for e in hit_list['genre']], key=cmp_to_key(locale.strcoll) ):            
             filter_holder.add_genre(element)
-        for element in hit_list['theme']:
+        for element in sorted([_("theme_" + e) for e in hit_list['theme']], key=cmp_to_key(locale.strcoll) ):
             filter_holder.add_theme(element)
-        for element in hit_list['director']:
+        for element in sorted( hit_list['director'], key=cmp_to_key(locale.strcoll) ):
             filter_holder.add_director(element)
-        for element in hit_list['actor']:
+        for element in sorted( hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
             filter_holder.add_actor(element)
             
             
