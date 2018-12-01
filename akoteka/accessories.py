@@ -289,10 +289,10 @@ def folder_investigation( actual_dir, json_list, filter_selection ):
     # and finaly returns
     return
 
-def collect_cards( rootdir, filter_selection ):
-
+def collect_cards( rootdirs, filter_selection ):
     media_list = json.loads('[]')
-    folder_investigation(rootdir, media_list, filter_selection)
 
-    #print(json.dumps(media_list, sort_keys=True, indent=4) )
+    for rootdir in rootdirs:
+        folder_investigation(rootdir, media_list, filter_selection)
+
     return media_list

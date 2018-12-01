@@ -105,7 +105,7 @@ class CardHolder( QLabel ):
         # Cards
         #
         # ------------
-        self.cc = CollectCard( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
+        self.cc = CollectCardThread( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
         self.cc.trigger.connect(self.fill_up_card_holder)
         self.cc.start()
         
@@ -147,19 +147,17 @@ class CardHolder( QLabel ):
     # This method fills up the card_holder
     #
     # connected SIGNAL 
-    def fill_up_card_holder(self, card_array):
+    def fill_up_card_holder(self, card_list):
         
-        for card_list in card_array:
-        
-            for crd in card_list:
+        for crd in card_list:
 
-                card = Card(self)
-                card.set_image_path( crd["image-path"] )
-                card.set_child_paths( crd["child-paths"] )
-                card.set_media_path( crd["media-path"] )
-                card.set_title( crd["title"][language] )
+            card = Card(self)
+            card.set_image_path( crd["image-path"] )
+            card.set_child_paths( crd["child-paths"] )
+            card.set_media_path( crd["media-path"] )
+            card.set_title( crd["title"][language] )
 
-                if crd["media-path"]:
+            if crd["media-path"]:
                     
                     card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
                     card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
@@ -170,11 +168,13 @@ class CardHolder( QLabel ):
                     card.add_element_to_collector_line( _("title_length"), crd["length"])
                     card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
 
-                self.card_holder_layout.addWidget( card )
+            self.card_holder_layout.addWidget( card )
         
         self.show_card_holder()
 
-class CollectCard(QtCore.QThread):
+
+
+class CollectCardThread(QtCore.QThread):
     trigger = pyqtSignal(list)
 
     def __init__(self, parent=None, paths=None, filter_selection=None):
@@ -186,14 +186,13 @@ class CollectCard(QtCore.QThread):
         self.filter_selection = filter_selection
         
     def run(self):
-        card_array = []
-        for path in self.paths:
-            card_list = collect_cards( path, self.filter_selection )
-            card_array.append(card_list)
+
+        #for path in self.paths:
+        card_list = collect_cards( self.paths, self.filter_selection )
 
         #import time
         #time.sleep(10)
-        self.trigger.emit(card_array)
+        self.trigger.emit(card_list)
 
     def __del__(self):
         self.exiting = True
