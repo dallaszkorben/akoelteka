@@ -1,9 +1,17 @@
 import sys
 import os
 
+from threading import Thread
+
 from pkg_resources import resource_string, resource_filename
 
 from akoteka.gui.card_holder_pane import CardHolder
+
+from akoteka.accessories import collect_filters
+
+from functools import cmp_to_key
+
+import locale
     
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
@@ -79,17 +87,21 @@ class GuiAkoTeka(QWidget):
     def start_card_holder(self):
 
         previous_holder = None
+        
+        paths = [
+                    media_path
+                ]
+        hierarchy = ""
+        
+        thread = Thread(target=self.fill_up_filters, args=(paths,))
+        #thread.daemon = True                            
+        thread.start()    
+        
         card_holder=CardHolder(
             self,
             previous_holder,
-            {
-                "key" : "all",       #all, best, new, favorite, director, actor, theme, genre
-                "value" : "",
-                "hierarchy" : "",
-                "paths" : [
-                    "/media/akoel/Movies/Final"
-                ]                
-            }
+            hierarchy,
+            paths
         )
 
         self.add_new_holder(previous_holder, card_holder)
@@ -97,8 +109,34 @@ class GuiAkoTeka(QWidget):
     def set_back_button_listener(self, listener):
         self.control_panel.set_back_button_listener(listener)
         
-    def get_filter(self):
+    def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
+    
+    
+    #
+    # Fills up the Filters
+    #
+    def fill_up_filters(self, paths):
+        
+        hit_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set()        
+        }
+
+        for path in paths:
+            collect_filters(path, hit_list)
+        
+        for element in sorted([(_("genre_" + e),e) for e in hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):
+            self.get_filter_holder().add_genre(element[0], element[1])        
+        for element in sorted([(_("theme_" + e), e) for e in hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):
+            self.get_filter_holder().add_theme(element[0], element[1])
+        for element in sorted( hit_list['director'], key=cmp_to_key(locale.strcoll) ):
+            self.get_filter_holder().add_director(element)
+        for element in sorted( hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
+            self.get_filter_holder().add_actor(element)
+      
 
 # =========================================
 #
@@ -137,6 +175,16 @@ class ControlPanel(QWidget):
         
         # Filter on the right
         self_layout.addWidget(self.filter_holder)
+
+#        mylist = []
+#        lm = ModelForTranslation(mylist, self)
+#        cb = QComboBox(self)
+#        cb.setModel(lm)
+#        self_layout.addWidget(cb )
+        
+        
+        # Read the actual element from the list
+#        print( cb.itemData(cb.currentIndex()) )
         
         self.back_button_listener = None
 
@@ -150,6 +198,9 @@ class ControlPanel(QWidget):
     def get_filter_holder(self):
         return self.filter_holder
 
+#
+# Dropdown HOLDER
+#
 class FilterDropDownHolder(QWidget):
     
     def __init__(self):
@@ -166,7 +217,7 @@ class FilterDropDownHolder(QWidget):
         self.self_layout.addWidget(filter_dropdown)
         
 
-class FilterDropDown(QWidget):
+class FilterDropDownSimple(QWidget):
     
     def __init__(self, label):
         super().__init__()
@@ -214,6 +265,95 @@ class FilterDropDown(QWidget):
 
     def add_element(self, element):
         self.dropdown.addItem(element)
+
+
+class ModelForTranslation(QAbstractTableModel):
+    
+    """
+    datalist: a list where each item is a row
+    """
+
+    def __init__ (self, datalist=[], parent=None, *args):
+        QAbstractTableModel.__init__(self, parent, *args)
+        self.datalist = datalist
+    
+    # Mandatory
+    def rowCount(self, parent=QModelIndex()):
+        return len(self.datalist)
+
+    # Mandatory
+    def columnCount(self, parent):
+        return 2
+
+    # Mandatory
+    def data(self, index, role=Qt.DisplayRole):
+        row = index.row()
+        column = index.column()
+
+        if index.isValid() and role == Qt.DisplayRole:
+            elements_of_row = self.datalist[row]
+            return QVariant(elements_of_row['name'])
+
+        elif index.isValid() and role == Qt.UserRole:
+            elements_of_row = self.datalist[row]
+            return elements_of_row['id']
+        else:
+            return QVariant()
+
+    def insertRows(self, position, rows=1, index=QModelIndex()):
+        self.beginInsertRows(QModelIndex(), position, position + rows - 1)
+        for row in range(rows):
+            self.datalist.insert(position + row,  {})
+        self.endInsertRows()
+        return True
+
+    def setData(self, index, value, role):        
+        row = index.row()
+        column = index.column()
+
+        # 256 value is for the second position
+        if role == Qt.UserRole and column == 0:
+            self.datalist[row]['id'] = value
+        # 2 value is for the first position
+        elif role == Qt.EditRole and column == 0:
+            self.datalist[row]['name'] = value
+   
+        return True
+
+
+class FilterDropDownTranslated(QWidget):
+    
+    def __init__(self, label):
+        super().__init__()
+
+        self_layout = QHBoxLayout(self)
+        self_layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout( self_layout )
+#        self.setStyleSheet( 'background: green')
+        
+        self_layout.addWidget( QLabel(label))
+
+        self.dropdown = QComboBox(self)
+        mylist = []
+        tm = ModelForTranslation(mylist, self)
+        self.dropdown.setModel(tm)
+
+        style_box = '''
+            QComboBox { 
+                max-width: 200px; min-width: 200px; border: 1px solid gray; border-radius: 5px;
+            }        '''
+      
+        self.dropdown.setStyleSheet(style_box)
+        self.dropdown.addItem("","")
+
+        self_layout.addWidget( self.dropdown )
+
+    #
+    # value:    Translated text
+    # id:       translation code
+    #
+    def add_element(self, value, id):
+        self.dropdown.addItem(value, id)
         
 
 class FilterCheckBox(QWidget):
@@ -236,6 +376,9 @@ class FilterCheckBox(QWidget):
         
         self_layout.addWidget( checkbox)
 
+#
+# Checkbox HOLDER
+#
 class FilterCheckBoxHolder(QWidget):
     
     def __init__(self):
@@ -252,6 +395,9 @@ class FilterCheckBoxHolder(QWidget):
         self.self_layout.addWidget(filter_checkbox)
         
 
+#
+# Filter HOLDER
+#
 class FilterHolder(QWidget):
     def __init__(self):
         super().__init__()
@@ -279,8 +425,8 @@ class FilterHolder(QWidget):
         #
         # Dropdown - genre+theme
         #
-        self.filter_dd_genre = FilterDropDown(_('title_genre'))
-        self.filter_dd_theme = FilterDropDown(_('title_theme'))
+        self.filter_dd_genre = FilterDropDownTranslated(_('title_genre'))
+        self.filter_dd_theme = FilterDropDownTranslated(_('title_theme'))
         
         holder_dropdown_gt = FilterDropDownHolder()
         
@@ -292,8 +438,8 @@ class FilterHolder(QWidget):
         #
         # Dropdown - director+actor
         #
-        self.filter_dd_director = FilterDropDown(_('title_director'))
-        self.filter_dd_actor = FilterDropDown(_('title_actor'))
+        self.filter_dd_director = FilterDropDownSimple(_('title_director'))
+        self.filter_dd_actor = FilterDropDownSimple(_('title_actor'))
         
         holder_dropdown_da = FilterDropDownHolder()
         
@@ -302,11 +448,11 @@ class FilterHolder(QWidget):
         
         self_layout.addWidget(holder_dropdown_da)
 
-    def add_genre(self, genre):
-        self.filter_dd_genre.add_element(genre)
+    def add_genre(self, value, id):
+        self.filter_dd_genre.add_element(value, id)
 
-    def add_theme(self, theme):
-        self.filter_dd_theme.add_element(theme)
+    def add_theme(self, value, id):
+        self.filter_dd_theme.add_element(value, id)
     
     def add_director(self, director):
         self.filter_dd_director.add_element(director)
@@ -314,10 +460,20 @@ class FilterHolder(QWidget):
     def add_actor(self, actor):
         self.filter_dd_actor.add_element(actor)
     
-    
+    def get_filter_selection(self):
+        filter_selection = {
+            "best": None,
+            "new": None,
+            "favorite": None,
+            "genre": "",
+            "theme": "",
+            "director": "",
+            "actor": ""
+        }
+        return filter_selection
     
         
-def main():    
+def main():   
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
     ex.start_card_holder()

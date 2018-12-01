@@ -108,7 +108,7 @@ class ConfigIni( Property ):
 
     # (section, key, default)
     LANGUAGE = ("general", "language", "hu")
-    MEDIA_PATH_FILM = ("media", "path-film", ".")
+    MEDIA_PATH = ("media", "media-path", ".")
     MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
     MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
     
@@ -133,8 +133,8 @@ class ConfigIni( Property ):
     def get_language(self):
         return self.get(self.LANGUAGE[0], self.LANGUAGE[1], self.LANGUAGE[2])
 
-    def get_media_path_film(self):
-        return self.get(self.MEDIA_PATH_FILM[0], self.MEDIA_PATH_FILM[1], self.MEDIA_PATH_FILM[2])
+    def get_media_path(self):
+        return self.get(self.MEDIA_PATH[0], self.MEDIA_PATH[1], self.MEDIA_PATH[2])
 
     def get_media_player_video(self):
         return self.get(self.MEDIA_PLAYER_VIDEO[0], self.MEDIA_PLAYER_VIDEO[1], self.MEDIA_PLAYER_VIDEO[2])
@@ -146,8 +146,8 @@ class ConfigIni( Property ):
     def set_language(self, lang):
         self.update(self.LANGUAGE[0], self.LANGUAGE[1], lang)
 
-    def set_media_path_film(self, path):
-        self.update(self.MEDIA_PATH_FILM[0], self.MEDIA_PATH_FILM[1], path)
+    def set_media_path(self, path):
+        self.update(self.MEDIA_PATH[0], self.MEDIA_PATH[1], path)
 
     def set_media_player_video(self, player):
         self.update(self.MEDIA_PLAYER_VIDEO[0], self.MEDIA_PLAYER_VIDEO[1], player)

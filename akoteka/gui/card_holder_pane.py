@@ -1,21 +1,19 @@
 import sys
 import os
 import json
-import locale
 from subprocess import call
 from threading import Thread
 from pkg_resources import resource_string, resource_filename
-from functools import cmp_to_key
 
+from PyQt5.QtCore import pyqtSignal  
 
 from akoteka.accessories import collect_cards
-from akoteka.accessories import collect_filters
 from akoteka.accessories import filter_key
 
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
 
-from akoteka.gui.glob import media_path_film
+#from akoteka.gui.glob import media_path_film
 from akoteka.gui.glob import media_player_video
 from akoteka.gui.glob import media_player_video_param
 
@@ -39,29 +37,34 @@ COLOR_CARD_HOLDER_MAIN = "#73948d"
 # The title_layer stores the Title and the card_holder_canvas
 # The card_holder_layout stores the Cards
 #
+#            parent,
+#            previous_holder,
+#            hierarchy,
+#            paths
+#
 class CardHolder( QLabel ):
-    def __init__(self, parent, previous_holder, target):
+    
+    card_array = None
+    
+    def __init__(self, parent, previous_holder, hierarchy, paths):
         super().__init__()
 
         self.parent = parent
         self.previous_holder = previous_holder
-
-        
-        thread = Thread(target=self.fill_up_filters, args=(self.parent.get_filter(), target))
-        #thread.daemon = True                            
-        thread.start()                                  
+        self.hierarchy = hierarchy
+        self.paths = paths 
 
         # -------------
         #
         # Main Panel
         #
         # ------------
-        self_layout = QVBoxLayout(self)
-        self.setLayout(self_layout)
+        self.self_layout = QVBoxLayout(self)
+        self.setLayout(self.self_layout)
         # controls the distance between the MainWindow and the added container: scrollContent
         # order: left, top, right, bottom
-        self_layout.setContentsMargins(9,9,9,9)     
-        self_layout.setSpacing(10)
+        self.self_layout.setContentsMargins(9,9,9,9)     
+        self.self_layout.setSpacing(10)
         self.setStyleSheet('background: ' + COLOR_CARD_HOLDER_MAIN)   
 
         # -------------
@@ -73,17 +76,9 @@ class CardHolder( QLabel ):
         title.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
         title.setAlignment(Qt.AlignHCenter)
         
-        #title_text = _("title_list") + "\n" + _( "title_" + target["key"] )        
-        #translated = _(target["key"] + "_" + target["value"]) if target["key"] == "genre" or target["key"] == "theme" else None
-        #nottranslated = target["value"] if not translated and target["key"] != "all" and target["key"] != "best" and target["key"] != "new" and #target["key"] != "favorite" else None
-        #title_value = translated if translated else nottranslated if nottranslated else None
-        #title_text += ( ": " + title_value )  if title_value else ""
-        #title.setText(title_text)
-        #self_layout.addWidget( title )        
-        
-        self.title_hierarchy = target["hierarchy"]
+        self.title_hierarchy = self.hierarchy
         title.setText(self.title_hierarchy)
-        self_layout.addWidget( title )        
+        self.self_layout.addWidget( title )        
         
         # -------------
         #
@@ -98,49 +93,21 @@ class CardHolder( QLabel ):
         #self.card_holder_layout.setSpacing(5)
         #card_holder_canvas.setStyleSheet('background: ' + COLOR_CARD_HOLDER_CARDS)   
 
-        self_layout.addWidget(card_holder_canvas)
+        self.self_layout.addWidget(card_holder_canvas)
         
         # -------------
         #
         # Cards
         #
         # ------------
-        #self.remove_cards()
-
-        self.key = target[ "key" ]
-        self.value = target[ "value" ]
-        self.value_store_mode = filter_key[self.key]
+        self.cc = CollectCard( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
+        self.cc.trigger.connect(self.fill_up_card_holder)
+        self.cc.start()
         
-        for path in target["paths"]:
-        
-            card_list = collect_cards( path, key=self.key, value=self.value, value_store_mode=self.value_store_mode )
-            for crd in card_list:
-            
-                #scrollLayout.addWidget( QPushButton(str(i)) )
-                card = Card(self)
-                card.set_image_path( crd["image-path"] )
-                card.set_child_paths( crd["child-paths"] )
-                card.set_media_path( crd["media-path"] )
-                card.set_title( crd["title"][language] )
-                
-                if crd["media-path"]:
-                    card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
-                    card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
-                    card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
-                    card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
-
-                    card.add_element_to_collector_line( _("title_year"), crd["year"])
-                    card.add_element_to_collector_line( _("title_length"), crd["length"])
-                    card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
-                            
-                #scroll_layout.addWidget( card )
-                self.card_holder_layout.addWidget( card )
-            
-            # add after the last card
-            #scroll_layout.addStretch(1)        
-
-        self.stretchie = QSpacerItem(10,10,QSizePolicy.Minimum,QSizePolicy.Expanding)
-        self.card_holder_layout.addItem(self.stretchie)
+        #self.trigger_fill_up_card_holder.connect(self.fill_up_card_holder)        
+        #thread = Thread(target=self.collect_cards, args=())
+        ##thread.daemon = True                            
+        #thread.start() 
         
         self.parent.set_back_button_listener(self)
   
@@ -156,14 +123,11 @@ class CardHolder( QLabel ):
             widgetToRemove.setParent(None)
             
     def go_deeper(self, child_paths, card_title):
-        deeper_card_holder = CardHolder(self.parent, self, 
-            {
-                "key" : self.key,
-                "value" : self.value,
-                "value-store-mode" : self.value_store_mode,
-                "hierarchy" : self.title_hierarchy + (" > " if self.title_hierarchy else "") + card_title,
-                "paths" : child_paths        
-            }                                        
+        deeper_card_holder = CardHolder(
+            self.parent, 
+            self, 
+            self.title_hierarchy + (" > " if self.title_hierarchy else "") + card_title, 
+            child_paths 
         )
         self.parent.add_new_holder(self, deeper_card_holder)
         
@@ -171,30 +135,59 @@ class CardHolder( QLabel ):
         self.parent.restore_previous_holder(self.previous_holder, self)
         self.parent.set_back_button_listener(self.previous_holder)
 
-    def fill_up_filters(self, filter_holder, target):
+    # 
+    # This method fills up the card_holder
+    #
+    # connected SIGNAL 
+    def fill_up_card_holder(self, card_array):
         
-        hit_list = {
-            "genre": set(),
-            "theme": set(),
-            "director": set(),
-            "actor": set()        
-        }
-
-        for path in target["paths"]:
-            collect_filters(path, hit_list)
+        for card_list in card_array:
         
-        for element in sorted([_("genre_" + e) for e in hit_list['genre']], key=cmp_to_key(locale.strcoll) ):            
-            filter_holder.add_genre(element)
-        for element in sorted([_("theme_" + e) for e in hit_list['theme']], key=cmp_to_key(locale.strcoll) ):
-            filter_holder.add_theme(element)
-        for element in sorted( hit_list['director'], key=cmp_to_key(locale.strcoll) ):
-            filter_holder.add_director(element)
-        for element in sorted( hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
-            filter_holder.add_actor(element)
-            
-            
-                
+            for crd in card_list:
 
+                card = Card(self)
+                card.set_image_path( crd["image-path"] )
+                card.set_child_paths( crd["child-paths"] )
+                card.set_media_path( crd["media-path"] )
+                card.set_title( crd["title"][language] )
+
+                if crd["media-path"]:
+                    
+                    card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
+                    card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
+                    card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
+                    card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
+
+                    card.add_element_to_collector_line( _("title_year"), crd["year"])
+                    card.add_element_to_collector_line( _("title_length"), crd["length"])
+                    card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
+
+                self.card_holder_layout.addWidget( card )
+
+
+class CollectCard(QtCore.QThread):
+    trigger = pyqtSignal(list)
+
+    def __init__(self, parent=None, paths=None, filter_selection=None):
+        super().__init__()
+        #self.start()
+        
+        self.parent = parent
+        self.paths = paths
+        self.filter_selection = filter_selection
+        
+    def run(self):
+        card_array = []
+        for path in self.paths:
+            card_list = collect_cards( path, self.filter_selection )
+            card_array.append(card_list)
+
+        self.trigger.emit(card_array)
+
+    def __del__(self):
+        self.exiting = True
+        self.wait()
+        
       
 class CardHolderPanel( QLabel ):
     def __init__(self):
@@ -255,14 +248,14 @@ class Card(QLabel):
         self.setLayout( self_layout )
         self.setStyleSheet( 'background: ' +  COLOR_CARD_HOLDER_CARDS)
         
-        card_holder = QLabel()
-        self_layout.addWidget(card_holder)
-        card_layout = QHBoxLayout(card_holder)
+        card_panel = QLabel()
+        self_layout.addWidget(card_panel)
+        card_layout = QHBoxLayout(card_panel)
         card_layout.setContentsMargins(0, 0, 0, 0)
         # gap between the card, an the elements of the card - horizontal gap
         card_layout.setSpacing(10)
-        card_holder.setLayout( card_layout )
-        card_holder.setStyleSheet('background: ' + COLOR_CARD)
+        card_panel.setLayout( card_layout )
+        card_panel.setStyleSheet('background: ' + COLOR_CARD)
 
         self.card_image = CardImage()
         card_layout.addWidget( self.card_image )
@@ -336,7 +329,6 @@ class Card(QLabel):
         else:
 #            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_CONTAINER)        
             qp.setBrush( QColor(COLOR_CARD_BORDER_CONTAINER ))
-
 
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
         qp.end()

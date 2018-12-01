@@ -26,6 +26,11 @@ from PyQt5 import QtCore
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QAbstractTableModel
+from PyQt5.QtCore import QModelIndex
+from PyQt5.QtCore import QVariant
+from PyQt5.QtCore import QThread
+from PyQt5.QtCore import pyqtSignal
 
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict
@@ -33,7 +38,7 @@ from akoteka.handle_property import Dict
 # Read config.ini
 config_ini = ConfigIni.get_instance()
 language = config_ini.get_language()
-media_path_film = config_ini.get_media_path_film()
+media_path = config_ini.get_media_path()
 media_player_video = config_ini.get_media_player_video()
 media_player_video_param = config_ini.get_media_player_video_param()
 
