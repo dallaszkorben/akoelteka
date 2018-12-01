@@ -85,15 +85,20 @@ class CardHolder( QLabel ):
         # Card Holder Panel
         #
         # ------------
-        card_holder_canvas = CardHolderPanel()
-        self.card_holder_layout = card_holder_canvas.getLayout()
-        #self.card_holder_layout = QVBoxLayout(card_holder_canvas)
+        self.card_holder_canvas = CardHolderPanel()
+        self.card_holder_layout = self.card_holder_canvas.getLayout()
+        
+        # Basically the Canvas Holder is Hidden
+        self.card_holder_canvas.setHidden(True)
+        
+        #self.card_holder_layout = QVBoxLayout(self.card_holder_canvas)
         #card_holder_canvas.setLayout(self.card_holder_layout)
         #self.card_holder_layout.setContentsMargins(12,12,12,12)  
         #self.card_holder_layout.setSpacing(5)
         #card_holder_canvas.setStyleSheet('background: ' + COLOR_CARD_HOLDER_CARDS)   
 
-        self.self_layout.addWidget(card_holder_canvas)
+        self.self_layout.addWidget(self.card_holder_canvas)
+        self.self_layout.addStretch(1)
         
         # -------------
         #
@@ -111,6 +116,9 @@ class CardHolder( QLabel ):
         
         self.parent.set_back_button_listener(self)
   
+    def show_card_holder(self):
+        self.card_holder_canvas.setHidden(False)
+        
     def remove_cards(self):
         self.card_holder_layout.removeItem(self.stretchie)
         for i in reversed(range(self.card_holder_layout.count())): 
@@ -163,7 +171,8 @@ class CardHolder( QLabel ):
                     card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
 
                 self.card_holder_layout.addWidget( card )
-
+        
+        self.show_card_holder()
 
 class CollectCard(QtCore.QThread):
     trigger = pyqtSignal(list)
@@ -182,6 +191,8 @@ class CollectCard(QtCore.QThread):
             card_list = collect_cards( path, self.filter_selection )
             card_array.append(card_list)
 
+        #import time
+        #time.sleep(10)
         self.trigger.emit(card_array)
 
     def __del__(self):
@@ -349,6 +360,11 @@ class QVLine(QFrame):
         self.setFrameShape(QFrame.VLine)
         self.setFrameShadow(QFrame.Sunken)
         
+# ---------------------------------------------------
+#
+# CardInfoTitle
+#
+# ---------------------------------------------------
 class CardInfoTitle(QLabel):
     def __init__(self):
         super().__init__()
@@ -358,7 +374,7 @@ class CardInfoTitle(QLabel):
         # border
         self.setFrameShape(QFrame.Panel)
         self.setFrameShadow(QFrame.Sunken)
-        self.setLineWidth(1)
+        self.setLineWidth(0)
 
         # font, colors
         self.setFont(QFont( "Comic Sans MS", 18, weight=QFont.Bold))
@@ -394,9 +410,13 @@ class CardInfoLineValue(QLabel):
     
         self.setText(value)
 
+# ---------------------------------------------------
 #
-# CardInfoLine contains a label and value horizontaly ordered
+# CardInfoLine 
 #
+# It contains a label and value horizontaly ordered
+#
+# ---------------------------------------------------
 class CardInfoLine(QLabel):
     def __init__(self, label, value):
         super().__init__()
@@ -406,17 +426,19 @@ class CardInfoLine(QLabel):
         self.setLayout( line_layout )
         line_layout.setSpacing(5)
         
-        # border
+        # border of the line
         self.setFrameShape(QFrame.Panel)
         self.setFrameShadow(QFrame.Sunken)
-        self.setLineWidth(2)
+        self.setLineWidth(0)
 
         line_layout.addWidget(CardInfoLineLabel(label + ":"),)
         line_layout.addWidget(CardInfoLineValue(value), 1) 
         
 
 #
-# CardInfoLinesHolder contains CardInfoLine objects vertically ordered
+# CardInfoLinesHolder
+#
+# It contains CardInfoLine objects vertically ordered
 #
 class CardInfoLinesHolder(QLabel):
     def __init__(self):
@@ -437,11 +459,15 @@ class CardInfoLinesHolder(QLabel):
         
         #line_layout.addStretch(1)
 
+# ---------------------------------------------------
 #
-# CardInformation contains two other containers vertically ordered:
+# CardInformation
+#
+# It contains two other containers vertically ordered:
 # -CardInfoTitle
 # -CardInfoLinesHolder
 #
+# ---------------------------------------------------
 class CardInformation(QLabel):
     def __init__(self):
         super().__init__()
@@ -455,6 +481,10 @@ class CardInformation(QLabel):
         self.info_layout.addWidget( self.card_info_title )
         self.card_info_lines_holder = CardInfoLinesHolder()
         self.info_layout.addWidget( self.card_info_lines_holder )
+        
+        # Horizintal line under the "Year/Length/Nationality" line
+        self.info_layout.addWidget( QHLine())
+
 
     def set_title(self, title ):
         self.card_info_title.set_title(title)
