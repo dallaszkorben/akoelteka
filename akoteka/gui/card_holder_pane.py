@@ -91,12 +91,6 @@ class CardHolder( QLabel ):
         # Basically the Canvas Holder is Hidden
         self.card_holder_canvas.setHidden(True)
         
-        #self.card_holder_layout = QVBoxLayout(self.card_holder_canvas)
-        #card_holder_canvas.setLayout(self.card_holder_layout)
-        #self.card_holder_layout.setContentsMargins(12,12,12,12)  
-        #self.card_holder_layout.setSpacing(5)
-        #card_holder_canvas.setStyleSheet('background: ' + COLOR_CARD_HOLDER_CARDS)   
-
         self.self_layout.addWidget(self.card_holder_canvas)
         self.self_layout.addStretch(1)
         
@@ -108,11 +102,6 @@ class CardHolder( QLabel ):
         self.cc = CollectCardThread( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
         self.cc.trigger.connect(self.fill_up_card_holder)
         self.cc.start()
-        
-        #self.trigger_fill_up_card_holder.connect(self.fill_up_card_holder)        
-        #thread = Thread(target=self.collect_cards, args=())
-        ##thread.daemon = True                            
-        #thread.start() 
         
         self.parent.set_back_button_listener(self)
   
@@ -170,7 +159,8 @@ class CardHolder( QLabel ):
 
             self.card_holder_layout.addWidget( card )
         
-        self.show_card_holder()
+        if card_list:
+            self.show_card_holder()
 
 
 

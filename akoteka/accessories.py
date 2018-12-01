@@ -263,6 +263,7 @@ def folder_investigation( actual_dir, json_list, filter_selection ):
         for category, value in filter_selection.items():
             
             if value != None and value != "":
+                print(category, value)
                 
                 if filter_key[category]['store-mode'] == 'v':
                     if value != card[category]:

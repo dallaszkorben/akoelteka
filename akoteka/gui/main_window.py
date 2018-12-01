@@ -217,6 +217,12 @@ class FilterDropDownHolder(QWidget):
         self.self_layout.addWidget(filter_dropdown)
         
 
+# =============================
+#
+# Filter Drop-Down Simple
+#
+# =============================
+#
 class FilterDropDownSimple(QWidget):
     
     def __init__(self, label):
@@ -263,8 +269,11 @@ class FilterDropDownSimple(QWidget):
 
         self_layout.addWidget( self.dropdown )
 
-    def add_element(self, element):
-        self.dropdown.addItem(element)
+    def add_element(self, value, id):
+        self.dropdown.addItem(value, id)
+
+    def get_selected(self):
+        return self.dropdown.itemData( self.dropdown.currentIndex() )
 
 
 class ModelForTranslation(QAbstractTableModel):
@@ -321,6 +330,11 @@ class ModelForTranslation(QAbstractTableModel):
         return True
 
 
+# =================================
+#
+# Filter Drop-Down Translated 
+#
+# =================================
 class FilterDropDownTranslated(QWidget):
     
     def __init__(self, label):
@@ -354,7 +368,7 @@ class FilterDropDownTranslated(QWidget):
     #
     def add_element(self, value, id):
         self.dropdown.addItem(value, id)
-        
+       
 
 class FilterCheckBox(QWidget):
     def __init__(self, label):
@@ -365,16 +379,19 @@ class FilterCheckBox(QWidget):
         self.setLayout( self_layout )
 #        self.setStyleSheet( 'background: green')
         
-        checkbox = QCheckBox(label)
-        checkbox.setLayoutDirection( Qt.RightToLeft )
+        self.checkbox = QCheckBox(label)
+        self.checkbox.setLayoutDirection( Qt.RightToLeft )
         style_checkbox = '''
             QCheckBox { 
                 min-height: 15px; max-height: 15px; border: 0px solid gray;
             }
         '''
-        checkbox.setStyleSheet( style_checkbox )
+        self.checkbox.setStyleSheet( style_checkbox )
         
-        self_layout.addWidget( checkbox)
+        self_layout.addWidget( self.checkbox)
+
+    def is_checked(self):
+        return 'y' if self.checkbox.isChecked() else None
 
 #
 # Checkbox HOLDER
@@ -425,8 +442,10 @@ class FilterHolder(QWidget):
         #
         # Dropdown - genre+theme
         #
-        self.filter_dd_genre = FilterDropDownTranslated(_('title_genre'))
-        self.filter_dd_theme = FilterDropDownTranslated(_('title_theme'))
+        #self.filter_dd_genre = FilterDropDownTranslated(_('title_genre'))
+        #self.filter_dd_theme = FilterDropDownTranslated(_('title_theme'))
+        self.filter_dd_genre = FilterDropDownSimple(_('title_genre'))
+        self.filter_dd_theme = FilterDropDownSimple(_('title_theme'))
         
         holder_dropdown_gt = FilterDropDownHolder()
         
@@ -455,21 +474,23 @@ class FilterHolder(QWidget):
         self.filter_dd_theme.add_element(value, id)
     
     def add_director(self, director):
-        self.filter_dd_director.add_element(director)
+        self.filter_dd_director.add_element(director, director)
     
     def add_actor(self, actor):
-        self.filter_dd_actor.add_element(actor)
+        self.filter_dd_actor.add_element(actor, actor)
     
     def get_filter_selection(self):
         filter_selection = {
-            "best": None,
-            "new": None,
-            "favorite": None,
-            "genre": "",
-            "theme": "",
-            "director": "",
-            "actor": ""
+            "best": self.filter_cb_best.is_checked(),
+            "new": self.filter_cb_new.is_checked(),
+            "favorite": self.filter_cb_favorite.is_checked(),
+            "genre": self.filter_dd_genre.get_selected(),
+            "theme": self.filter_dd_theme.get_selected(),
+            "director": self.filter_dd_director.get_selected(),
+            "actor": self.filter_dd_actor.get_selected()
         }
+        
+        print(filter_selection)
         return filter_selection
     
         
