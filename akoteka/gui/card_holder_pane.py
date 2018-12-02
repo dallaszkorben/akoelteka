@@ -99,17 +99,27 @@ class CardHolder( QLabel ):
         # Cards
         #
         # ------------
-        self.cc = CollectCardThread( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
+        self.cc = CollectCardThread( self, self.paths )
+        #self.cc = CollectCardThread( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
         self.cc.trigger.connect(self.fill_up_card_holder)
         self.cc.start()
         
+        # ----------------------
+        #
+        # Listeners registration
+        #
+        # ----------------------
         self.parent.set_back_button_listener(self)
+        self.parent.set_filter_listener(self)
   
     def show_card_holder(self):
         self.card_holder_canvas.setHidden(False)
         
+    def hide_card_holder(self):
+        self.card_holder_canvas.setHidden(True)
+        
     def remove_cards(self):
-        self.card_holder_layout.removeItem(self.stretchie)
+        #self.card_holder_layout.removeItem(self.stretchie)
         for i in reversed(range(self.card_holder_layout.count())): 
             widgetToRemove = self.card_holder_layout.itemAt(i).widget()
         
@@ -119,6 +129,13 @@ class CardHolder( QLabel ):
             # remove it from the gui
             widgetToRemove.setParent(None)
             
+        self.hide_card_holder()
+
+    # ----------------------------------
+    #
+    # Clicked on the Collector's picture
+    #
+    # ----------------------------------
     def go_deeper(self, child_paths, card_title):
         deeper_card_holder = CardHolder(
             self.parent, 
@@ -128,18 +145,38 @@ class CardHolder( QLabel ):
         )
         self.parent.add_new_holder(self, deeper_card_holder)
         
+    # --------------------
+    #
+    # Back button pressed
+    #
+    # --------------------
     def go_back(self):
         self.parent.restore_previous_holder(self.previous_holder, self)
         self.parent.set_back_button_listener(self.previous_holder)
 
+    # --------------------
+    #
+    # Filter Changed
+    #
+    # --------------------
+    def refresh(self):
+        self.fill_up_card_holder(self.card_list)
+
+    # -------------------------------------
     # 
     # This method fills up the card_holder
     #
     # connected SIGNAL 
+    # -------------------------------------
     def fill_up_card_holder(self, card_list):
     
         self.card_list = card_list
+    
+        # Remove all Cards and hide the CardHolder
+        self.remove_cards()
         
+        is_card = False
+
         for crd in card_list:
 
             card = Card(self)
@@ -148,20 +185,40 @@ class CardHolder( QLabel ):
             card.set_media_path( crd["media-path"] )
             card.set_title( crd["title"][language] )
 
+            fits = True
+            
             if crd["media-path"]:
                     
-                    card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
-                    card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
-                    card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
-                    card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
+                card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
+                card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
+                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
+                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
 
-                    card.add_element_to_collector_line( _("title_year"), crd["year"])
-                    card.add_element_to_collector_line( _("title_length"), crd["length"])
-                    card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
+                card.add_element_to_collector_line( _("title_year"), crd["year"])
+                card.add_element_to_collector_line( _("title_length"), crd["length"])
+                card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
+                    
+                for category, value in self.parent.get_filter_holder().get_filter_selection().items():
+            
+                    if value != None and value != "":
 
-            self.card_holder_layout.addWidget( card )
+                        if filter_key[category]['store-mode'] == 'v':
+                            if value != crd[category]:
+                                fits = False
+                        elif filter_key[category]['store-mode'] == 'a':
+                            if value not in crd[category]:
+                                fits = False
+                        else:
+                            fits = False
+            
+            if fits:
+                self.card_holder_layout.addWidget( card )
+                is_card = True
         
-        if card_list:
+        # If there was at least one Card
+        if is_card:
+
+            # then the CardHolder will be show
             self.show_card_holder()
 
 
@@ -169,21 +226,19 @@ class CardHolder( QLabel ):
 class CollectCardThread(QtCore.QThread):
     trigger = pyqtSignal(list)
 
-    def __init__(self, parent=None, paths=None, filter_selection=None):
+    def __init__(self, parent=None, paths=None):
+    #def __init__(self, parent=None, paths=None, filter_selection=None):
         super().__init__()
         #self.start()
         
         self.parent = parent
         self.paths = paths
-        self.filter_selection = filter_selection
+        #self.filter_selection = filter_selection
         
     def run(self):
 
-        #for path in self.paths:
-        card_list = collect_cards( self.paths, self.filter_selection )
+        card_list = collect_cards( self.paths)
 
-        #import time
-        #time.sleep(10)
         self.trigger.emit(card_list)
 
     def __del__(self):

@@ -102,8 +102,8 @@ def collect_filters( actual_dir, hit_list ):
     return hit_list
 
 
-
-def folder_investigation( actual_dir, json_list, filter_selection ):
+def folder_investigation( actual_dir, json_list):
+#def folder_investigation( actual_dir, json_list, filter_selection ):
     
     # Collect files and and dirs in the current directory
     file_list = [f for f in os.listdir(actual_dir) if os.path.isfile(os.path.join(actual_dir, f))]
@@ -259,23 +259,25 @@ def folder_investigation( actual_dir, json_list, filter_selection ):
                 print(configparser.NoOptionError)
                 # TODO It could be more sophisticated, depending what field failed
 
-        fits = True
-        for category, value in filter_selection.items():
-            
-            if value != None and value != "":
-                print(category, value)
-                
-                if filter_key[category]['store-mode'] == 'v':
-                    if value != card[category]:
-                        fits = False
-                elif filter_key[category]['store-mode'] == 'a':
-                    if value not in card[category]:
-                        fits = False
-                else:
-                    fits = False
-        if fits:
-            json_list.append(card)
+#        fits = True
+#        for category, value in filter_selection.items():
+#            
+#            if value != None and value != "":
+#                print(category, value)
+#                
+#                if filter_key[category]['store-mode'] == 'v':
+#                    if value != card[category]:
+#                        fits = False
+#                elif filter_key[category]['store-mode'] == 'a':
+#                    if value not in card[category]:
+#                        fits = False
+#                else:
+#                    fits = False
+#        if fits:
+#            json_list.append(card)
 
+        json_list.append(card)
+        
     #
     # if the folder does not contain a media file and a card then it is taken as a simple folder
     #
@@ -284,16 +286,18 @@ def folder_investigation( actual_dir, json_list, filter_selection ):
         # so it goes through the subfolders, there is any
         for name in dir_list:
             subfolder_path_os = os.path.join(actual_dir, name)            
-            folder_investigation( subfolder_path_os, json_list, filter_selection )
-
+            folder_investigation( subfolder_path_os, json_list )
+            #folder_investigation( subfolder_path_os, json_list, filter_selection )
 
     # and finaly returns
     return
 
-def collect_cards( rootdirs, filter_selection ):
+#def collect_cards( rootdirs, filter_selection ):
+def collect_cards( rootdirs ):    
     media_list = json.loads('[]')
 
     for rootdir in rootdirs:
-        folder_investigation(rootdir, media_list, filter_selection)
+        #folder_investigation(rootdir, media_list, filter_selection)
+        folder_investigation(rootdir, media_list)
 
     return media_list

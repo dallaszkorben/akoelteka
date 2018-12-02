@@ -108,6 +108,9 @@ class GuiAkoTeka(QWidget):
 
     def set_back_button_listener(self, listener):
         self.control_panel.set_back_button_listener(listener)
+
+    def set_filter_listener(self, listener):
+        self.control_panel.set_filter_listener(listener)
         
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
@@ -126,8 +129,7 @@ class GuiAkoTeka(QWidget):
         }
 
         for path in paths:
-            collect_filters(path, hit_list)
-        
+            collect_filters(path, hit_list)        
         for element in sorted([(_("genre_" + e),e) for e in hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):
             self.get_filter_holder().add_genre(element[0], element[1])        
         for element in sorted([(_("theme_" + e), e) for e in hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):
@@ -140,7 +142,9 @@ class GuiAkoTeka(QWidget):
 
 # =========================================
 #
-# Control Panel on the TOP of the Window
+#          Control Panel 
+#
+# on the TOP of the Window
 #
 # Contains:
 #           Back Button
@@ -157,7 +161,12 @@ class ControlPanel(QWidget):
         # controls the distance between the MainWindow and the added container: scrollContent
         self_layout.setContentsMargins(3, 3, 3, 3)
         self_layout.setSpacing(5)
-        
+
+        # -------------
+        #
+        # Back Button
+        #
+        # -------------        
         back_button = QPushButton()
         back_button.clicked.connect(self.back_button_on_click)
         
@@ -171,30 +180,35 @@ class ControlPanel(QWidget):
 
         self_layout.addStretch(1)
         
+        # -------------
+        #
+        # Filter Holder
+        #
+        # -------------
         self.filter_holder = FilterHolder()
+        self.filter_holder.changed.connect(self.filter_on_change)
         
         # Filter on the right
         self_layout.addWidget(self.filter_holder)
 
-#        mylist = []
-#        lm = ModelForTranslation(mylist, self)
-#        cb = QComboBox(self)
-#        cb.setModel(lm)
-#        self_layout.addWidget(cb )
-        
-        
-        # Read the actual element from the list
-#        print( cb.itemData(cb.currentIndex()) )
-        
+        # Listeners
         self.back_button_listener = None
+        self.filter_listener = None
 
     def set_back_button_listener(self, listener):
         self.back_button_listener = listener
+        
+    def set_filter_listener(self, listener):
+        self.filter_listener = listener
         
     def back_button_on_click(self):
         if self.back_button_listener:
             self.back_button_listener.go_back()
 
+    def filter_on_change(self):
+        if self.filter_listener:
+            self.filter_listener.refresh()
+    
     def get_filter_holder(self):
         return self.filter_holder
 
@@ -225,6 +239,8 @@ class FilterDropDownHolder(QWidget):
 #
 class FilterDropDownSimple(QWidget):
     
+    state_changed = pyqtSignal()
+    
     def __init__(self, label):
         super().__init__()
 
@@ -236,6 +252,8 @@ class FilterDropDownSimple(QWidget):
         self_layout.addWidget( QLabel(label))
 
         self.dropdown = QComboBox(self)
+        
+        self.dropdown.currentIndexChanged.connect(self.current_index_changed)
 
         # TODO does not work to set the properties of the dropdown list. find out and fix
         style =             '''
@@ -275,127 +293,36 @@ class FilterDropDownSimple(QWidget):
     def get_selected(self):
         return self.dropdown.itemData( self.dropdown.currentIndex() )
 
+    def current_index_changed(self):
+        self.state_changed.emit()
 
-class ModelForTranslation(QAbstractTableModel):
-    
-    """
-    datalist: a list where each item is a row
-    """
-
-    def __init__ (self, datalist=[], parent=None, *args):
-        QAbstractTableModel.__init__(self, parent, *args)
-        self.datalist = datalist
-    
-    # Mandatory
-    def rowCount(self, parent=QModelIndex()):
-        return len(self.datalist)
-
-    # Mandatory
-    def columnCount(self, parent):
-        return 2
-
-    # Mandatory
-    def data(self, index, role=Qt.DisplayRole):
-        row = index.row()
-        column = index.column()
-
-        if index.isValid() and role == Qt.DisplayRole:
-            elements_of_row = self.datalist[row]
-            return QVariant(elements_of_row['name'])
-
-        elif index.isValid() and role == Qt.UserRole:
-            elements_of_row = self.datalist[row]
-            return elements_of_row['id']
-        else:
-            return QVariant()
-
-    def insertRows(self, position, rows=1, index=QModelIndex()):
-        self.beginInsertRows(QModelIndex(), position, position + rows - 1)
-        for row in range(rows):
-            self.datalist.insert(position + row,  {})
-        self.endInsertRows()
-        return True
-
-    def setData(self, index, value, role):        
-        row = index.row()
-        column = index.column()
-
-        # 256 value is for the second position
-        if role == Qt.UserRole and column == 0:
-            self.datalist[row]['id'] = value
-        # 2 value is for the first position
-        elif role == Qt.EditRole and column == 0:
-            self.datalist[row]['name'] = value
-   
-        return True
-
-
-# =================================
+# ==========
 #
-# Filter Drop-Down Translated 
+# CheckBox
 #
-# =================================
-class FilterDropDownTranslated(QWidget):
-    
+# ==========
+class FilterCheckBox(QCheckBox):
     def __init__(self, label):
-        super().__init__()
+        super().__init__(label)
 
-        self_layout = QHBoxLayout(self)
-        self_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout( self_layout )
-#        self.setStyleSheet( 'background: green')
-        
-        self_layout.addWidget( QLabel(label))
-
-        self.dropdown = QComboBox(self)
-        mylist = []
-        tm = ModelForTranslation(mylist, self)
-        self.dropdown.setModel(tm)
-
-        style_box = '''
-            QComboBox { 
-                max-width: 200px; min-width: 200px; border: 1px solid gray; border-radius: 5px;
-            }        '''
-      
-        self.dropdown.setStyleSheet(style_box)
-        self.dropdown.addItem("","")
-
-        self_layout.addWidget( self.dropdown )
-
-    #
-    # value:    Translated text
-    # id:       translation code
-    #
-    def add_element(self, value, id):
-        self.dropdown.addItem(value, id)
-       
-
-class FilterCheckBox(QWidget):
-    def __init__(self, label):
-        super().__init__()
-
-        self_layout = QVBoxLayout(self)
-        self_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout( self_layout )
-#        self.setStyleSheet( 'background: green')
-        
-        self.checkbox = QCheckBox(label)
-        self.checkbox.setLayoutDirection( Qt.RightToLeft )
+        self.setLayoutDirection( Qt.RightToLeft )
         style_checkbox = '''
             QCheckBox { 
                 min-height: 15px; max-height: 15px; border: 0px solid gray;
             }
         '''
-        self.checkbox.setStyleSheet( style_checkbox )
+        self.setStyleSheet( style_checkbox )
         
-        self_layout.addWidget( self.checkbox)
-
+        
     def is_checked(self):
-        return 'y' if self.checkbox.isChecked() else None
+        return 'y' if self.isChecked() else None        
+ 
 
+# ================
 #
 # Checkbox HOLDER
 #
+# ================
 class FilterCheckBoxHolder(QWidget):
     
     def __init__(self):
@@ -412,10 +339,15 @@ class FilterCheckBoxHolder(QWidget):
         self.self_layout.addWidget(filter_checkbox)
         
 
+# ===============
 #
 # Filter HOLDER
 #
+# ===============
 class FilterHolder(QWidget):
+    
+    changed = pyqtSignal()
+    
     def __init__(self):
         super().__init__()
 
@@ -424,9 +356,11 @@ class FilterHolder(QWidget):
         self_layout.setContentsMargins(0, 0, 0, 0)
         self_layout.setSpacing(8)    
         
+        # ----------
         #
         # Checkboxes
         #
+        # ----------
         self.filter_cb_best = FilterCheckBox(_('title_best'))
         self.filter_cb_new = FilterCheckBox(_('title_new'))
         self.filter_cb_favorite = FilterCheckBox(_('title_favorite'))
@@ -437,13 +371,22 @@ class FilterHolder(QWidget):
         holder_checkbox.add_checkbox(self.filter_cb_new)
         holder_checkbox.add_checkbox(self.filter_cb_favorite)
                 
+        # Listener
+        self.filter_cb_best.stateChanged.connect(self.state_changed)
+        self.filter_cb_new.stateChanged.connect(self.state_changed)
+        self.filter_cb_favorite.stateChanged.connect(self.state_changed)
+                
         self_layout.addWidget(holder_checkbox)
+
+        # ----------
+        #
+        # Dropdowns 
+        #
+        # ----------
 
         #
         # Dropdown - genre+theme
         #
-        #self.filter_dd_genre = FilterDropDownTranslated(_('title_genre'))
-        #self.filter_dd_theme = FilterDropDownTranslated(_('title_theme'))
         self.filter_dd_genre = FilterDropDownSimple(_('title_genre'))
         self.filter_dd_theme = FilterDropDownSimple(_('title_theme'))
         
@@ -466,6 +409,12 @@ class FilterHolder(QWidget):
         holder_dropdown_da.add_dropdown(self.filter_dd_actor)
         
         self_layout.addWidget(holder_dropdown_da)
+
+        # Listeners
+        self.filter_dd_genre.state_changed.connect(self.state_changed)
+        self.filter_dd_theme.state_changed.connect(self.state_changed)
+        self.filter_dd_director.state_changed.connect(self.state_changed)
+        self.filter_dd_actor.state_changed.connect(self.state_changed)
 
     def add_genre(self, value, id):
         self.filter_dd_genre.add_element(value, id)
@@ -491,6 +440,8 @@ class FilterHolder(QWidget):
         }
         return filter_selection
     
+    def state_changed(self):
+        self.changed.emit()
         
 def main():   
     app = QApplication(sys.argv)
