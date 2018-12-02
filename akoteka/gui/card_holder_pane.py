@@ -137,6 +137,8 @@ class CardHolder( QLabel ):
     #
     # connected SIGNAL 
     def fill_up_card_holder(self, card_list):
+    
+        self.card_list = card_list
         
         for crd in card_list:
 

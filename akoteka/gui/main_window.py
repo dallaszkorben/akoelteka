@@ -489,8 +489,6 @@ class FilterHolder(QWidget):
             "director": self.filter_dd_director.get_selected(),
             "actor": self.filter_dd_actor.get_selected()
         }
-        
-        print(filter_selection)
         return filter_selection
     
         
