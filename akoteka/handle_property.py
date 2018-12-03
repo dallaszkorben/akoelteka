@@ -1,6 +1,8 @@
 import os
 import configparser
 
+PROJECT = 'akoteka'
+
 class Property(object):
     """
     This singleton handles the package's ini file.
@@ -96,7 +98,8 @@ class Dict( Property ):
         return inst
         
     def __init__(self, lng):
-        file = os.path.join(os.getcwd(), self.__class__.DICT_FOLDER, self.__class__.DICT_FILE_PRE + "_" + lng + "." + self.__class__.DICT_FILE_EXT)
+        #file = os.path.join(os.getcwd(), self.__class__.DICT_FOLDER, self.__class__.DICT_FILE_PRE + "_" + lng + "." + self.__class__.DICT_FILE_EXT)
+        file = os.path.join(os.getcwd(), PROJECT, self.__class__.DICT_FOLDER, self.__class__.DICT_FILE_PRE + "_" + lng + "." + self.__class__.DICT_FILE_EXT)
         super().__init__( file )
     
     def _(self, key):
@@ -126,7 +129,7 @@ class ConfigIni( Property ):
         return inst
         
     def __init__(self):
-        file = os.path.join(os.getcwd(), ConfigIni.INI_FILE_NAME)
+        file = os.path.join(os.getcwd(), PROJECT, ConfigIni.INI_FILE_NAME)
         super().__init__( file )
 
 

@@ -49,13 +49,7 @@ filter_key = {
     }
 }
 
-
-def read_config_file():
-    
-    pass
-    
-
-#
+# ===============================
 # 
 #    hit_list = {
 #        "genre": set(),
@@ -64,7 +58,7 @@ def read_config_file():
 #        "actor": set()        
 #    }
 #
-#
+# ===============================
 def collect_filters( actual_dir, hit_list ):
 
     for dirpath, dirnames, filenames in os.walk(actual_dir):
