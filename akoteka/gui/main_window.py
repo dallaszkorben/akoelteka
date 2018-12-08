@@ -444,6 +444,13 @@ class FilterHolder(QWidget):
         self.changed.emit()
         
 def main():   
+    
+    #from akoteka.accessories import collect_cards
+    #import json
+    #ret = collect_cards(["/media/akoel/Movies/Final/Sagas/-Wall.Street"])
+    #print(json.dumps(ret))
+    #exit()
+    
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
     ex.start_card_holder()

@@ -100,7 +100,6 @@ class CardHolder( QLabel ):
         #
         # ------------
         self.cc = CollectCardThread( self, self.paths )
-        #self.cc = CollectCardThread( self, self.paths, self.parent.get_filter_holder().get_filter_selection() )
         self.cc.trigger.connect(self.fill_up_card_holder)
         self.cc.start()
         
@@ -181,7 +180,13 @@ class CardHolder( QLabel ):
 
             card = Card(self)
             card.set_image_path( crd["image-path"] )
-            card.set_child_paths( crd["child-paths"] )
+            
+            child_paths = []
+            for sub_card in crd["sub-cards"]:
+                if sub_card:
+                    child_paths.append(sub_card['recent-folder'])
+            
+            card.set_child_paths( child_paths )
             card.set_media_path( crd["media-path"] )
             card.set_title( crd["title"][language] )
 
@@ -196,7 +201,7 @@ class CardHolder( QLabel ):
 
                 card.add_element_to_collector_line( _("title_year"), crd["year"])
                 card.add_element_to_collector_line( _("title_length"), crd["length"])
-                card.add_element_to_collector_line( _("title_nationality"), ", ".join( [ dic._("nat_" + a) for a in crd["nationality"] ]) )
+                card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["country"] ]) )
                     
                 for category, value in self.parent.get_filter_holder().get_filter_selection().items():
             
@@ -227,13 +232,11 @@ class CollectCardThread(QtCore.QThread):
     trigger = pyqtSignal(list)
 
     def __init__(self, parent=None, paths=None):
-    #def __init__(self, parent=None, paths=None, filter_selection=None):
         super().__init__()
         #self.start()
         
         self.parent = parent
         self.paths = paths
-        #self.filter_selection = filter_selection
         
     def run(self):
 
@@ -528,7 +531,7 @@ class CardInformation(QLabel):
         self.card_info_lines_holder = CardInfoLinesHolder()
         self.info_layout.addWidget( self.card_info_lines_holder )
         
-        # Horizintal line under the "Year/Length/Nationality" line
+        # Horizintal line under the "Year/Length/Country" line
         self.info_layout.addWidget( QHLine())
 
 
@@ -603,4 +606,6 @@ class CardImage(QLabel):
         self.child_paths = child_paths
 
     def get_child_paths( self ):
-        return self.child_paths
+        
+        return self.child_paths       
+        

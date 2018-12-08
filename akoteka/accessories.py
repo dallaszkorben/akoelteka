@@ -97,29 +97,36 @@ def collect_filters( actual_dir, hit_list ):
 
 
 def folder_investigation( actual_dir, json_list):
-#def folder_investigation( actual_dir, json_list, filter_selection ):
     
     # Collect files and and dirs in the current directory
     file_list = [f for f in os.listdir(actual_dir) if os.path.isfile(os.path.join(actual_dir, f))]
     dir_list = [d for d in os.listdir(actual_dir) if os.path.isdir(os.path.join(actual_dir, d))]
 
-    #print(json.dumps( file_list, sort_keys=True, indent=4) )
-   
     # now I got to a certain level of directory structure
     card_path_os = None
     media_path_os = None
     image_path_os = None
     media_name = None
+    
+    is_card_dir = True
 
     # Go through all files in the folder
     for file_name in file_list:
 
+        #
         # collect the files which count
+        #
+        
+        # find the Card
         if pattern_card.match( file_name ):
             card_path_os = os.path.join(actual_dir, file_name)
+            
+        # find the Media
         if pattern_media.match(file_name):            
             media_path_os = os.path.join(actual_dir, file_name)
             media_name = file_name
+            
+        # find the Image
         if pattern_image.match( file_name ):
            image_path_os = os.path.join(actual_dir, file_name)
 
@@ -130,7 +137,7 @@ def folder_investigation( actual_dir, json_list):
     title_json_list = {}
     title_json_list['hu'] = media_name
     title_json_list['en'] = media_name
-    card['child-paths'] = json.loads('[]')
+#    card['child-paths'] = json.loads('[]')
     card['title'] = title_json_list
                 
     card['year'] = ""
@@ -141,7 +148,7 @@ def folder_investigation( actual_dir, json_list):
     card['genre'] = json.loads('[]')
     card['theme'] = json.loads('[]')
     card['actor'] = json.loads('[]')
-    card['nationality'] = json.loads('[]')
+    card['country'] = json.loads('[]')
                 
     card['best'] = ""
     card['new'] = ""
@@ -149,13 +156,19 @@ def folder_investigation( actual_dir, json_list):
                                         
     card['links'] = {}
 
+    card['recent-folder'] = actual_dir
+    card['sub-cards'] = json.loads('[]')
+
+
+    # ----------------------------------
     #
-    # if there is card but no media and there is at least one dir then it is taken as a:
-    # 
-    # COLLECTOR
+    # it is a COLLECTOR CARD dir
     #
-    # the we stop here
-    #
+    # there is:     -Card 
+    #               -at least one Dir
+    # ther is NO:   -Media
+    #  
+    # ----------------------------------
     if card_path_os and not media_path_os and dir_list:
                 
         parser = configparser.RawConfigParser()
@@ -170,10 +183,6 @@ def folder_investigation( actual_dir, json_list):
             # saves the os path of the media - There is no
             card['media-path'] = None
             
-            child_paths = json.loads('[]')
-            for folder in dir_list:
-                card['child-paths'].append(os.path.join(actual_dir, folder))
-            
             card['title']['hu'] = parser.get("titles", "title_hu")
             card['title']['en'] = parser.get("titles", "title_en")
                 
@@ -183,13 +192,15 @@ def folder_investigation( actual_dir, json_list):
                 # TODO It could be more sophisticated, depending what field failed
 
         json_list.append(card)
-        return
- 
+        
+    # --------------------------------
     #
-    # if the folder contains media file and card then it taken as a:
+    # it is a MEDIA CARD dir
     #
-    # MEDIA CARD
-    #
+    # there is:     -Card 
+    #               -Media
+    # 
+    # --------------------------------
     elif card_path_os and media_path_os:
 
         # first collect every data from the card
@@ -203,9 +214,6 @@ def folder_investigation( actual_dir, json_list):
             # saves the os path of the media
             card['media-path'] = media_path_os
             
-            child_paths = json.loads('[]')
-            card['child-paths'] = child_paths
-                
             card['title']['hu'] = parser.get("titles", "title_hu")
             card['title']['en'] = parser.get("titles", "title_en")
                 
@@ -237,9 +245,9 @@ def folder_investigation( actual_dir, json_list):
             for actor in actors:
                 card['actor'].append(actor.strip())
 
-            nationalities = parser.get("general", "nationality").split(",")
-            for nationality in nationalities:
-                card['nationality'].append(nationality.strip())
+            countries = parser.get("general", "country").split(",")
+            for country in countries:
+                card['country'].append(country.strip())
                 
             card['best'] = parser.get("extra", "best")
             card['new'] = parser.get("extra", "new")
@@ -250,48 +258,37 @@ def folder_investigation( actual_dir, json_list):
                 
         except (configparser.NoSectionError, configparser.NoOptionError):
                 
-                print(configparser.NoOptionError)
-                # TODO It could be more sophisticated, depending what field failed
-
-#        fits = True
-#        for category, value in filter_selection.items():
-#            
-#            if value != None and value != "":
-#                print(category, value)
-#                
-#                if filter_key[category]['store-mode'] == 'v':
-#                    if value != card[category]:
-#                        fits = False
-#                elif filter_key[category]['store-mode'] == 'a':
-#                    if value not in card[category]:
-#                        fits = False
-#                else:
-#                    fits = False
-#        if fits:
-#            json_list.append(card)
+            print(configparser.NoOptionError)
+            # TODO It could be more sophisticated, depending what field failed
 
         json_list.append(card)
-        
-    #
-    # if the folder does not contain a media file and a card then it is taken as a simple folder
-    #
-    else:
 
-        # so it goes through the subfolders, there is any
-        for name in dir_list:
-            subfolder_path_os = os.path.join(actual_dir, name)            
-            folder_investigation( subfolder_path_os, json_list )
-            #folder_investigation( subfolder_path_os, json_list, filter_selection )
+    # ----------------------------------
+    #
+    # it is NO CARD dir
+    #
+    # ----------------------------------
+    else:
+        
+        is_card_dir = False
+        
+    # ----------------------------
+    #
+    # Through the Sub-directories
+    #
+    # ----------------------------    
+    for name in dir_list:
+        subfolder_path_os = os.path.join(actual_dir, name)
+        folder_investigation( subfolder_path_os, card['sub-cards'] if is_card_dir else json_list )
 
     # and finaly returns
     return
 
-#def collect_cards( rootdirs, filter_selection ):
 def collect_cards( rootdirs ):    
     media_list = json.loads('[]')
 
     for rootdir in rootdirs:
-        #folder_investigation(rootdir, media_list, filter_selection)
         folder_investigation(rootdir, media_list)
 
+    #print (media_list)
     return media_list
