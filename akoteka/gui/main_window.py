@@ -8,6 +8,7 @@ from pkg_resources import resource_string, resource_filename
 from akoteka.gui.card_holder_pane import CardHolder
 
 from akoteka.accessories import collect_filters
+from akoteka.accessories import collect_cards
 
 from functools import cmp_to_key
 
@@ -82,29 +83,42 @@ class GuiAkoTeka(QWidget):
             actual_holder.setParent(None)
         
             previous_holder.setHidden(False)
+
         
-        
+    # --------------------------
+    #
+    # Start Card Holder
+    #
+    # --------------------------
     def start_card_holder(self):
 
-        previous_holder = None
-        
-        paths = [
-                    media_path
-                ]
+        previous_holder = None        
         hierarchy = ""
-        
-        thread = Thread(target=self.fill_up_filters, args=(paths,))
-        #thread.daemon = True                            
-        thread.start()    
+        card_structure = []        
         
         card_holder=CardHolder(
             self,
             previous_holder,
             hierarchy,
-            paths
+            card_structure
         )
 
         self.add_new_holder(previous_holder, card_holder)
+
+        paths = [media_path]        
+        
+        self.cc = CollectCardThread( paths )
+        self.cc.collected.connect(card_holder.fill_up_card_holder)
+        self.cc.start()
+        
+        #thread = Thread(target=self.collect_cards_in_thread, args=(paths, card_holder))
+
+        
+    def collect_cards_in_thread(self, paths, card_holder):
+        card_structure = collect_cards(paths)
+      
+        card_holder.set_recent_card_structure(card_structure)
+        card_holder.fill_up_card_holder()
 
     def set_back_button_listener(self, listener):
         self.control_panel.set_back_button_listener(listener)
@@ -139,6 +153,25 @@ class GuiAkoTeka(QWidget):
         for element in sorted( hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
             self.get_filter_holder().add_actor(element)
       
+
+class CollectCardThread(QtCore.QThread):
+    collected = pyqtSignal(list)
+
+    def __init__(self, paths=None):
+        super().__init__()
+        #self.start()
+        
+        self.paths = paths
+        
+    def run(self):
+
+        card_list = collect_cards( self.paths)
+        self.collected.emit(card_list)
+
+    def __del__(self):
+        self.exiting = True
+        self.wait()
+
 
 # =========================================
 #

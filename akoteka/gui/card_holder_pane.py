@@ -7,7 +7,6 @@ from pkg_resources import resource_string, resource_filename
 
 from PyQt5.QtCore import pyqtSignal  
 
-from akoteka.accessories import collect_cards
 from akoteka.accessories import filter_key
 
 from akoteka.gui.glob import *
@@ -46,13 +45,13 @@ class CardHolder( QLabel ):
     
     card_array = None
     
-    def __init__(self, parent, previous_holder, hierarchy, paths):
+    def __init__(self, parent, previous_holder, hierarchy, recent_card_structure):
         super().__init__()
 
         self.parent = parent
         self.previous_holder = previous_holder
         self.hierarchy = hierarchy
-        self.paths = paths 
+        self.recent_card_structure = recent_card_structure
 
         # -------------
         #
@@ -99,9 +98,7 @@ class CardHolder( QLabel ):
         # Cards
         #
         # ------------
-        self.cc = CollectCardThread( self, self.paths )
-        self.cc.trigger.connect(self.fill_up_card_holder)
-        self.cc.start()
+        self.fill_up_card_holder()
         
         # ----------------------
         #
@@ -135,12 +132,12 @@ class CardHolder( QLabel ):
     # Clicked on the Collector's picture
     #
     # ----------------------------------
-    def go_deeper(self, child_paths, card_title):
+    def go_deeper(self, card_structure, card_title):
         deeper_card_holder = CardHolder(
             self.parent, 
             self, 
             self.title_hierarchy + (" > " if self.title_hierarchy else "") + card_title, 
-            child_paths 
+            card_structure 
         )
         self.parent.add_new_holder(self, deeper_card_holder)
         
@@ -153,40 +150,36 @@ class CardHolder( QLabel ):
         self.parent.restore_previous_holder(self.previous_holder, self)
         self.parent.set_back_button_listener(self.previous_holder)
 
-    # --------------------
-    #
-    # Filter Changed
-    #
-    # --------------------
-    def refresh(self):
-        self.fill_up_card_holder(self.card_list)
-
     # -------------------------------------
     # 
     # This method fills up the card_holder
     #
     # connected SIGNAL 
     # -------------------------------------
-    def fill_up_card_holder(self, card_list):
-    
-        self.card_list = card_list
-    
+    def fill_up_card_holder(self, recent_card_structure = []):
+
+        # it happens in the first time called from main_window.py
+        if recent_card_structure:
+            self.recent_card_structure = recent_card_structure
+
+        filtered_card_structure = json.loads('[]')
+        self.generate_filtered_card_structure(self.recent_card_structure, filtered_card_structure)
+
+        #print(self.recent_card_structure)
         # Remove all Cards and hide the CardHolder
         self.remove_cards()
         
+        
+        # Filter out the Cards
+        
         is_card = False
 
-        for crd in card_list:
+        for crd in filtered_card_structure:
 
             card = Card(self)
             card.set_image_path( crd["image-path"] )
             
-            child_paths = []
-            for sub_card in crd["sub-cards"]:
-                if sub_card:
-                    child_paths.append(sub_card['recent-folder'])
-            
-            card.set_child_paths( child_paths )
+            card.set_sub_cards( crd["sub-cards"] )
             card.set_media_path( crd["media-path"] )
             card.set_title( crd["title"][language] )
 
@@ -220,6 +213,11 @@ class CardHolder( QLabel ):
                 self.card_holder_layout.addWidget( card )
                 is_card = True
         
+        # Change filter according to the Cards
+        
+        
+        
+        
         # If there was at least one Card
         if is_card:
 
@@ -228,27 +226,101 @@ class CardHolder( QLabel ):
 
 
 
-class CollectCardThread(QtCore.QThread):
-    trigger = pyqtSignal(list)
 
-    def __init__(self, parent=None, paths=None):
-        super().__init__()
-        #self.start()
+    # ===============================
+    # 
+    #    hit_list = {
+    #       "genre": set(),
+    #       "theme": set(),
+    #       "director": set(),
+    #       "actor": set(),
+    #       "favorite": boolean,
+    #       "new": boolean,    
+    #       "best": boolean,    
+    #    }
+    #
+    #    filters = {
+    #       "genre": string,
+    #       "theme": string,
+    #       "director": string,
+    #       "actor": string,
+    #       "favorite": boolean,
+    #       "new": boolean,
+    #       "best": boolean,
+    #    }
+    #
+    # ===============================    
+    def generate_filtered_card_structure(self, card_structure, filtered_card_structure):
+
+        mediaFits = False
+        collectorFits = False
+
+        for crd in card_structure:
+            card = {}
+            card['image-path'] = crd['image-path']
+            card['media-path'] = crd['media-path']
+            card['title'] = crd['title']                 
+            card['year'] = crd['year']
+            card['director'] = crd['director']
+            card['length'] = crd['length']
+            card['sound'] = crd['sound']
+            card['sub'] = crd['sub']
+            card['genre'] = crd['genre']
+            card['theme'] = crd['theme']
+            card['actor'] = crd['actor']
+            card['country'] = crd['country']                
+            card['best'] = crd['best']
+            card['new'] = crd['new']
+            card['favorite'] = crd['favorite']                                        
+            card['links'] = crd['links']
+            card['recent-folder'] = crd['recent-folder']
+            card['sub-cards'] = json.loads('[]')            
+
+            # in case of MEDIA CARD
+            if crd["media-path"]:
+
+                fits = True
+                
+                # go through the filters
+                for category, value in self.parent.get_filter_holder().get_filter_selection().items():
+ 
+                    if crd['new'] == 'n':
+                        fits = False
+                    # if the specific filter is set
+#                    if value != None and value != "":
+#
+#                        if filter_key[category]['store-mode'] == 'v':
+#                            if value != crd[category]:
+#                                fits = False
+#                        elif filter_key[category]['store-mode'] == 'a':
+#                            if value not in crd[category]:
+#                                fits = False
+#                        else:
+#                            fits = False
+
+                # let's keep this MEDIA CARD as it fits
+                if fits:
+                    
+                    filtered_card_structure.append(card)                    
+                    mediaFits = True
+                    
+            # in case of COLLECTOR CARD
+            else:
+                                
+                # then it depends on the next level
+                fits = self.generate_filtered_card_structure(crd['sub-cards'], card['sub-cards'])
+                
+                if fits:
+                    filtered_card_structure.append(card)
+                    collectorFits = True
+                    
         
-        self.parent = parent
-        self.paths = paths
-        
-    def run(self):
+        return (mediaFits or collectorFits)
+                    
+            
+                
+                
 
-        card_list = collect_cards( self.paths)
-
-        self.trigger.emit(card_list)
-
-    def __del__(self):
-        self.exiting = True
-        self.wait()
-        
-      
 class CardHolderPanel( QLabel ):
     def __init__(self):
         super().__init__()
@@ -341,7 +413,7 @@ class Card(QLabel):
             #call( param_list )
             
         else:
-            self.card_holder.go_deeper(self.get_child_paths(), self.card_information.get_title() )
+            self.card_holder.go_deeper(self.get_sub_cards(), self.card_information.get_title() )
        
     def set_image_path( self, image_path ):
         self.card_image.set_image_path( image_path )
@@ -358,11 +430,11 @@ class Card(QLabel):
     def get_media_path( self ):
         return self.card_image.get_media_path( )
     
-    def set_child_paths( self, child_paths ):
-        self.card_image.set_child_paths( child_paths )
+    def set_sub_cards( self, sub_cards ):
+        self.card_image.set_sub_cards( sub_cards )
         
-    def get_child_paths( self ):
-        return self.card_image.get_child_paths()
+    def get_sub_cards( self ):
+        return self.card_image.get_sub_cards()
         
     def set_title(self, title):
         self.card_information.set_title(title)
@@ -567,7 +639,7 @@ class CardImage(QLabel):
         self.setStyleSheet('background: black')
        
         self.media_path = None
-        self.child_paths = json.loads('[]')
+        self.sub_cards = json.loads('[]')
         
         self.setMinimumWidth(PICTURE_WIDTH)
         self.setMaximumWidth(PICTURE_WIDTH)
@@ -602,10 +674,10 @@ class CardImage(QLabel):
     def get_media_path( self ):
         return self.media_path
 
-    def set_child_paths( self, child_paths ):
-        self.child_paths = child_paths
+    def set_sub_cards( self, sub_cards ):
+        self.sub_cards = sub_cards
 
-    def get_child_paths( self ):
+    def get_sub_cards( self ):
         
-        return self.child_paths       
+        return self.sub_cards      
         

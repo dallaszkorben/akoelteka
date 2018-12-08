@@ -142,7 +142,6 @@ class ConfigIni( Property ):
     def get_media_player_video_param(self):
         return self.get(self.MEDIA_PLAYER_VIDEO_PARAM[0], self.MEDIA_PLAYER_VIDEO_PARAM[1], self.MEDIA_PLAYER_VIDEO_PARAM[2])
 
-
     def set_language(self, lang):
         self.update(self.LANGUAGE[0], self.LANGUAGE[1], lang)
 
