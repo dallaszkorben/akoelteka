@@ -84,6 +84,7 @@ class GuiAkoTeka(QWidget):
         
             previous_holder.setHidden(False)
 
+#            actual_holder.fill_up_card_holder()
         
     # --------------------------
     #
@@ -105,14 +106,11 @@ class GuiAkoTeka(QWidget):
 
         self.add_new_holder(previous_holder, card_holder)
 
-        paths = [media_path]        
+        paths = [media_path]      
         
         self.cc = CollectCardThread( paths )
         self.cc.collected.connect(card_holder.fill_up_card_holder)
         self.cc.start()
-        
-        #thread = Thread(target=self.collect_cards_in_thread, args=(paths, card_holder))
-
         
     def collect_cards_in_thread(self, paths, card_holder):
         card_structure = collect_cards(paths)
@@ -130,28 +128,6 @@ class GuiAkoTeka(QWidget):
         return self.control_panel.get_filter_holder()
     
     
-    #
-    # Fills up the Filters
-    #
-    def fill_up_filters(self, paths):
-        
-        hit_list = {
-            "genre": set(),
-            "theme": set(),
-            "director": set(),
-            "actor": set()        
-        }
-
-        for path in paths:
-            collect_filters(path, hit_list)        
-        for element in sorted([(_("genre_" + e),e) for e in hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):
-            self.get_filter_holder().add_genre(element[0], element[1])        
-        for element in sorted([(_("theme_" + e), e) for e in hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):
-            self.get_filter_holder().add_theme(element[0], element[1])
-        for element in sorted( hit_list['director'], key=cmp_to_key(locale.strcoll) ):
-            self.get_filter_holder().add_director(element)
-        for element in sorted( hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
-            self.get_filter_holder().add_actor(element)
       
 
 class CollectCardThread(QtCore.QThread):
@@ -203,7 +179,7 @@ class ControlPanel(QWidget):
         back_button = QPushButton()
         back_button.clicked.connect(self.back_button_on_click)
         
-        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", "back-button.jpg")) ))
+        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", "back-button.png")) ))
         back_button.setIconSize(QSize(32,32))
         back_button.setCursor(QCursor(Qt.PointingHandCursor))
         back_button.setStyleSheet("background:transparent; border:none") 
@@ -240,7 +216,7 @@ class ControlPanel(QWidget):
 
     def filter_on_change(self):
         if self.filter_listener:
-            self.filter_listener.refresh()
+            self.filter_listener.fill_up_card_holder()
     
     def get_filter_holder(self):
         return self.filter_holder
@@ -319,12 +295,18 @@ class FilterDropDownSimple(QWidget):
         self.dropdown.addItem("")
 
         self_layout.addWidget( self.dropdown )
+    
+    def clear_elements(self):
+        self.dropdown.clear()
 
     def add_element(self, value, id):
         self.dropdown.addItem(value, id)
 
     def get_selected(self):
         return self.dropdown.itemData( self.dropdown.currentIndex() )
+    
+    def select_element(self, id):
+        self.dropdown.setCurrentIndex( self.dropdown.findData(id) )
 
     def current_index_changed(self):
         self.state_changed.emit()
@@ -449,17 +431,41 @@ class FilterHolder(QWidget):
         self.filter_dd_director.state_changed.connect(self.state_changed)
         self.filter_dd_actor.state_changed.connect(self.state_changed)
 
+    def clear_genre(self):
+        self.filter_dd_genre.clear_elements()
+        
     def add_genre(self, value, id):
         self.filter_dd_genre.add_element(value, id)
+        
+    def select_genre(self, id):
+        self.filter_dd_genre.select_element(id)
+
+    def clear_theme(self):
+        self.filter_dd_theme.clear_elements()
 
     def add_theme(self, value, id):
         self.filter_dd_theme.add_element(value, id)
+        
+    def select_theme(self, id):
+        self.filter_dd_theme.select_element(id)        
+
+    def clear_director(self):
+        self.filter_dd_director.clear_elements()
     
     def add_director(self, director):
         self.filter_dd_director.add_element(director, director)
     
+    def select_director(self, id):
+        self.filter_dd_director.select_element(id)
+        
+    def clear_actor(self):
+        self.filter_dd_actor.clear_elements()
+
     def add_actor(self, actor):
         self.filter_dd_actor.add_element(actor, actor)
+        
+    def select_actor(self, id):
+        self.filter_dd_actor.select_element(id)        
     
     def get_filter_selection(self):
         filter_selection = {
@@ -477,12 +483,6 @@ class FilterHolder(QWidget):
         self.changed.emit()
         
 def main():   
-    
-    #from akoteka.accessories import collect_cards
-    #import json
-    #ret = collect_cards(["/media/akoel/Movies/Final/Sagas/-Wall.Street"])
-    #print(json.dumps(ret))
-    #exit()
     
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()

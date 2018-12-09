@@ -25,7 +25,7 @@ setup(
                 ['akoteka=akoteka.gui.main_window:main']
       },
       package_data={
-        'prala': ['gui/img/*.jpg'],
+        'prala': ['gui/img/*.png'],
         'prala': ['setup/setup.ini'],
         'prala': ['dict/*.properties'],
         'prala': ['config.ini'],

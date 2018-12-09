@@ -1,4 +1,4 @@
-include akoteka/gui/img/*.jpg
+include akoteka/gui/img/*.png
 include akoteka/setup/setup.ini
 include akoteka/dict/*.properties
 include akoteka/config.ini

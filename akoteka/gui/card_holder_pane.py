@@ -4,6 +4,8 @@ import json
 from subprocess import call
 from threading import Thread
 from pkg_resources import resource_string, resource_filename
+from functools import cmp_to_key
+import locale
 
 from PyQt5.QtCore import pyqtSignal  
 
@@ -106,7 +108,7 @@ class CardHolder( QLabel ):
         #
         # ----------------------
         self.parent.set_back_button_listener(self)
-        self.parent.set_filter_listener(self)
+#        self.parent.set_filter_listener(self)
   
     def show_card_holder(self):
         self.card_holder_canvas.setHidden(False)
@@ -133,6 +135,7 @@ class CardHolder( QLabel ):
     #
     # ----------------------------------
     def go_deeper(self, card_structure, card_title):
+        
         deeper_card_holder = CardHolder(
             self.parent, 
             self, 
@@ -149,108 +152,169 @@ class CardHolder( QLabel ):
     def go_back(self):
         self.parent.restore_previous_holder(self.previous_holder, self)
         self.parent.set_back_button_listener(self.previous_holder)
+        
+        if self.previous_holder:
+            self.previous_holder.fill_up_card_holder()
 
     # -------------------------------------
     # 
     # This method fills up the card_holder
-    #
-    # connected SIGNAL 
+    # 
     # -------------------------------------
     def fill_up_card_holder(self, recent_card_structure = []):
+
+        self.parent.set_filter_listener(None)
 
         # it happens in the first time called from main_window.py
         if recent_card_structure:
             self.recent_card_structure = recent_card_structure
 
+        # produces the Filtered_Card_Structure out of recent_card_structure
         filtered_card_structure = json.loads('[]')
-        self.generate_filtered_card_structure(self.recent_card_structure, filtered_card_structure)
-
-        #print(self.recent_card_structure)
+        filter_hit_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set(),
+            "favorite": set(),
+            "new": set(),
+            "best": set()
+        }
+        self.generate_filtered_card_structure(self.recent_card_structure, filtered_card_structure, filter_hit_list)
+       
+#        print(self.recent_card_structure)
+#        print()
+#        print()
+        
+        # ------------------------------------
+        #
+        # Save the recent state of the filters
+        #
+        # ------------------------------------
+        filters = {
+            "genre": "",
+            "theme": "",
+            "director": "",
+            "actor": "",
+            "favorite": "",
+            "new": "",
+            "best": ""
+        }
+        for category, value in self.parent.get_filter_holder().get_filter_selection().items():            
+            if value != None and value != "":
+                filters[category] = value
+        
         # Remove all Cards and hide the CardHolder
         self.remove_cards()
-        
-        
-        # Filter out the Cards
-        
+
+        #
+        # Show the MEDIA CARDs / COLLECTOR CARDs on the recent level        
+        #
         is_card = False
 
         for crd in filtered_card_structure:
+        #for crd in self.recent_card_structure:            
+            #print(crd['recent-folder'])
 
             card = Card(self)
             card.set_image_path( crd["image-path"] )
             
-            card.set_sub_cards( crd["sub-cards"] )
+            #card.set_sub_cards( crd["sub-cards"] )
+            card.set_sub_cards( crd["orig-sub-cards"] )
             card.set_media_path( crd["media-path"] )
             card.set_title( crd["title"][language] )
 
             fits = True
             
+            # if MEDIA CARD
             if crd["media-path"]:
                     
                 card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
                 card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
-                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) for g in crd["genre"] ] ) )
-                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) for a in crd["theme"] ] ) )
+                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) if g else "" for g in crd["genre"] ] ) )
+                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in crd["theme"] ] ) )
 
                 card.add_element_to_collector_line( _("title_year"), crd["year"])
                 card.add_element_to_collector_line( _("title_length"), crd["length"])
                 card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["country"] ]) )
                     
-                for category, value in self.parent.get_filter_holder().get_filter_selection().items():
-            
-                    if value != None and value != "":
-
-                        if filter_key[category]['store-mode'] == 'v':
-                            if value != crd[category]:
-                                fits = False
-                        elif filter_key[category]['store-mode'] == 'a':
-                            if value not in crd[category]:
-                                fits = False
-                        else:
-                            fits = False
+                #for category, value in self.parent.get_filter_holder().get_filter_selection().items():
+#                for category, value in filters.items():
+#            
+#                    if value != None and value != "":
+#
+#                        if filter_key[category]['store-mode'] == 'v':
+#                            if value != crd[category]:
+#                                fits = False
+#                        elif filter_key[category]['store-mode'] == 'a':
+#                            if value not in crd[category]:
+#                                fits = False
+#                        else:
+#                            fits = False
             
             if fits:
                 self.card_holder_layout.addWidget( card )
                 is_card = True
         
         # Change filter according to the Cards
+        self.parent.get_filter_holder().clear_genre()
+        self.parent.get_filter_holder().add_genre("", "")
+        for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.parent.get_filter_holder().add_genre(element[0], element[1])
         
-        
-        
+        self.parent.get_filter_holder().clear_theme()
+        self.parent.get_filter_holder().add_theme("", "")
+        for element in sorted([(_("theme_" + e), e) for e in filter_hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.parent.get_filter_holder().add_theme(element[0], element[1])
+
+        self.parent.get_filter_holder().clear_director()
+        self.parent.get_filter_holder().add_director("")
+        for element in sorted( filter_hit_list['director'], key=cmp_to_key(locale.strcoll) ):
+            self.parent.get_filter_holder().add_director(element)
+
+        self.parent.get_filter_holder().clear_actor()
+        self.parent.get_filter_holder().add_actor("")
+        for element in sorted( filter_hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
+            self.parent.get_filter_holder().add_actor(element)
         
         # If there was at least one Card
         if is_card:
 
             # then the CardHolder will be show
             self.show_card_holder()
+            
+        # --------------------
+        #
+        # Reselect the Filters
+        #
+        # --------------------
+        self.parent.get_filter_holder().select_genre(filters["genre"])
+        self.parent.get_filter_holder().select_theme(filters["theme"])
+        self.parent.get_filter_holder().select_director(filters["director"])
+        self.parent.get_filter_holder().select_actor(filters["actor"])
+        
+        self.parent.set_filter_listener(self)
 
 
 
 
-    # ===============================
+
+    # ================================
     # 
-    #    hit_list = {
-    #       "genre": set(),
-    #       "theme": set(),
-    #       "director": set(),
-    #       "actor": set(),
-    #       "favorite": boolean,
-    #       "new": boolean,    
-    #       "best": boolean,    
-    #    }
+    # Generates Filtered CardStructure
     #
-    #    filters = {
-    #       "genre": string,
-    #       "theme": string,
-    #       "director": string,
-    #       "actor": string,
-    #       "favorite": boolean,
-    #       "new": boolean,
-    #       "best": boolean,
-    #    }
     #
-    # ===============================    
-    def generate_filtered_card_structure(self, card_structure, filtered_card_structure):
+    # filter_hit_list = {
+    #   "genre": set(),
+    #   "theme": set(),
+    #   "director": set(),
+    #   "actor": set(),
+    #   "favorite": set(),
+    #   "new": set(),
+    #   "best": set()
+    # }
+    # ================================   
+    def generate_filtered_card_structure(self, card_structure, filtered_card_structure, filter_hit_list):
 
         mediaFits = False
         collectorFits = False
@@ -274,7 +338,8 @@ class CardHolder( QLabel ):
             card['favorite'] = crd['favorite']                                        
             card['links'] = crd['links']
             card['recent-folder'] = crd['recent-folder']
-            card['sub-cards'] = json.loads('[]')            
+            card['sub-cards'] = json.loads('[]')
+            card['orig-sub-cards'] = crd['sub-cards']
 
             # in case of MEDIA CARD
             if crd["media-path"]:
@@ -283,23 +348,33 @@ class CardHolder( QLabel ):
                 
                 # go through the filters
                 for category, value in self.parent.get_filter_holder().get_filter_selection().items():
- 
-                    if crd['new'] == 'n':
-                        fits = False
+            
                     # if the specific filter is set
-#                    if value != None and value != "":
-#
-#                        if filter_key[category]['store-mode'] == 'v':
-#                            if value != crd[category]:
-#                                fits = False
-#                        elif filter_key[category]['store-mode'] == 'a':
-#                            if value not in crd[category]:
-#                                fits = False
-#                        else:
-#                            fits = False
+                    if value != None and value != "":
+
+                        if filter_key[category]['store-mode'] == 'v':
+                            if value != crd[category]:
+                                fits = False
+                                
+                        elif filter_key[category]['store-mode'] == 'a':
+                            if value not in crd[category]:
+                                fits = False
+                        else:
+                            fits = False
 
                 # let's keep this MEDIA CARD as it fits
                 if fits:
+
+                    # Collect the filters
+                    for category, value in self.parent.get_filter_holder().get_filter_selection().items():
+                        if filter_key[category]['store-mode'] == 'v':
+                            if card[category]:
+                                filter_hit_list[category].add(card[category])
+                                
+                        elif filter_key[category]['store-mode'] == 'a':
+                            for cat in card[category]:
+                                if cat.strip():
+                                    filter_hit_list[category].add(cat.strip())
                     
                     filtered_card_structure.append(card)                    
                     mediaFits = True
@@ -308,12 +383,11 @@ class CardHolder( QLabel ):
             else:
                                 
                 # then it depends on the next level
-                fits = self.generate_filtered_card_structure(crd['sub-cards'], card['sub-cards'])
+                fits = self.generate_filtered_card_structure(crd['sub-cards'], card['sub-cards'], filter_hit_list)
                 
                 if fits:
                     filtered_card_structure.append(card)
                     collectorFits = True
-                    
         
         return (mediaFits or collectorFits)
                     
