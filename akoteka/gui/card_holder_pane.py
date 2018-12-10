@@ -22,6 +22,7 @@ from akoteka.gui.glob import media_player_video_param
 
 PICTURE_WIDTH = 190
 PICTURE_HEIGHT = 160
+RATE_WIDTH = 30
 
 COLOR_CARD = "#b3d4c9"
 COLOR_CARD_BORDER_MEDIA = "#b3d4c9"
@@ -224,7 +225,7 @@ class CardHolder( QLabel ):
             card.set_media_path( crd["media-path"] )
             card.set_title( crd["title"][language] )
 
-            fits = True
+            #fits = True
             
             # if MEDIA CARD
             if crd["media-path"]:
@@ -237,24 +238,17 @@ class CardHolder( QLabel ):
                 card.add_element_to_collector_line( _("title_year"), crd["year"])
                 card.add_element_to_collector_line( _("title_length"), crd["length"])
                 card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["country"] ]) )
-                    
-                #for category, value in self.parent.get_filter_holder().get_filter_selection().items():
-#                for category, value in filters.items():
-#            
-#                    if value != None and value != "":
-#
-#                        if filter_key[category]['store-mode'] == 'v':
-#                            if value != crd[category]:
-#                                fits = False
-#                        elif filter_key[category]['store-mode'] == 'a':
-#                            if value not in crd[category]:
-#                                fits = False
-#                        else:
-#                            fits = False
+                   
+                # initialize the rating buttons
+                card.set_favorite(crd["favorite"])
+                card.set_best(crd["best"])
+                card.set_new(crd["new"])
             
-            if fits:
-                self.card_holder_layout.addWidget( card )
-                is_card = True
+            # Show the CARD on the CARD HOLDER
+            self.card_holder_layout.addWidget( card )
+            
+            # There is at least ONE CARD (MEDIA/COLLECTOR)
+            is_card = True
         
         # Change filter according to the Cards
         self.parent.get_filter_holder().clear_genre()
@@ -294,8 +288,6 @@ class CardHolder( QLabel ):
         self.parent.get_filter_holder().select_actor(filters["actor"])
         
         self.parent.set_filter_listener(self)
-
-
 
 
 
@@ -463,10 +455,15 @@ class Card(QLabel):
         card_panel.setLayout( card_layout )
         card_panel.setStyleSheet('background: ' + COLOR_CARD)
 
+        #
+        # Containers in the Card
+        #
         self.card_image = CardImage()
         card_layout.addWidget( self.card_image )
         self.card_information = CardInformation()
         card_layout.addWidget( self.card_information )
+        self.card_rating = CardRating()
+        card_layout.addWidget( self.card_rating )
  
         self.borderRadius = 5
        
@@ -518,6 +515,15 @@ class Card(QLabel):
         
     def add_element_to_collector_line( self, label, value ):
         self.card_information.add_element_to_collector_line( label, value )
+        
+    def set_favorite( self, favorite ):
+        self.card_rating.set_favorite(favorite)
+        
+    def set_best( self, best ):
+        self.card_rating.set_best( best )
+        
+    def set_new( self, new ):
+        self.card_rating.set_new( new )
 
     def paintEvent(self, event):
         # get current window size
@@ -531,11 +537,18 @@ class Card(QLabel):
             #self.setStyleSheet('background: ' + COLOR_CARD_BORDER_MEDIA)
             #qp.setPen(self.foregroundColor)
             qp.setBrush( QColor(COLOR_CARD_BORDER_MEDIA))
+            
+            # Show the RATING section
+            self.card_rating.setHidden(False)
 
         else:
 #            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_CONTAINER)        
             qp.setBrush( QColor(COLOR_CARD_BORDER_CONTAINER ))
+            
+            # Hide the RATING section
+            self.card_rating.setHidden(True)
 
+        # Create ROUNDED corner to the CARD
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
         qp.end()
         
@@ -678,7 +691,8 @@ class CardInformation(QLabel):
         self.info_layout.addWidget( self.card_info_lines_holder )
         
         # Horizintal line under the "Year/Length/Country" line
-        self.info_layout.addWidget( QHLine())
+        self.horizontal_line = QHLine()
+        self.info_layout.addWidget( self.horizontal_line )
 
 
     def set_title(self, title ):
@@ -755,3 +769,82 @@ class CardImage(QLabel):
         
         return self.sub_cards      
         
+
+# ---------------------------------------------------
+#
+# CardRating
+#
+# It contains three elments in vertically ordered:
+# -Favorite
+# -Best
+# -New
+#
+# ---------------------------------------------------
+class CardRating(QLabel):
+    def __init__(self):
+        super().__init__()
+        
+        self.rating_layout = QVBoxLayout(self)
+        self.setLayout(self.rating_layout)
+        self.rating_layout.setContentsMargins(1,1,1,1)
+        self.rating_layout.setSpacing(0)
+        #self.setStyleSheet('background: green')
+        self.setMinimumWidth(RATE_WIDTH)
+
+
+        # FAVORITE button
+        self.rating_favorite_button = QPushButton()
+        self.rating_favorite_button.setCheckable(True)        
+        rating_favorite_icon = QIcon()
+        rating_favorite_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "favorite-on.png")) ), QIcon.Normal, QIcon.On)
+        rating_favorite_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "favorite-off.png")) ), QIcon.Normal, QIcon.Off)
+        self.rating_favorite_button.clicked.connect(self.rating_favorite_button_on_click)        
+        self.rating_favorite_button.setIcon( rating_favorite_icon )
+        self.rating_favorite_button.setIconSize(QSize(25,25))
+        self.rating_favorite_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.rating_favorite_button.setStyleSheet("background:transparent; border:none") 
+        self.rating_layout.addWidget( self.rating_favorite_button )
+
+        # BEST button
+        self.rating_best_button = QPushButton()
+        self.rating_best_button.setCheckable(True)        
+        rating_best_icon = QIcon()
+        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "best-on.png")) ), QIcon.Normal, QIcon.On)
+        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "best-off.png")) ), QIcon.Normal, QIcon.Off)
+        self.rating_best_button.clicked.connect(self.rating_best_button_on_click)        
+        self.rating_best_button.setIcon( rating_best_icon )
+        self.rating_best_button.setIconSize(QSize(25,25))
+        self.rating_best_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.rating_best_button.setStyleSheet("background:transparent; border:none") 
+        self.rating_layout.addWidget( self.rating_best_button )
+
+        # NEW button
+        self.rating_new_button = QPushButton()
+        self.rating_new_button.setCheckable(True)        
+        rating_new_icon = QIcon()
+        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "new-on.png")) ), QIcon.Normal, QIcon.On)
+        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "new-off.png")) ), QIcon.Normal, QIcon.Off)
+        self.rating_new_button.clicked.connect(self.rating_new_button_on_click)        
+        self.rating_new_button.setIcon( rating_new_icon )
+        self.rating_new_button.setIconSize(QSize(25,25))
+        self.rating_new_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.rating_new_button.setStyleSheet("background:transparent; border:none") 
+        self.rating_layout.addWidget( self.rating_new_button )
+
+    def set_favorite(self, favorite):
+        self.rating_favorite_button.setChecked(favorite == 'y')
+
+    def rating_favorite_button_on_click(self):
+        print( "favorit was clicked")
+        
+    def set_best(self, best):
+        self.rating_best_button.setChecked(best == 'y')
+
+    def rating_best_button_on_click(self):
+        print( "best was clicked")
+    
+    def set_new(self, new):
+        self.rating_new_button.setChecked(new == 'y')
+        
+    def rating_new_button_on_click(self):
+        print( "new was clicked")

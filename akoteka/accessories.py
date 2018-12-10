@@ -49,53 +49,6 @@ filter_key = {
     }
 }
 
-# ===============================
-# 
-#    hit_list = {
-#        "genre": set(),
-#        "theme": set(),
-#        "director": set(),
-#        "actor": set()        
-#    }
-#
-# ===============================
-def collect_filters( actual_dir, hit_list ):
-
-    for dirpath, dirnames, filenames in os.walk(actual_dir):
-
-        for name in filenames:
-            if pattern_card.match( name ):
-                card_path_os = os.path.join(dirpath, name)
-                
-                parser = configparser.RawConfigParser()
-                parser.read(card_path_os)
-            
-                for category, lst in hit_list.items():
-                    fk = filter_key[category]
-
-                    try:
-                
-                        value = parser.get( "general", category )
-
-                        if fk["store-mode"] == 'v':
-
-                            if value:
-                                hit_list[category].add(value.strip())
-                                
-                        elif fk["store-mode"] == 'a':
-                                    
-                            values = value.split(",")            
-                            for value in values:
-                                if value:
-                                    
-                                    hit_list[category].add(value.strip())
-                
-                    except (configparser.NoSectionError, configparser.NoOptionError) as e:
-                        pass
-
-    return hit_list
-
-
 def folder_investigation( actual_dir, json_list):
     
     # Collect files and and dirs in the current directory
@@ -137,7 +90,6 @@ def folder_investigation( actual_dir, json_list):
     title_json_list = {}
     title_json_list['hu'] = media_name
     title_json_list['en'] = media_name
-#    card['child-paths'] = json.loads('[]')
     card['title'] = title_json_list
                 
     card['year'] = ""
@@ -186,9 +138,8 @@ def folder_investigation( actual_dir, json_list):
             card['title']['hu'] = parser.get("titles", "title_hu")
             card['title']['en'] = parser.get("titles", "title_en")
                 
-        except (configparser.NoSectionError, configparser.NoOptionError):
-                
-                print(configparser.NoOptionError)
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            print(nop_err, "in ", card_path_os)
                 # TODO It could be more sophisticated, depending what field failed
 
         json_list.append(card)
@@ -249,16 +200,15 @@ def folder_investigation( actual_dir, json_list):
             for country in countries:
                 card['country'].append(country.strip())
                 
-            card['best'] = parser.get("extra", "best")
-            card['new'] = parser.get("extra", "new")
-            card['favorite'] = parser.get("extra", "favorite")
+            card['best'] = parser.get("rating", "best")
+            card['new'] = parser.get("rating", "new")
+            card['favorite'] = parser.get("rating", "favorite")
                                                 
             card['links']['imdb'] = parser.get("links", "imdb")
             
                 
-        except (configparser.NoSectionError, configparser.NoOptionError):
-                
-            print(configparser.NoOptionError)
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            print(nop_err, "in ", card_path_os)
             # TODO It could be more sophisticated, depending what field failed
 
         json_list.append(card)

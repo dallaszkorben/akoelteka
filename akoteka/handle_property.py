@@ -71,6 +71,8 @@ class Property(object):
                 # if no section -> NoSectionError | if no key -> Create it
                 self.parser.set(section, key, value)
             except configparser.NoSectionError:
+                print("hello")
+
                 self.parser[section]={key: value}
 
         self.__write_file()

@@ -7,7 +7,6 @@ from pkg_resources import resource_string, resource_filename
 
 from akoteka.gui.card_holder_pane import CardHolder
 
-from akoteka.accessories import collect_filters
 from akoteka.accessories import collect_cards
 
 from functools import cmp_to_key
@@ -376,21 +375,21 @@ class FilterHolder(QWidget):
         # Checkboxes
         #
         # ----------
+        self.filter_cb_favorite = FilterCheckBox(_('title_favorite'))
         self.filter_cb_best = FilterCheckBox(_('title_best'))
         self.filter_cb_new = FilterCheckBox(_('title_new'))
-        self.filter_cb_favorite = FilterCheckBox(_('title_favorite'))
-        
-        holder_checkbox = FilterCheckBoxHolder()
                 
-        holder_checkbox.add_checkbox(self.filter_cb_best)
-        holder_checkbox.add_checkbox(self.filter_cb_new)
+        holder_checkbox = FilterCheckBoxHolder()
+        
         holder_checkbox.add_checkbox(self.filter_cb_favorite)
+        holder_checkbox.add_checkbox(self.filter_cb_best)
+        holder_checkbox.add_checkbox(self.filter_cb_new)        
                 
         # Listener
+        self.filter_cb_favorite.stateChanged.connect(self.state_changed)
         self.filter_cb_best.stateChanged.connect(self.state_changed)
         self.filter_cb_new.stateChanged.connect(self.state_changed)
-        self.filter_cb_favorite.stateChanged.connect(self.state_changed)
-                
+                        
         self_layout.addWidget(holder_checkbox)
 
         # ----------
