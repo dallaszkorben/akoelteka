@@ -50,3 +50,14 @@ dic = Dict.get_instance( language )
 def _(word):
     return dic._(word)
 
+SECTION_RATING = 'rating'
+SECTION_GENERAL = 'general'
+SECTION_TITLE = 'title'
+SECTION_EXTRA = 'extra'
+
+RATING_KEY_FAVORITE = 'favorite'
+RATING_KEY_NEW = 'new'
+RATING_KEY_BEST = 'best'
+
+FILE_CARD_INI = 'card.ini'
+

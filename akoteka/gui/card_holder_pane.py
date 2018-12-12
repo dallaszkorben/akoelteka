@@ -11,6 +11,8 @@ from PyQt5.QtCore import pyqtSignal
 
 from akoteka.accessories import filter_key
 
+from akoteka.handle_property import Property
+
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
 
@@ -182,11 +184,7 @@ class CardHolder( QLabel ):
             "best": set()
         }
         self.generate_filtered_card_structure(self.recent_card_structure, filtered_card_structure, filter_hit_list)
-       
-#        print(self.recent_card_structure)
-#        print()
-#        print()
-        
+     
         # ------------------------------------
         #
         # Save the recent state of the filters
@@ -218,31 +216,30 @@ class CardHolder( QLabel ):
             #print(crd['recent-folder'])
 
             card = Card(self)
-            card.set_image_path( crd["image-path"] )
+            card.set_image_path( crd["extra"]["image-path"] )
             
             #card.set_sub_cards( crd["sub-cards"] )
-            card.set_sub_cards( crd["orig-sub-cards"] )
-            card.set_media_path( crd["media-path"] )
+            card.set_sub_cards( crd["extra"]["orig-sub-cards"] )
+            card.set_media_path( crd["extra"]["media-path"] )
             card.set_title( crd["title"][language] )
 
             #fits = True
             
             # if MEDIA CARD
-            if crd["media-path"]:
+            if crd["extra"]["media-path"]:
                     
-                card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["director"] ] ) )
-                card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["actor"] ] ) )
-                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) if g else "" for g in crd["genre"] ] ) )
-                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in crd["theme"] ] ) )
+                card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["general"]["director"] ] ) )
+                card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["general"]["actor"] ] ) )
+                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) if g else "" for g in crd["general"]["genre"] ] ) )
+                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in crd["general"]["theme"] ] ) )
 
-                card.add_element_to_collector_line( _("title_year"), crd["year"])
-                card.add_element_to_collector_line( _("title_length"), crd["length"])
-                card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["country"] ]) )
+                card.add_element_to_collector_line( _("title_year"), crd["general"]["year"])
+                card.add_element_to_collector_line( _("title_length"), crd["general"]["length"])
+                card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["general"]["country"] ]) )
                    
                 # initialize the rating buttons
-                card.set_favorite(crd["favorite"])
-                card.set_best(crd["best"])
-                card.set_new(crd["new"])
+                card.set_rating(crd['rating'])
+                card.set_folder(crd['extra']['recent-folder'])
             
             # Show the CARD on the CARD HOLDER
             self.card_holder_layout.addWidget( card )
@@ -310,31 +307,24 @@ class CardHolder( QLabel ):
 
         mediaFits = False
         collectorFits = False
-
+            
         for crd in card_structure:
+            
+            
             card = {}
-            card['image-path'] = crd['image-path']
-            card['media-path'] = crd['media-path']
-            card['title'] = crd['title']                 
-            card['year'] = crd['year']
-            card['director'] = crd['director']
-            card['length'] = crd['length']
-            card['sound'] = crd['sound']
-            card['sub'] = crd['sub']
-            card['genre'] = crd['genre']
-            card['theme'] = crd['theme']
-            card['actor'] = crd['actor']
-            card['country'] = crd['country']                
-            card['best'] = crd['best']
-            card['new'] = crd['new']
-            card['favorite'] = crd['favorite']                                        
-            card['links'] = crd['links']
-            card['recent-folder'] = crd['recent-folder']
-            card['sub-cards'] = json.loads('[]')
-            card['orig-sub-cards'] = crd['sub-cards']
+            card['title'] = crd['title']
+            card['general'] = crd['general']
+            card['rating'] = crd['rating']
+
+            card['extra'] = {}            
+            card['extra']['image-path'] = crd['extra']['image-path']
+            card['extra']['media-path'] = crd['extra']['media-path']
+            card['extra']['recent-folder'] = crd['extra']['recent-folder']            
+            card['extra']['sub-cards'] = json.loads('[]')
+            card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
 
             # in case of MEDIA CARD
-            if crd["media-path"]:
+            if crd['extra']['media-path']:
 
                 fits = True
                 
@@ -345,11 +335,11 @@ class CardHolder( QLabel ):
                     if value != None and value != "":
 
                         if filter_key[category]['store-mode'] == 'v':
-                            if value != crd[category]:
+                            if value != crd[filter_key[category]['section']][category]:
                                 fits = False
                                 
                         elif filter_key[category]['store-mode'] == 'a':
-                            if value not in crd[category]:
+                            if value not in crd[filter_key[category]['section']][category]:
                                 fits = False
                         else:
                             fits = False
@@ -360,11 +350,11 @@ class CardHolder( QLabel ):
                     # Collect the filters
                     for category, value in self.parent.get_filter_holder().get_filter_selection().items():
                         if filter_key[category]['store-mode'] == 'v':
-                            if card[category]:
-                                filter_hit_list[category].add(card[category])
+                            if card[filter_key[category]['section']][category]:
+                                filter_hit_list[category].add(card[filter_key[category]['section']][category])
                                 
                         elif filter_key[category]['store-mode'] == 'a':
-                            for cat in card[category]:
+                            for cat in card[filter_key[category]['section']][category]:
                                 if cat.strip():
                                     filter_hit_list[category].add(cat.strip())
                     
@@ -372,10 +362,10 @@ class CardHolder( QLabel ):
                     mediaFits = True
                     
             # in case of COLLECTOR CARD
-            else:
-                                
+            else:                     
+                     
                 # then it depends on the next level
-                fits = self.generate_filtered_card_structure(crd['sub-cards'], card['sub-cards'], filter_hit_list)
+                fits = self.generate_filtered_card_structure(crd['extra']['sub-cards'], card['extra']['sub-cards'], filter_hit_list)
                 
                 if fits:
                     filtered_card_structure.append(card)
@@ -516,15 +506,12 @@ class Card(QLabel):
     def add_element_to_collector_line( self, label, value ):
         self.card_information.add_element_to_collector_line( label, value )
         
-    def set_favorite( self, favorite ):
-        self.card_rating.set_favorite(favorite)
+    def set_rating( self, rating ):
+        self.card_rating.set_rating(rating)
         
-    def set_best( self, best ):
-        self.card_rating.set_best( best )
+    def set_folder( self, folder ):
+        self.card_rating.set_folder(folder)
         
-    def set_new( self, new ):
-        self.card_rating.set_new( new )
-
     def paintEvent(self, event):
         # get current window size
         s = self.size()
@@ -831,20 +818,42 @@ class CardRating(QLabel):
         self.rating_new_button.setStyleSheet("background:transparent; border:none") 
         self.rating_layout.addWidget( self.rating_new_button )
 
-    def set_favorite(self, favorite):
-        self.rating_favorite_button.setChecked(favorite == 'y')
+    def set_folder(self, folder):
+        self.folder = folder
 
+    def set_rating(self, rating):
+        self.rating = rating
+        self.rating_favorite_button.setChecked(rating[ RATING_KEY_FAVORITE ] == 'y')
+        self.rating_best_button.setChecked(rating[ RATING_KEY_BEST ] == 'y')
+        self.rating_new_button.setChecked(rating[ RATING_KEY_FAVORITE ] == 'y')
+
+    # -----------------------
+    #
+    # FAVORITE icon clicked
+    #
+    # -----------------------
     def rating_favorite_button_on_click(self):
-        print( "favorit was clicked")
-        
-    def set_best(self, best):
-        self.rating_best_button.setChecked(best == 'y')
+        self.rating[ RATING_KEY_FAVORITE ] = 'y' if self.rating_favorite_button.isChecked() else 'n'
+        card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
+        card_ini.update(SECTION_RATING, RATING_KEY_FAVORITE, self.rating[RATING_KEY_FAVORITE])
 
+    # -----------------------
+    #
+    # BEST icon clicked
+    #
+    # -----------------------       
     def rating_best_button_on_click(self):
-        print( "best was clicked")
-    
-    def set_new(self, new):
-        self.rating_new_button.setChecked(new == 'y')
-        
+        self.rating[RATING_KEY_BEST] = 'y' if self.rating_best_button.isChecked() else 'n'
+        card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
+        card_ini.update(SECTION_RATING, RATING_KEY_BEST, self.rating[RATING_KEY_BEST])
+
+    # -----------------------
+    #
+    # NEW icon clicked
+    #
+    # -----------------------            
     def rating_new_button_on_click(self):
-        print( "new was clicked")
+        self.rating[RATING_KEY_NEW] = 'y' if self.rating_new_button.isChecked() else 'n'
+        card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
+        card_ini.update(SECTION_RATING, RATING_KEY_NEW, self.rating[RATING_KEY_NEW])
+

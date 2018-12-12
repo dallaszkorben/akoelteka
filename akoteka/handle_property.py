@@ -77,6 +77,12 @@ class Property(object):
 
         self.__write_file()
 
+
+# ====================
+#
+# Handle dictionary
+#
+# ====================
 class Dict( Property ):
     
     DICT_FILE_PRE = "resources"
@@ -105,6 +111,11 @@ class Dict( Property ):
         return self.get(self.__class__.DICT_SECTION, key,  "[" + key + "]")
 
 
+# =====================
+#
+# Handle config.ini
+#
+# =====================
 class ConfigIni( Property ):
     INI_FILE_NAME="config.ini"
 

@@ -13,39 +13,46 @@ filter_key = {
     "best":{
         "store-mode": "v",
         "key-dict-prefix": "title_",
-        "value-dict": False
+        "value-dict": False,
+        "section": "rating"
     },
     "new":{
         "store-mode": "v",
         "key-dict-prefix": "title_",
-        "value-dict": False
+        "value-dict": False,
+        "section": "rating"
     },
     "favorite":{
         "store-mode": "v",
         "key-dict-prefix": "title_",
-        "value-dict": False
+        "value-dict": False,
+        "section": "rating"
     },
     "director":{
         "store-mode": "a",
         "key-dict-prefix": "title_",
-        "value-dict": False
+        "value-dict": False,
+        "section": "general"
     },
     "actor": {
         "store-mode": "a",
         "key-dict-prefix": "title_",
-        "value-dict": False
+        "value-dict": False,
+        "section": "general"
     },
     "theme":{
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
-        "value-dict-prefix": "theme_"
+        "value-dict-prefix": "theme_",
+        "section": "general"
     },
     "genre":{
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
-        "value-dict-prefix": "genre_"        
+        "value-dict-prefix": "genre_",
+        "section": "general"
     }
 }
 
@@ -85,31 +92,38 @@ def folder_investigation( actual_dir, json_list):
 
 
     card = {}
-    card['image-path'] = ""
-    card['media-path'] = ""
+    
     title_json_list = {}
     title_json_list['hu'] = media_name
     title_json_list['en'] = media_name
     card['title'] = title_json_list
                 
-    card['year'] = ""
-    card['director'] = json.loads('[]')
-    card['length'] = ""
-    card['sound'] = json.loads('[]')
-    card['sub'] = json.loads('[]')
-    card['genre'] = json.loads('[]')
-    card['theme'] = json.loads('[]')
-    card['actor'] = json.loads('[]')
-    card['country'] = json.loads('[]')
+    general_json_list = {}
+    general_json_list['year'] = ""
+    general_json_list['director'] = json.loads('[]')
+    general_json_list['length'] = ""
+    general_json_list['sound'] = json.loads('[]')
+    general_json_list['sub'] = json.loads('[]')
+    general_json_list['genre'] = json.loads('[]')
+    general_json_list['theme'] = json.loads('[]')
+    general_json_list['actor'] = json.loads('[]')
+    general_json_list['country'] = json.loads('[]')
+    card['general'] = general_json_list
                 
-    card['best'] = ""
-    card['new'] = ""
-    card['favorite'] = ""
+    rating_json_list = {}
+    rating_json_list['best'] = ""
+    rating_json_list['new'] = ""
+    rating_json_list['favorite'] = ""
+    card['rating'] = rating_json_list
                                         
     card['links'] = {}
 
-    card['recent-folder'] = actual_dir
-    card['sub-cards'] = json.loads('[]')
+    extra_json_list = {}    
+    extra_json_list['image-path'] = ""
+    extra_json_list['media-path'] = ""
+    extra_json_list['recent-folder'] = actual_dir
+    extra_json_list['sub-cards'] = json.loads('[]')
+    card['extra'] = extra_json_list
 
 
     # ----------------------------------
@@ -130,10 +144,10 @@ def folder_investigation( actual_dir, json_list):
         try:
             
             # save the http path of the image
-            card['image-path'] = image_path_os
+            card['extra']['image-path'] = image_path_os
 
             # saves the os path of the media - There is no
-            card['media-path'] = None
+            card['extra']['media-path'] = None
             
             card['title']['hu'] = parser.get("titles", "title_hu")
             card['title']['en'] = parser.get("titles", "title_en")
@@ -160,49 +174,49 @@ def folder_investigation( actual_dir, json_list):
         try:
             
             # save the http path of the image
-            card['image-path'] = image_path_os
+            card['extra']['image-path'] = image_path_os
 
             # saves the os path of the media
-            card['media-path'] = media_path_os
+            card['extra']['media-path'] = media_path_os
             
             card['title']['hu'] = parser.get("titles", "title_hu")
             card['title']['en'] = parser.get("titles", "title_en")
                 
-            card['year'] = parser.get("general", "year")
+            card['general']['year'] = parser.get("general", "year")
                 
             directors = parser.get("general", "director").split(",")            
             for director in directors:
-                card['director'].append(director.strip())
+                card['general']['director'].append(director.strip())
                 
-            card['length'] = parser.get("general", "length")
+            card['general']['length'] = parser.get("general", "length")
                 
             sounds = parser.get("general", "sound").split(",")
             for sound in sounds:
-                card['sound'].append(sound.strip())
+                card['general']['sound'].append(sound.strip())
 
             subs = parser.get("general", "sub").split(",")
             for sub in subs:
-                card['sub'].append(sub.strip())
+                card['general']['sub'].append(sub.strip())
 
             genres = parser.get("general", "genre").split(",")
             for genre in genres:
-                card['genre'].append(genre.strip())
+                card['general']['genre'].append(genre.strip())
 
             themes = parser.get("general", "theme").split(",")
             for theme in themes:
-                card['theme'].append(theme.strip())
+                card['general']['theme'].append(theme.strip())
                 
             actors = parser.get("general", "actor").split(",")
             for actor in actors:
-                card['actor'].append(actor.strip())
+                card['general']['actor'].append(actor.strip())
 
             countries = parser.get("general", "country").split(",")
             for country in countries:
-                card['country'].append(country.strip())
+                card['general']['country'].append(country.strip())
                 
-            card['best'] = parser.get("rating", "best")
-            card['new'] = parser.get("rating", "new")
-            card['favorite'] = parser.get("rating", "favorite")
+            card['rating']['best'] = parser.get("rating", "best")
+            card['rating']['new'] = parser.get("rating", "new")
+            card['rating']['favorite'] = parser.get("rating", "favorite")
                                                 
             card['links']['imdb'] = parser.get("links", "imdb")
             
@@ -229,7 +243,7 @@ def folder_investigation( actual_dir, json_list):
     # ----------------------------    
     for name in dir_list:
         subfolder_path_os = os.path.join(actual_dir, name)
-        folder_investigation( subfolder_path_os, card['sub-cards'] if is_card_dir else json_list )
+        folder_investigation( subfolder_path_os, card['extra']['sub-cards'] if is_card_dir else json_list )
 
     # and finaly returns
     return

@@ -83,8 +83,6 @@ class GuiAkoTeka(QWidget):
         
             previous_holder.setHidden(False)
 
-#            actual_holder.fill_up_card_holder()
-        
     # --------------------------
     #
     # Start Card Holder
