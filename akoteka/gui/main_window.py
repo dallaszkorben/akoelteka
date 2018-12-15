@@ -21,6 +21,8 @@ class GuiAkoTeka(QWidget):
     def __init__(self):
         super().__init__()     
         
+        self.actual_folder = None
+        
         # most outer container, just right in the Main Window
         box_layout = QVBoxLayout(self)
         self.setLayout(box_layout)
@@ -29,7 +31,7 @@ class GuiAkoTeka(QWidget):
         box_layout.setSpacing(0)
     
         # control line
-        self.control_panel = ControlPanel()
+        self.control_panel = ControlPanel(self)
         box_layout.addWidget( self.control_panel)
     
         # scroll_content where you can add your widgets - has scroll
@@ -158,8 +160,10 @@ class CollectCardThread(QtCore.QThread):
 #
 # =========================================
 class ControlPanel(QWidget):
-    def __init__(self):
+    def __init__(self, gui):
         super().__init__()        
+        
+        self.gui = gui
         
         self_layout = QHBoxLayout(self)
         self.setLayout(self_layout)
@@ -186,6 +190,24 @@ class ControlPanel(QWidget):
 
         self_layout.addStretch(1)
         
+        # -------------------
+        #
+        # Select Media-Folder
+        #
+        # -------------------
+        self.select_media_folder_button = QPushButton()
+        self.select_media_folder_button.setCheckable(False)
+        self.select_media_folder_button.clicked.connect(self.select_media_folder_button_on_click)
+        
+        select_media_folder_icon = QIcon.fromTheme("folder-open")
+        self.select_media_folder_button.setIcon( select_media_folder_icon )
+        self.select_media_folder_button.setIconSize(QSize(25,25))
+        self.select_media_folder_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.select_media_folder_button.setStyleSheet("background:transparent; border:none") 
+        self_layout.addWidget( self.select_media_folder_button )
+        
+        
+        
         # -------------
         #
         # Filter Holder
@@ -210,6 +232,18 @@ class ControlPanel(QWidget):
     def back_button_on_click(self):
         if self.back_button_listener:
             self.back_button_listener.go_back()
+            
+    def select_media_folder_button_on_click(self):
+        
+        file = str(QFileDialog.getExistingDirectory(self, _('title_select_media_directory'), media_path, QFileDialog.ShowDirsOnly))
+        if file != media_path:
+            
+            # Update the config.ini file
+            config_ini.set_media_path(file)
+            
+            # remove history
+            
+        
 
     def filter_on_change(self):
         if self.filter_listener:
