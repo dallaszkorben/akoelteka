@@ -19,7 +19,7 @@ from akoteka.gui.glob import _
 class GuiAkoTeka(QWidget):
     
     def __init__(self):
-        super().__init__()        
+        super().__init__()     
         
         # most outer container, just right in the Main Window
         box_layout = QVBoxLayout(self)

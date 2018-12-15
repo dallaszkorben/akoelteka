@@ -825,7 +825,7 @@ class CardRating(QLabel):
         self.rating = rating
         self.rating_favorite_button.setChecked(rating[ RATING_KEY_FAVORITE ] == 'y')
         self.rating_best_button.setChecked(rating[ RATING_KEY_BEST ] == 'y')
-        self.rating_new_button.setChecked(rating[ RATING_KEY_FAVORITE ] == 'y')
+        self.rating_new_button.setChecked(rating[ RATING_KEY_NEW ] == 'y')
 
     # -----------------------
     #

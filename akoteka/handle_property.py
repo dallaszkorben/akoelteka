@@ -1,5 +1,6 @@
 import os
 import configparser
+from pathlib import Path
 
 class Property(object):
     """
@@ -15,13 +16,17 @@ class Property(object):
     then it will be generated with default value
     """
        
-    def __init__(self, file, writable=False):
+    def __init__(self, file, writable=False, folder=None):
         self.writable = writable
         self.file = file
-        #self.file = os.path.join(os.getcwd(), INI_FILE_NAME)
+        self.folder = folder
         self.parser = configparser.RawConfigParser()
 
     def __write_file(self):
+        
+        if self.folder:
+            Path(self.folder).mkdir(parents=True, exist_ok=True)
+        
         with open(self.file, 'w') as configfile:
             self.parser.write(configfile)
 
@@ -29,13 +34,16 @@ class Property(object):
 
         # if not existing file
         if not os.path.exists(self.file):
+            print("GET", "No file: ", self.file, " Source: ", __file__)
+            
             self.parser[section]={key: default_value}
             self.__write_file()
         self.parser.read(self.file)
 
         try:
             result=self.parser.get(section,key)
-        except (configparser.NoSectionError, configparser.NoOptionError):
+        except (configparser.NoSectionError, configparser.NoOptionError) as e:
+            print("GET", e, 'in ', self.file, " Source: ", __file__)
             if self.writable:
                 self.update(section, key, default_value)
                 result=self.parser.get(section,key)
@@ -64,14 +72,15 @@ class Property(object):
 
     def update(self, section, key, value):
         if not os.path.exists(self.file):
+            print("UPDATE", "No file: ", self.file, " Source: ", __file__)
             self.parser[section]={key: value}        
         else:
             self.parser.read(self.file)
             try:
                 # if no section -> NoSectionError | if no key -> Create it
                 self.parser.set(section, key, value)
-            except configparser.NoSectionError:
-                print("hello")
+            except configparser.NoSectionError as e:
+                print("UPDATE", e, "in ", self.file, " Source: ", __file__ )
 
                 self.parser[section]={key: value}
 
@@ -117,13 +126,15 @@ class Dict( Property ):
 #
 # =====================
 class ConfigIni( Property ):
+    HOME = str(Path.home())
+    CONFIG_FOLDER = '.akoteka'
     INI_FILE_NAME="config.ini"
 
     # (section, key, default)
-    LANGUAGE = ("general", "language", "hu")
-    MEDIA_PATH = ("media", "media-path", ".")
-    MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
-    MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
+    DEFAULT_LANGUAGE = ("general", "language", "hu")
+    DEFAULT_MEDIA_PATH = ("media", "media-path", ".")
+    DEFAULT_MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
+    DEFAULT_MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
     
     __instance = None    
 
@@ -135,37 +146,38 @@ class ConfigIni( Property ):
     @classmethod
     def get_instance(cls):
         inst = cls.__new__(cls)
-        cls.__init__(cls.__instance)     
+        cls.__init__(cls.__instance)
         return inst
         
     def __init__(self):
-        file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ConfigIni.INI_FILE_NAME)
-        super().__init__( file )
+        folder = os.path.join(ConfigIni.HOME, ConfigIni.CONFIG_FOLDER)
+        file = os.path.join(folder, ConfigIni.INI_FILE_NAME)
+        super().__init__( file, True, folder )
 
 
     def get_language(self):
-        return self.get(self.LANGUAGE[0], self.LANGUAGE[1], self.LANGUAGE[2])
+        return self.get(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], self.DEFAULT_LANGUAGE[2])
 
     def get_media_path(self):
-        return self.get(self.MEDIA_PATH[0], self.MEDIA_PATH[1], self.MEDIA_PATH[2])
+        return self.get(self.DEFAULT_MEDIA_PATH[0], self.DEFAULT_MEDIA_PATH[1], self.DEFAULT_MEDIA_PATH[2])
 
     def get_media_player_video(self):
-        return self.get(self.MEDIA_PLAYER_VIDEO[0], self.MEDIA_PLAYER_VIDEO[1], self.MEDIA_PLAYER_VIDEO[2])
+        return self.get(self.DEFAULT_MEDIA_PLAYER_VIDEO[0], self.DEFAULT_MEDIA_PLAYER_VIDEO[1], self.DEFAULT_MEDIA_PLAYER_VIDEO[2])
 
     def get_media_player_video_param(self):
-        return self.get(self.MEDIA_PLAYER_VIDEO_PARAM[0], self.MEDIA_PLAYER_VIDEO_PARAM[1], self.MEDIA_PLAYER_VIDEO_PARAM[2])
+        return self.get(self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[1], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[2])
 
     def set_language(self, lang):
-        self.update(self.LANGUAGE[0], self.LANGUAGE[1], lang)
+        self.update(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], lang)
 
     def set_media_path(self, path):
-        self.update(self.MEDIA_PATH[0], self.MEDIA_PATH[1], path)
+        self.update(self.DEFAULT_MEDIA_PATH[0], self.DEFAULT_MEDIA_PATH[1], path)
 
     def set_media_player_video(self, player):
-        self.update(self.MEDIA_PLAYER_VIDEO[0], self.MEDIA_PLAYER_VIDEO[1], player)
+        self.update(self.DEFAULT_MEDIA_PLAYER_VIDEO[0], self.DEFAULT_MEDIA_PLAYER_VIDEO[1], player)
 
     def set_media_player_video_param(self, param):
-        self.update(self.MEDIA_PLAYER_VIDEO_PARAM[0], self.MEDIA_PLAYER_VIDEO_PARAM[1], param)
+        self.update(self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[1], param)
 
 
 
