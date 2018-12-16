@@ -50,12 +50,11 @@ class CardHolder( QLabel ):
     
     card_array = None
     
-    def __init__(self, parent, previous_holder, hierarchy, recent_card_structure):
+    def __init__(self, parent, recent_card_structure, title_hierarchy):
         super().__init__()
 
         self.parent = parent
-        self.previous_holder = previous_holder
-        self.hierarchy = hierarchy
+        self.title_hierarchy = title_hierarchy
         self.recent_card_structure = recent_card_structure
 
         # -------------
@@ -80,7 +79,6 @@ class CardHolder( QLabel ):
         title.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
         title.setAlignment(Qt.AlignHCenter)
         
-        self.title_hierarchy = self.hierarchy
         title.setText(self.title_hierarchy)
         self.self_layout.addWidget( title )        
         
@@ -132,32 +130,29 @@ class CardHolder( QLabel ):
             
         self.hide_card_holder()
 
+    def get_title_hierarchy(self):
+        return self.title_hierarchy
+
     # ----------------------------------
     #
     # Clicked on the Collector's picture
     #
+    # Go down in the hierarchy
+    #
     # ----------------------------------
     def go_deeper(self, card_structure, card_title):
+     
+        self.parent.add_holder(card_structure, card_title)
         
-        deeper_card_holder = CardHolder(
-            self.parent, 
-            self, 
-            self.title_hierarchy + (" > " if self.title_hierarchy else "") + card_title, 
-            card_structure 
-        )
-        self.parent.add_new_holder(self, deeper_card_holder)
-        
-    # --------------------
+    # ------------------------
     #
     # Back button pressed
     #
-    # --------------------
+    # Come up in the hierarchy
+    #
+    # ------------------------
     def go_back(self):
-        self.parent.restore_previous_holder(self.previous_holder, self)
-        self.parent.set_back_button_listener(self.previous_holder)
-        
-        if self.previous_holder:
-            self.previous_holder.fill_up_card_holder()
+        self.parent.restore_previous_holder()
 
     # -------------------------------------
     # 

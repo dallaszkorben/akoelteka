@@ -16,12 +16,15 @@ import locale
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
 
+from akoteka.gui import glob
+
 class GuiAkoTeka(QWidget):
     
     def __init__(self):
         super().__init__()     
         
-        self.actual_folder = None
+        self.actual_card_holder = None
+        self.card_holder_list = []
         
         # most outer container, just right in the Main Window
         box_layout = QVBoxLayout(self)
@@ -64,26 +67,59 @@ class GuiAkoTeka(QWidget):
         fg=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()
         fg.moveCenter(cp)
-        self.move(fg.topLeft())
+        self.move(fg.topLeft())     
+
+
+    # ---------------------------
+    #
+    # Go deeper in the hierarchy
+    #
+    # ---------------------------
+    def add_holder( self, card_structure, card_title ):
+
+        # if there is already a CardHolder
+        if self.actual_card_holder:        
+            title_hierarchy = self.actual_card_holder.get_title_hierarchy()
+            
+            # hide it
+            self.actual_card_holder.setHidden(True)
+            
+            # save it in the list of card holder
+            self.card_holder_list.append(self.actual_card_holder)
+            
+        else:
+            title_hierarchy = ""
         
-    def add_new_holder(self, previous_holder, new_holder):
-
-        ## if there was previous holder
-        if previous_holder:
-
-            # then hide it
-            previous_holder.setHidden(True)
+        self.actual_card_holder = CardHolder(            
+            self, 
+            card_structure,
+            title_hierarchy + (" > " if title_hierarchy else "") + card_title
+        )        
 
         # add the new holder
-        self.scroll_layout.addWidget(new_holder)
+        self.scroll_layout.addWidget(self.actual_card_holder)
         
-    def restore_previous_holder(self, previous_holder, actual_holder):
+    # -------------------------
+    #
+    # Come up in the hierarchy
+    #
+    # -------------------------
+    def restore_previous_holder(self):
         
-        if previous_holder:
-            self.scroll_layout.removeWidget(actual_holder)
-            actual_holder.setParent(None)
+        size = len(self.card_holder_list)
+        if  size >= 1:
+            previous_card_holder = self.card_holder_list[size - 1]            
+            self.card_holder_list.remove(previous_card_holder)
+            
+            # hide the old CardHolder
+            self.actual_card_holder.setHidden(True)            
+            
+            # remove from the layout the old CardHolder
+            self.scroll_layout.removeWidget(self.actual_card_holder)
         
-            previous_holder.setHidden(False)
+            self.actual_card_holder = previous_card_holder
+            
+            self.actual_card_holder.setHidden(False)
 
     # --------------------------
     #
@@ -92,23 +128,13 @@ class GuiAkoTeka(QWidget):
     # --------------------------
     def start_card_holder(self):
 
-        previous_holder = None        
-        hierarchy = ""
-        card_structure = []        
-        
-        card_holder=CardHolder(
-            self,
-            previous_holder,
-            hierarchy,
-            card_structure
-        )
+        # Create the first Card Holder
+        self.add_holder( [], "" ) 
 
-        self.add_new_holder(previous_holder, card_holder)
-
-        paths = [media_path]      
-        
+        # Start to collect the Cards
+        paths = [glob.media_path]        
         self.cc = CollectCardThread( paths )
-        self.cc.collected.connect(card_holder.fill_up_card_holder)
+        self.cc.collected.connect(self.actual_card_holder.fill_up_card_holder)
         self.cc.start()
         
     def collect_cards_in_thread(self, paths, card_holder):
@@ -125,8 +151,6 @@ class GuiAkoTeka(QWidget):
         
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
-    
-    
       
 
 class CollectCardThread(QtCore.QThread):
@@ -148,6 +172,8 @@ class CollectCardThread(QtCore.QThread):
         self.wait()
 
 
+
+
 # =========================================
 #
 #          Control Panel 
@@ -161,8 +187,8 @@ class CollectCardThread(QtCore.QThread):
 # =========================================
 class ControlPanel(QWidget):
     def __init__(self, gui):
-        super().__init__()        
-        
+        super().__init__()
+       
         self.gui = gui
         
         self_layout = QHBoxLayout(self)
@@ -235,14 +261,28 @@ class ControlPanel(QWidget):
             
     def select_media_folder_button_on_click(self):
         
-        file = str(QFileDialog.getExistingDirectory(self, _('title_select_media_directory'), media_path, QFileDialog.ShowDirsOnly))
-        if file != media_path:
+        folder = QFileDialog.getExistingDirectory(self, _('title_select_media_directory'), glob.media_path, QFileDialog.ShowDirsOnly)
+        
+        if folder:
             
             # Update the config.ini file
-            config_ini.set_media_path(file)
+            config_ini.set_media_path(folder)            
+            
+            # Re-read the config.ini file
+            glob.re_read_config_ini()
+            print(glob.media_path)
             
             # remove history
+            for card_holder in self.gui.card_holder_list:
+                card_holder.setHidden(True)
+                self.gui.scroll_layout.removeWidget(card_holder)
+                
+            # Remove recent CardHolder as well
+            self.gui.actual_card_holder.setHidden(True)
+            self.gui.scroll_layout.removeWidget(self.gui.actual_card_holder)
+            self.gui.actual_card_holder = None
             
+            self.gui.start_card_holder()
         
 
     def filter_on_change(self):

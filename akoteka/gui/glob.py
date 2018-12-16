@@ -36,14 +36,21 @@ from PyQt5.QtCore import pyqtSignal
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict
 
-# Read config.ini
 config_ini = ConfigIni.get_instance()
-language = config_ini.get_language()
-media_path = config_ini.get_media_path()
-media_player_video = config_ini.get_media_player_video()
-media_player_video_param = config_ini.get_media_player_video_param()
 
+def re_read_config_ini():
+    global language
+    global media_player_video
+    global media_player_video_param
+    global media_path
+    
+    # Read config.ini    
+    language = config_ini.get_language()    
+    media_path = config_ini.get_media_path()
+    media_player_video = config_ini.get_media_player_video()
+    media_player_video_param = config_ini.get_media_player_video_param()
 
+re_read_config_ini()
 
 # Get the dictionary
 dic = Dict.get_instance( language )
@@ -61,4 +68,3 @@ RATING_KEY_NEW = 'new'
 RATING_KEY_BEST = 'best'
 
 FILE_CARD_INI = 'card.ini'
-
