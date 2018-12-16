@@ -18,8 +18,8 @@ from akoteka.gui.glob import _
 from akoteka.gui import glob
 
 #from akoteka.gui.glob import media_path_film
-from akoteka.gui.glob import media_player_video
-from akoteka.gui.glob import media_player_video_param
+#from akoteka.gui.glob import media_player_video
+#from akoteka.gui.glob import media_player_video_param
 
 PICTURE_WIDTH = 190
 PICTURE_HEIGHT = 160
@@ -452,9 +452,9 @@ class Card(QLabel):
         # Play media
         if self.get_media_path():
             
-            switch_list = media_player_video_param.split(" ")
+            switch_list = glob.media_player_video_param.split(" ")
             param_list = []
-            param_list.append(media_player_video)
+            param_list.append(glob.media_player_video)
             param_list += switch_list
             param_list.append(self.get_media_path())
 
