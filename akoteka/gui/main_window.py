@@ -5,8 +5,6 @@ from threading import Thread
 
 from pkg_resources import resource_string, resource_filename
 
-from akoteka.gui.card_holder_pane import CardHolder
-
 from akoteka.accessories import collect_cards
 
 from functools import cmp_to_key
@@ -15,8 +13,9 @@ import locale
     
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
-
 from akoteka.gui import glob
+from akoteka.gui.card_holder_pane import CardHolder
+from akoteka.gui.configuration_dialog import ConfigurationDialog
 
 class GuiAkoTeka(QWidget):
     
@@ -117,9 +116,13 @@ class GuiAkoTeka(QWidget):
             # remove from the layout the old CardHolder
             self.scroll_layout.removeWidget(self.actual_card_holder)
         
+            # the current card holder is the previous
             self.actual_card_holder = previous_card_holder
             
+            # show the current card holder
             self.actual_card_holder.setHidden(False)
+            
+            self.actual_card_holder.fill_up_card_holder()
 
     # --------------------------
     #
@@ -137,11 +140,14 @@ class GuiAkoTeka(QWidget):
         self.cc.collected.connect(self.actual_card_holder.fill_up_card_holder)
         self.cc.start()
         
-    def collect_cards_in_thread(self, paths, card_holder):
-        card_structure = collect_cards(paths)
-      
-        card_holder.set_recent_card_structure(card_structure)
-        card_holder.fill_up_card_holder()
+        
+        
+        
+#    def collect_cards_in_thread(self, paths, card_holder):
+#        card_structure = collect_cards(paths)
+#      
+#        card_holder.set_recent_card_structure(card_structure)
+#        card_holder.fill_up_card_holder()
 
     def set_back_button_listener(self, listener):
         self.control_panel.set_back_button_listener(listener)
@@ -206,7 +212,7 @@ class ControlPanel(QWidget):
         back_button = QPushButton()
         back_button.clicked.connect(self.back_button_on_click)
         
-        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", "back-button.png")) ))
+        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", IMG_BACK_BUTTON)) ))
         back_button.setIconSize(QSize(32,32))
         back_button.setCursor(QCursor(Qt.PointingHandCursor))
         back_button.setStyleSheet("background:transparent; border:none") 
@@ -218,19 +224,20 @@ class ControlPanel(QWidget):
         
         # -------------------
         #
-        # Select Media-Folder
+        # Config Button
         #
         # -------------------
-        self.select_media_folder_button = QPushButton()
-        self.select_media_folder_button.setCheckable(False)
-        self.select_media_folder_button.clicked.connect(self.select_media_folder_button_on_click)
+        self.config_button = QPushButton()
+        self.config_button.setCheckable(False)
+        self.config_button.clicked.connect(self.config_button_on_click)
         
-        select_media_folder_icon = QIcon.fromTheme("folder-open")
-        self.select_media_folder_button.setIcon( select_media_folder_icon )
-        self.select_media_folder_button.setIconSize(QSize(25,25))
-        self.select_media_folder_button.setCursor(QCursor(Qt.PointingHandCursor))
-        self.select_media_folder_button.setStyleSheet("background:transparent; border:none") 
-        self_layout.addWidget( self.select_media_folder_button )
+        config_icon = QIcon()
+        config_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_CONFIG_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.config_button.setIcon( config_icon )
+        self.config_button.setIconSize(QSize(25,25))
+        self.config_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.config_button.setStyleSheet("background:transparent; border:none") 
+        self_layout.addWidget( self.config_button )
         
         
         
@@ -249,6 +256,9 @@ class ControlPanel(QWidget):
         self.back_button_listener = None
         self.filter_listener = None
 
+    def refresh_label(self):
+        self.filter_holder.refresh_label()
+
     def set_back_button_listener(self, listener):
         self.back_button_listener = listener
         
@@ -258,33 +268,54 @@ class ControlPanel(QWidget):
     def back_button_on_click(self):
         if self.back_button_listener:
             self.back_button_listener.go_back()
-            
-    def select_media_folder_button_on_click(self):
+
+
+    # -----------------------
+    #
+    # Config Button Clicked
+    #
+    # -----------------------
+    def config_button_on_click(self):
+
+        dialog = ConfigurationDialog()
         
-        folder = QFileDialog.getExistingDirectory(self, _('title_select_media_directory'), glob.media_path, QFileDialog.ShowDirsOnly)
-        
-        if folder:
+#!!!!!        
+
+        # if OK was clicked
+        if dialog.exec_() == QDialog.Accepted:        
             
+            # get the values from the DIALOG
+            l = dialog.get_language()
+            mp = dialog.get_media_path()
+
             # Update the config.ini file
-            config_ini.set_media_path(folder)            
+            config_ini.set_media_path(mp) 
+            config_ini.set_language(l)
             
             # Re-read the config.ini file
             glob.re_read_config_ini()
-            print(glob.media_path)
             
             # remove history
             for card_holder in self.gui.card_holder_list:
                 card_holder.setHidden(True)
                 self.gui.scroll_layout.removeWidget(card_holder)
+            self.gui.card_holder_list.clear()
                 
             # Remove recent CardHolder as well
             self.gui.actual_card_holder.setHidden(True)
             self.gui.scroll_layout.removeWidget(self.gui.actual_card_holder)
             self.gui.actual_card_holder = None
             
+            # reload the cards
             self.gui.start_card_holder()
-        
-
+            
+            # refresh the Control Panel
+            self.refresh_label()
+            
+            print(self.gui.card_holder_list)
+            
+        dialog.deleteLater()
+ 
     def filter_on_change(self):
         if self.filter_listener:
             self.filter_listener.fill_up_card_holder()
@@ -292,9 +323,19 @@ class ControlPanel(QWidget):
     def get_filter_holder(self):
         return self.filter_holder
 
+
+
+
+
+
+
+
+
+# ================
 #
 # Dropdown HOLDER
 #
+# ================
 class FilterDropDownHolder(QWidget):
     
     def __init__(self):
@@ -309,7 +350,6 @@ class FilterDropDownHolder(QWidget):
 
     def add_dropdown(self, filter_dropdown):
         self.self_layout.addWidget(filter_dropdown)
-        
 
 # =============================
 #
@@ -329,7 +369,8 @@ class FilterDropDownSimple(QWidget):
         self.setLayout( self_layout )
 #        self.setStyleSheet( 'background: green')
         
-        self_layout.addWidget( QLabel(label))
+        self.label_widget = QLabel(label)
+        self_layout.addWidget( self.label_widget )
 
         self.dropdown = QComboBox(self)
         
@@ -381,6 +422,10 @@ class FilterDropDownSimple(QWidget):
 
     def current_index_changed(self):
         self.state_changed.emit()
+        
+    def refresh_label(self, new_label):
+        self.label_widget.setText(new_label)
+
 
 # ==========
 #
@@ -397,12 +442,14 @@ class FilterCheckBox(QCheckBox):
                 min-height: 15px; max-height: 15px; border: 0px solid gray;
             }
         '''
-        self.setStyleSheet( style_checkbox )
-        
-        
+        self.setStyleSheet( style_checkbox )        
+
     def is_checked(self):
         return 'y' if self.isChecked() else None        
  
+    def refresh_label(self, new_label):
+        self.setText(new_label)
+
 
 # ================
 #
@@ -502,6 +549,16 @@ class FilterHolder(QWidget):
         self.filter_dd_director.state_changed.connect(self.state_changed)
         self.filter_dd_actor.state_changed.connect(self.state_changed)
 
+    def refresh_label(self):
+        self.filter_dd_genre.refresh_label(_('title_genre'))
+        self.filter_dd_theme.refresh_label(_('title_theme'))
+        self.filter_dd_director.refresh_label(_('title_director'))
+        self.filter_dd_actor.refresh_label(_('title_actor'))
+        self.filter_cb_favorite.refresh_label(_('title_favorite'))
+        self.filter_cb_new.refresh_label(_('title_new'))
+        self.filter_cb_best.refresh_label(_('title_best'))
+        
+        
     def clear_genre(self):
         self.filter_dd_genre.clear_elements()
         

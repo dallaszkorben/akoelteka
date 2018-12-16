@@ -13,6 +13,10 @@ from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QCheckBox
 from PyQt5.QtWidgets import QStyleFactory
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QInputDialog
+from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QLineEdit
 
 
 from PyQt5.QtGui import QFont
@@ -43,6 +47,7 @@ def re_read_config_ini():
     global media_player_video
     global media_player_video_param
     global media_path
+    global dic
     
     # Read config.ini    
     language = config_ini.get_language()    
@@ -50,10 +55,10 @@ def re_read_config_ini():
     media_player_video = config_ini.get_media_player_video()
     media_player_video_param = config_ini.get_media_player_video_param()
 
-re_read_config_ini()
+    # Get the dictionary
+    dic = Dict.get_instance( language )
 
-# Get the dictionary
-dic = Dict.get_instance( language )
+re_read_config_ini()
 
 def _(word):
     return dic._(word)
@@ -68,3 +73,15 @@ RATING_KEY_NEW = 'new'
 RATING_KEY_BEST = 'best'
 
 FILE_CARD_INI = 'card.ini'
+
+IMG_CONFIG_BUTTON = "cogwheel-button.png"
+IMG_BACK_BUTTON = "back-button.png"
+IMG_FOLDER_BUTTON = "folder.png"
+IMG_BEST_ON = "best-on.png"
+IMG_BEST_OFF = "best-off.png"
+IMG_NEW_ON = "new-on.png"
+IMG_NEW_OFF = "new-off.png"
+IMG_FAVORITE_ON = "favorite-on.png"
+IMG_FAVORITE_OFF = "favorite-off.png"
+
+

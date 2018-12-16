@@ -15,12 +15,11 @@ from akoteka.handle_property import Property
 
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
+from akoteka.gui import glob
 
 #from akoteka.gui.glob import media_path_film
 from akoteka.gui.glob import media_player_video
 from akoteka.gui.glob import media_player_video_param
-
-#from akoteka.gui.glob import language
 
 PICTURE_WIDTH = 190
 PICTURE_HEIGHT = 160
@@ -109,7 +108,6 @@ class CardHolder( QLabel ):
         #
         # ----------------------
         self.parent.set_back_button_listener(self)
-#        self.parent.set_filter_listener(self)
   
     def show_card_holder(self):
         self.card_holder_canvas.setHidden(False)
@@ -118,7 +116,6 @@ class CardHolder( QLabel ):
         self.card_holder_canvas.setHidden(True)
         
     def remove_cards(self):
-        #self.card_holder_layout.removeItem(self.stretchie)
         for i in reversed(range(self.card_holder_layout.count())): 
             widgetToRemove = self.card_holder_layout.itemAt(i).widget()
         
@@ -140,8 +137,7 @@ class CardHolder( QLabel ):
     # Go down in the hierarchy
     #
     # ----------------------------------
-    def go_deeper(self, card_structure, card_title):
-     
+    def go_deeper(self, card_structure, card_title):     
         self.parent.add_holder(card_structure, card_title)
         
     # ------------------------
@@ -216,7 +212,7 @@ class CardHolder( QLabel ):
             #card.set_sub_cards( crd["sub-cards"] )
             card.set_sub_cards( crd["extra"]["orig-sub-cards"] )
             card.set_media_path( crd["extra"]["media-path"] )
-            card.set_title( crd["title"][language] )
+            card.set_title( crd["title"][glob.language] )
 
             #fits = True
             
@@ -303,8 +299,7 @@ class CardHolder( QLabel ):
         mediaFits = False
         collectorFits = False
             
-        for crd in card_structure:
-            
+        for crd in card_structure:            
             
             card = {}
             card['title'] = crd['title']
@@ -752,7 +747,7 @@ class CardImage(QLabel):
         return self.sub_cards      
         
 
-# ---------------------------------------------------
+# ===================================================
 #
 # CardRating
 #
@@ -761,7 +756,7 @@ class CardImage(QLabel):
 # -Best
 # -New
 #
-# ---------------------------------------------------
+# ===================================================
 class CardRating(QLabel):
     def __init__(self):
         super().__init__()
@@ -778,8 +773,8 @@ class CardRating(QLabel):
         self.rating_favorite_button = QPushButton()
         self.rating_favorite_button.setCheckable(True)        
         rating_favorite_icon = QIcon()
-        rating_favorite_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "favorite-on.png")) ), QIcon.Normal, QIcon.On)
-        rating_favorite_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "favorite-off.png")) ), QIcon.Normal, QIcon.Off)
+        rating_favorite_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_FAVORITE_ON)) ), QIcon.Normal, QIcon.On)
+        rating_favorite_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_FAVORITE_OFF)) ), QIcon.Normal, QIcon.Off)
         self.rating_favorite_button.clicked.connect(self.rating_favorite_button_on_click)        
         self.rating_favorite_button.setIcon( rating_favorite_icon )
         self.rating_favorite_button.setIconSize(QSize(25,25))
@@ -791,8 +786,8 @@ class CardRating(QLabel):
         self.rating_best_button = QPushButton()
         self.rating_best_button.setCheckable(True)        
         rating_best_icon = QIcon()
-        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "best-on.png")) ), QIcon.Normal, QIcon.On)
-        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "best-off.png")) ), QIcon.Normal, QIcon.Off)
+        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_ON)) ), QIcon.Normal, QIcon.On)
+        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_OFF)) ), QIcon.Normal, QIcon.Off)
         self.rating_best_button.clicked.connect(self.rating_best_button_on_click)        
         self.rating_best_button.setIcon( rating_best_icon )
         self.rating_best_button.setIconSize(QSize(25,25))
@@ -804,8 +799,8 @@ class CardRating(QLabel):
         self.rating_new_button = QPushButton()
         self.rating_new_button.setCheckable(True)        
         rating_new_icon = QIcon()
-        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "new-on.png")) ), QIcon.Normal, QIcon.On)
-        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", "new-off.png")) ), QIcon.Normal, QIcon.Off)
+        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_NEW_ON)) ), QIcon.Normal, QIcon.On)
+        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_OFF)) ), QIcon.Normal, QIcon.Off)
         self.rating_new_button.clicked.connect(self.rating_new_button_on_click)        
         self.rating_new_button.setIcon( rating_new_icon )
         self.rating_new_button.setIconSize(QSize(25,25))
