@@ -27,8 +27,7 @@ setup(
       package_data={
         'prala': ['gui/img/*.png'],
         'prala': ['setup/setup.ini'],
-        'prala': ['dict/*.properties'],
-        'prala': ['config.ini'],
+        'prala': ['dict/*.properties']
       },
       include_package_data = True,
       zip_safe=False)

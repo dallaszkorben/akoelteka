@@ -287,10 +287,14 @@ class ControlPanel(QWidget):
             # get the values from the DIALOG
             l = dialog.get_language()
             mp = dialog.get_media_path()
+            vp = dialog.get_media_player_video()
+            vpp = dialog.get_media_player_video_param()
 
             # Update the config.ini file
             config_ini.set_media_path(mp) 
             config_ini.set_language(l)
+            config_ini.set_media_player_video(vp)
+            config_ini.set_media_player_video_param(vpp)
             
             # Re-read the config.ini file
             glob.re_read_config_ini()
@@ -311,8 +315,6 @@ class ControlPanel(QWidget):
             
             # refresh the Control Panel
             self.refresh_label()
-            
-            print(self.gui.card_holder_list)
             
         dialog.deleteLater()
  

@@ -40,16 +40,25 @@ class ConfigurationDialog(QDialog):
         self.media_path_selector = MediaPathSelector(glob.media_path)
         self.content_section.addWidget(self.media_path_selector)
         
-        # video player
+        # video player 
+        self.media_player_video_selector = MediaPlayerVideoSelector(glob.media_player_video)
+        self.content_section.addWidget(self.media_player_video_selector)
         
         # video player parameters        
+        self.media_player_video_param = MediaPlayerVideoParam(glob.media_player_video_param)
+        self.content_section.addWidget(self.media_player_video_param)
     
     def get_media_path(self):
         return self.media_path_selector.get_media_path()
         
     def get_language(self):
         return self.language_selector.get_language()
+ 
+    def get_media_player_video(self):
+        return self.media_player_video_selector.get_media_player_video() 
     
+    def get_media_player_video_param(self):
+        return self.media_player_video_param.get_media_player_video_param()
 
 class ContentSection(QWidget):
         def __init__(self):
@@ -136,18 +145,81 @@ class MediaPathSelector(QWidget):
 
         self_layout.addWidget(self.folder_selector_button)
 
-
     def get_media_path(self):
         return self.folder_field.text()
     
     def select_folder_button_on_click(self):
         
-        folder = QFileDialog.getExistingDirectory(self, _('title_select_media_directory'), glob.media_path, QFileDialog.ShowDirsOnly)
+        folder = QFileDialog.getExistingDirectory(self, _('title_select_media_path'), glob.media_path, QFileDialog.ShowDirsOnly)
         
         if folder:
             self.folder_field.setText(folder)
         
+# ====================
+#
+# Media Player Video
+#
+# ====================
+class MediaPlayerVideoSelector(QWidget):
+    
+    def __init__(self, default_media_player_video_path):
+        super().__init__()    
+    
+        self_layout=QHBoxLayout(self)
+        self.setLayout(self_layout)
 
+        # Title
+        self_layout.addWidget(QLabel(_('title_media_player_video') + ':'))
 
+        # Text Field
+        self.file_field = QLineEdit(self)
+        self.file_field.setText(default_media_player_video_path)
+        self_layout.addWidget(self.file_field)
+        
+        # Button
+        self.folder_selector_button = QPushButton()
+        self.folder_selector_button.setCheckable(False)
+        selector_icon = QIcon()
+        selector_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_FOLDER_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.folder_selector_button.setIcon( selector_icon )
+        self.folder_selector_button.setIconSize(QSize(25,25))
+        self.folder_selector_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.folder_selector_button.setStyleSheet("background:transparent; border:none") 
+        self.folder_selector_button.clicked.connect(self.select_folder_button_on_click)
 
+        self_layout.addWidget(self.folder_selector_button)
+
+    def get_media_player_video(self):
+        return self.file_field.text()
+    
+    def select_folder_button_on_click(self):        
+        file, valami = QFileDialog.getOpenFileName(self, _('title_select_media_player_video'), os.path.abspath(os.sep))
+        
+        if file:
+            self.file_field.setText(file)
+
+# ========================
+#
+# Media Player Video Param
+#
+# ========================
+class MediaPlayerVideoParam(QWidget):
+    
+    def __init__(self, default_media_player_video_param):
+        super().__init__()    
+    
+        self_layout=QHBoxLayout(self)
+        self.setLayout(self_layout)
+
+        # Title
+        self_layout.addWidget(QLabel(_('title_media_player_video_param') + ':'))
+        
+        # Text Field
+        self.folder_field = QLineEdit(self)
+        self.folder_field.setText(default_media_player_video_param)
+        self_layout.addWidget(self.folder_field)
+        
+    def get_media_player_video_param(self):
+        return self.folder_field.text()
+    
 
