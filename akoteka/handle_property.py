@@ -135,6 +135,9 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PATH = ("media", "media-path", ".")
     DEFAULT_MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
     DEFAULT_MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
+    DEFAULT_MEDIA_PLAYER_AUDIO = ("media", "player-audio", "rhythmbox")
+    DEFAULT_MEDIA_PLAYER_AUDIO_PARAM = ("media", "player-audio-param", "")
+    
     
     __instance = None    
 
@@ -154,7 +157,6 @@ class ConfigIni( Property ):
         file = os.path.join(folder, ConfigIni.INI_FILE_NAME)
         super().__init__( file, True, folder )
 
-
     def get_language(self):
         return self.get(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], self.DEFAULT_LANGUAGE[2])
 
@@ -166,6 +168,12 @@ class ConfigIni( Property ):
 
     def get_media_player_video_param(self):
         return self.get(self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[1], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[2])
+
+    def get_media_player_audio(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_AUDIO[0], self.DEFAULT_MEDIA_PLAYER_AUDIO[1], self.DEFAULT_MEDIA_PLAYER_AUDIO[2])
+
+    def get_media_player_audio_param(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[1], self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[2])
 
     def set_language(self, lang):
         self.update(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], lang)
@@ -179,6 +187,11 @@ class ConfigIni( Property ):
     def set_media_player_video_param(self, param):
         self.update(self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[1], param)
 
+    def set_media_player_audio(self, player):
+        self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO[0], self.DEFAULT_MEDIA_PLAYER_AUDIO[1], player)
+
+    def set_media_player_audio_param(self, param):
+        self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[1], param)
 
 
 

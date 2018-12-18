@@ -15,6 +15,7 @@ from akoteka.handle_property import Property
 
 from akoteka.gui.glob import *
 from akoteka.gui.glob import _
+from akoteka.gui.glob import QHLine
 from akoteka.gui import glob
 
 #from akoteka.gui.glob import media_path_film
@@ -454,10 +455,9 @@ class Card(QLabel):
             
             switch_list = glob.media_player_video_param.split(" ")
             param_list = []
-            param_list.append(glob.media_player_video)
-            param_list += switch_list
+            param_list.append(glob.media_player_audio)
+            #param_list += switch_list
             param_list.append(self.get_media_path())
-
 
             thread = Thread(target = call, args = (param_list, ))
             thread.start()
@@ -529,21 +529,6 @@ class Card(QLabel):
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
         qp.end()
         
-        
-        
-
-        
-class QHLine(QFrame):
-    def __init__(self):
-        super(QHLine, self).__init__()
-        self.setFrameShape(QFrame.HLine)
-        self.setFrameShadow(QFrame.Sunken)
-
-class QVLine(QFrame):
-    def __init__(self):
-        super(QVLine, self).__init__()
-        self.setFrameShape(QFrame.VLine)
-        self.setFrameShadow(QFrame.Sunken)
         
 # ---------------------------------------------------
 #
@@ -671,7 +656,6 @@ class CardInformation(QLabel):
         self.horizontal_line = QHLine()
         self.info_layout.addWidget( self.horizontal_line )
 
-
     def set_title(self, title ):
         self.card_info_title.set_title(title)
         
@@ -708,8 +692,7 @@ class CardImage(QLabel):
         
         self.setMinimumWidth(PICTURE_WIDTH)
         self.setMaximumWidth(PICTURE_WIDTH)
-        self.setMinimumHeight(PICTURE_HEIGHT)
-      
+        self.setMinimumHeight(PICTURE_HEIGHT)      
 
     def enterEvent(self, event):
         self.update()
@@ -742,8 +725,7 @@ class CardImage(QLabel):
     def set_sub_cards( self, sub_cards ):
         self.sub_cards = sub_cards
 
-    def get_sub_cards( self ):
-        
+    def get_sub_cards( self ):        
         return self.sub_cards      
         
 

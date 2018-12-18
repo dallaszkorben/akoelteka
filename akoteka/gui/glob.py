@@ -40,13 +40,27 @@ from PyQt5.QtCore import pyqtSignal
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict
 
+class QHLine(QFrame):
+    def __init__(self):
+        super(QHLine, self).__init__()
+        self.setFrameShape(QFrame.HLine)
+        self.setFrameShadow(QFrame.Sunken)
+
+class QVLine(QFrame):
+    def __init__(self):
+        super(QVLine, self).__init__()
+        self.setFrameShape(QFrame.VLine)
+        self.setFrameShadow(QFrame.Sunken)
+
 config_ini = ConfigIni.get_instance()
 
 def re_read_config_ini():
     global language
+    global media_path
     global media_player_video
     global media_player_video_param
-    global media_path
+    global media_player_audio
+    global media_player_audio_param
     global dic
     
     # Read config.ini    
@@ -54,6 +68,8 @@ def re_read_config_ini():
     media_path = config_ini.get_media_path()
     media_player_video = config_ini.get_media_player_video()
     media_player_video_param = config_ini.get_media_player_video_param()
+    media_player_audio = config_ini.get_media_player_audio()
+    media_player_audio_param = config_ini.get_media_player_audio_param()
 
     # Get the dictionary
     dic = Dict.get_instance( language )
@@ -77,6 +93,7 @@ FILE_CARD_INI = 'card.ini'
 IMG_CONFIG_BUTTON = "cogwheel-button.png"
 IMG_BACK_BUTTON = "back-button.png"
 IMG_FOLDER_BUTTON = "folder.png"
+IMG_EMPTY_BUTTON = "empty.png"
 IMG_BEST_ON = "best-on.png"
 IMG_BEST_OFF = "best-off.png"
 IMG_NEW_ON = "new-on.png"

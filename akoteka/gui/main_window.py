@@ -289,12 +289,16 @@ class ControlPanel(QWidget):
             mp = dialog.get_media_path()
             vp = dialog.get_media_player_video()
             vpp = dialog.get_media_player_video_param()
+            ap = dialog.get_media_player_audio()
+            app = dialog.get_media_player_audio_param()
 
             # Update the config.ini file
             config_ini.set_media_path(mp) 
             config_ini.set_language(l)
             config_ini.set_media_player_video(vp)
             config_ini.set_media_player_video_param(vpp)
+            config_ini.set_media_player_audio(ap)
+            config_ini.set_media_player_audio_param(app)
             
             # Re-read the config.ini file
             glob.re_read_config_ini()
