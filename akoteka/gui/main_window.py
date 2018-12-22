@@ -1,21 +1,38 @@
 import sys
 import os
+import importlib
 
 from threading import Thread
 
 from pkg_resources import resource_string, resource_filename
 
-from akoteka.accessories import collect_cards
 
 from functools import cmp_to_key
 
 import locale
+
+from akoteka.setup.setup import getSetupIni
     
 from akoteka.gui.glob import *
-from akoteka.gui.glob import _
-from akoteka.gui import glob
+
 from akoteka.gui.card_holder_pane import CardHolder
 from akoteka.gui.configuration_dialog import ConfigurationDialog
+
+from akoteka.accessories import collect_cards
+from akoteka.constants import *
+
+from akoteka.handle_property import _
+from akoteka.handle_property import language
+from akoteka.handle_property import media_path
+from akoteka.handle_property import media_player_video
+from akoteka.handle_property import media_player_video_param
+from akoteka.handle_property import media_player_video_ext
+from akoteka.handle_property import media_player_audio
+from akoteka.handle_property import media_player_audio_param
+from akoteka.handle_property import media_player_audio_ext
+
+from akoteka.handle_property import re_read_config_ini
+from akoteka.handle_property import config_ini
 
 class GuiAkoTeka(QWidget):
     
@@ -55,7 +72,8 @@ class GuiAkoTeka(QWidget):
         self.back_button_listener = None
 
         # --- Window ---
-        self.setWindowTitle('akoTeka')    
+        sp=getSetupIni()
+        self.setWindowTitle(sp['name'] + '-' + sp['version'])    
         #self.setGeometry(300, 300, 300, 200)
         self.resize(900,600)
         self.center()
@@ -135,19 +153,12 @@ class GuiAkoTeka(QWidget):
         self.add_holder( [], "" ) 
 
         # Start to collect the Cards
-        paths = [glob.media_path]        
+#paths = [glob.media_path]
+        paths = [media_path]
         self.cc = CollectCardThread( paths )
         self.cc.collected.connect(self.actual_card_holder.fill_up_card_holder)
         self.cc.start()
-        
-        
-        
-        
-#    def collect_cards_in_thread(self, paths, card_holder):
-#        card_structure = collect_cards(paths)
-#      
-#        card_holder.set_recent_card_structure(card_structure)
-#        card_holder.fill_up_card_holder()
+       
 
     def set_back_button_listener(self, listener):
         self.control_panel.set_back_button_listener(listener)
@@ -299,10 +310,17 @@ class ControlPanel(QWidget):
             config_ini.set_media_player_video_param(vpp)
             config_ini.set_media_player_audio(ap)
             config_ini.set_media_player_audio_param(app)
-            
+
+
+#!!!!!!!!!!!!
             # Re-read the config.ini file
-            glob.re_read_config_ini()
-            
+            re_read_config_ini()
+            # Re-import card_holder_pane
+            mod = importlib.import_module("akoteka.gui.card_holder_pane")
+            importlib.reload(mod)
+#!!!!!!!!!!!!
+
+
             # remove history
             for card_holder in self.gui.card_holder_list:
                 card_holder.setHidden(True)

@@ -5,7 +5,7 @@ import re
 import configparser
 import cgi, cgitb
 
-pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv)$")
+pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv|mp3)$")
 pattern_image = re.compile( "^image[.]jp(eg|g)$" )
 pattern_card = re.compile("^card.ini$")
 
@@ -97,6 +97,11 @@ def folder_investigation( actual_dir, json_list):
     title_json_list['hu'] = media_name
     title_json_list['en'] = media_name
     card['title'] = title_json_list
+
+    storyline_json_list = {}
+    storyline_json_list['hu'] = ""
+    storyline_json_list['en'] = ""
+    card['storyline'] = storyline_json_list
                 
     general_json_list = {}
     general_json_list['year'] = ""
@@ -171,59 +176,117 @@ def folder_investigation( actual_dir, json_list):
         # first collect every data from the card
         parser = configparser.RawConfigParser()
         parser.read(card_path_os)
-        try:
-            
-            # save the http path of the image
-            card['extra']['image-path'] = image_path_os
 
+        try:
+            # save the http path of the image
+            card['extra']['image-path'] = image_path_os            
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
             # saves the os path of the media
             card['extra']['media-path'] = media_path_os
-            
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
             card['title']['hu'] = parser.get("titles", "title_hu")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:            
             card['title']['en'] = parser.get("titles", "title_en")
-                
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
+            card['storyline']['hu'] = parser.get("storyline", "storyline_hu")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
+            card['storyline']['en'] = parser.get("storyline", "storyline_en")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:            
             card['general']['year'] = parser.get("general", "year")
-                
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
             directors = parser.get("general", "director").split(",")            
             for director in directors:
                 card['general']['director'].append(director.strip())
-                
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
             card['general']['length'] = parser.get("general", "length")
-                
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
             sounds = parser.get("general", "sound").split(",")
             for sound in sounds:
                 card['general']['sound'].append(sound.strip())
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
 
+        try:
             subs = parser.get("general", "sub").split(",")
             for sub in subs:
                 card['general']['sub'].append(sub.strip())
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
 
+        try:
             genres = parser.get("general", "genre").split(",")
             for genre in genres:
                 card['general']['genre'].append(genre.strip())
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
 
+        try:
             themes = parser.get("general", "theme").split(",")
             for theme in themes:
                 card['general']['theme'].append(theme.strip())
-                
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
             actors = parser.get("general", "actor").split(",")
             for actor in actors:
                 card['general']['actor'].append(actor.strip())
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
 
+        try:
             countries = parser.get("general", "country").split(",")
             for country in countries:
                 card['general']['country'].append(country.strip())
-                
-            card['rating']['best'] = parser.get("rating", "best")
-            card['rating']['new'] = parser.get("rating", "new")
-            card['rating']['favorite'] = parser.get("rating", "favorite")
-                                                
-            card['links']['imdb'] = parser.get("links", "imdb")
-            
-                
         except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
-            print(nop_err, "in ", card_path_os)
-            # TODO It could be more sophisticated, depending what field failed
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
+            card['rating']['best'] = parser.get("rating", "best")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+            
+        try:
+            card['rating']['new'] = parser.get("rating", "new")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:
+            card['rating']['favorite'] = parser.get("rating", "favorite")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
+
+        try:                                                
+            card['links']['imdb'] = parser.get("links", "imdb")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            log_msg(nop_err, "in ", card_path_os)
 
         json_list.append(card)
 
@@ -247,6 +310,10 @@ def folder_investigation( actual_dir, json_list):
 
     # and finaly returns
     return
+
+def log_msg(par1, par2, par3):
+    print(par1, par2, par3)
+    
 
 def collect_cards( rootdirs ):    
     media_list = json.loads('[]')

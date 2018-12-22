@@ -11,26 +11,23 @@ from PyQt5.QtCore import pyqtSignal
 
 from akoteka.accessories import filter_key
 
+from akoteka.handle_property import _
+from akoteka.handle_property import dic
+from akoteka.handle_property import language
+from akoteka.handle_property import media_path
+from akoteka.handle_property import media_player_video
+from akoteka.handle_property import media_player_video_param
+from akoteka.handle_property import media_player_video_ext
+from akoteka.handle_property import media_player_audio
+from akoteka.handle_property import media_player_audio_param
+from akoteka.handle_property import media_player_audio_ext
 from akoteka.handle_property import Property
 
-from akoteka.gui.glob import *
-from akoteka.gui.glob import _
 from akoteka.gui.glob import QHLine
+from akoteka.gui.glob import *
 from akoteka.gui import glob
 
-#from akoteka.gui.glob import media_path_film
-#from akoteka.gui.glob import media_player_video
-#from akoteka.gui.glob import media_player_video_param
-
-PICTURE_WIDTH = 190
-PICTURE_HEIGHT = 160
-RATE_WIDTH = 30
-
-COLOR_CARD = "#b3d4c9"
-COLOR_CARD_BORDER_MEDIA = "#b3d4c9"
-COLOR_CARD_BORDER_CONTAINER = "#0e997a"
-COLOR_CARD_HOLDER_CARDS = "#3f6b61"
-COLOR_CARD_HOLDER_MAIN = "#73948d"
+from akoteka.constants import *
 
 # ================================================
 # 
@@ -204,8 +201,6 @@ class CardHolder( QLabel ):
         is_card = False
 
         for crd in filtered_card_structure:
-        #for crd in self.recent_card_structure:            
-            #print(crd['recent-folder'])
 
             card = Card(self)
             card.set_image_path( crd["extra"]["image-path"] )
@@ -213,22 +208,34 @@ class CardHolder( QLabel ):
             #card.set_sub_cards( crd["sub-cards"] )
             card.set_sub_cards( crd["extra"]["orig-sub-cards"] )
             card.set_media_path( crd["extra"]["media-path"] )
-            card.set_title( crd["title"][glob.language] )
+            card.set_title( crd["title"][language] )
 
-            #fits = True
-            
             # if MEDIA CARD
             if crd["extra"]["media-path"]:
-                    
-                card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["general"]["director"] ] ) )
-                card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["general"]["actor"] ] ) )
-                card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) if g else "" for g in crd["general"]["genre"] ] ) )
-                card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in crd["general"]["theme"] ] ) )
 
                 card.add_element_to_collector_line( _("title_year"), crd["general"]["year"])
                 card.add_element_to_collector_line( _("title_length"), crd["general"]["length"])
                 card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["general"]["country"] ]) )
+
+                card.add_separator()
+                if ''.join(crd["general"]["director"]):
+                    card.add_info_line( _("title_director"), ", ".join( [ d for d in crd["general"]["director"] ] ) )
+                    
+                if ''.join(crd["general"]["actor"]):
+                    card.add_info_line( _("title_actor"), ", ".join( [ a for a in crd["general"]["actor"] ] ) )
+                    
+                if ''.join(crd["general"]["genre"]):
+                    card.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) if g else "" for g in crd["general"]["genre"] ] ) )
+                    
+                if ''.join(crd["general"]["theme"]):
+                    card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in crd["general"]["theme"] ] ) )
+                
+                if crd['storyline'][language]:
+                    card.add_separator()                
+                    card.add_info_line( _('title_storyline'), crd['storyline'][language])
                    
+                card.add_info_line_stretch()
+                
                 # initialize the rating buttons
                 card.set_rating(crd['rating'])
                 card.set_folder(crd['extra']['recent-folder'])
@@ -304,6 +311,7 @@ class CardHolder( QLabel ):
             
             card = {}
             card['title'] = crd['title']
+            card['storyline'] = crd['storyline']
             card['general'] = crd['general']
             card['rating'] = crd['rating']
 
@@ -363,28 +371,12 @@ class CardHolder( QLabel ):
                     collectorFits = True
         
         return (mediaFits or collectorFits)
-                    
-            
-                
                 
 
 class CardHolderPanel( QLabel ):
     def __init__(self):
         super().__init__()
 
-        # -------------
-        #
-        # Main Panel
-        #
-        # ------------
-        #self_layout = QVBoxLayout(self)
-        #self.setLayout(self_layout)
-        ## controls the distance between the MainWindow and the added container: scrollContent
-        ## order: left, top, right, bottom
-        #self_layout.setContentsMargins(9,9,9,9)     
-        #self_layout.setSpacing(10)
-        #self.setStyleSheet('background: ' + COLOR_CARD_HOLDER_MAIN)   
-      
         self.self_layout = QVBoxLayout(self)
         self.setLayout(self.self_layout)
         self.self_layout.setContentsMargins(12,12,12,12)  
@@ -406,6 +398,8 @@ class CardHolderPanel( QLabel ):
 
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
         qp.end()
+
+
 
 # =========================================
 # 
@@ -439,7 +433,7 @@ class Card(QLabel):
         #
         # Containers in the Card
         #
-        self.card_image = CardImage()
+        self.card_image = CardImage( self )
         card_layout.addWidget( self.card_image )
         self.card_information = CardInformation()
         card_layout.addWidget( self.card_information )
@@ -448,35 +442,32 @@ class Card(QLabel):
  
         self.borderRadius = 5
        
-    def mousePressEvent(self, event):
-        
-        # Play media
-        if self.get_media_path():
-            
-            switch_list = glob.media_player_video_param.split(" ")
-            param_list = []
-            param_list.append(glob.media_player_audio)
-            #param_list += switch_list
-            param_list.append(self.get_media_path())
-
-            thread = Thread(target = call, args = (param_list, ))
-            thread.start()
-            #call( param_list )
-            
-        else:
-            self.card_holder.go_deeper(self.get_sub_cards(), self.card_information.get_title() )
+#    def mousePressEvent(self, event):
+#        
+#        # Play media
+#        if self.get_media_path():
+#            
+#            switch_list = media_player_video_param.split(" ")
+#            param_list = []
+#            param_list.append(media_player_video)
+#            param_list += switch_list
+#            param_list.append(self.get_media_path())
+#
+#            thread = Thread(target = call, args = (param_list, ))
+#            thread.start()
+#            #call( param_list )
+#            
+#        else:
+#            self.card_holder.go_deeper(self.get_sub_cards(), self.card_information.get_title() )
        
+    def get_card_holder( self ):
+        return self.card_holder
+
     def set_image_path( self, image_path ):
         self.card_image.set_image_path( image_path )
         
     def set_media_path( self, media_path ):
         self.card_image.set_media_path( media_path )
-        
-        # if it is a direct card to a media
-#        if self.card_image.get_media_path():
-#            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_MEDIA)
-#        else:
-#            self.setStyleSheet('background: ' + COLOR_CARD_BORDER_CONTAINER)
 
     def get_media_path( self ):
         return self.card_image.get_media_path( )
@@ -489,9 +480,18 @@ class Card(QLabel):
         
     def set_title(self, title):
         self.card_information.set_title(title)
+
+    def get_title(self):
+        return self.card_information.get_title()
+        
+    def add_separator(self):
+        self.card_information.add_separator()
         
     def add_info_line( self, label, value ):
         self.card_information.add_info_line( label, value )
+        
+    def add_info_line_stretch(self):
+        self.card_information.add_stretch()
         
     def add_element_to_collector_line( self, label, value ):
         self.card_information.add_element_to_collector_line( label, value )
@@ -547,7 +547,7 @@ class CardInfoTitle(QLabel):
         self.setLineWidth(0)
 
         # font, colors
-        self.setFont(QFont( "Comic Sans MS", 18, weight=QFont.Bold))
+        self.setFont(QFont( FONT_TYPE, INFO_TITLE_FONT_SIZE, weight=QFont.Bold))
         self.text = None
     
     def set_title(self, title):
@@ -557,15 +557,18 @@ class CardInfoTitle(QLabel):
     def get_title(self):
         return self.text
         
+        
+
+
 class CardInfoLineLabel(QLabel):
     def __init__(self, label):
         super().__init__()
  
         self.setAlignment(Qt.AlignTop);
-        self.setMinimumWidth(60)
+        self.setMinimumWidth( INFO_LABEL_WIDTH )
         
         # font, colors
-        self.setFont(QFont( "Comic Sans MS", 10, weight=QFont.Normal))
+        self.setFont(QFont( FONT_TYPE, INFO_FONT_SIZE, weight=QFont.Normal))
 
         self.setText(label)
 
@@ -574,9 +577,15 @@ class CardInfoLineValue(QLabel):
         super().__init__()
         
         self.setWordWrap(True)
+        self.setMaximumHeight( ONE_LINE_HEIGHT )
+        
+        #line_layout = QHBoxLayout(self)        
+        #line_layout.setContentsMargins(15, 15, 15, 15)
+        #self.setLayout( line_layout )
+        
         
         # font, colors
-        self.setFont(QFont( "Comic Sans MS", 10, weight=QFont.Normal))
+        self.setFont(QFont( FONT_TYPE, INFO_FONT_SIZE, weight=QFont.Normal))
     
         self.setText(value)
 
@@ -653,8 +662,8 @@ class CardInformation(QLabel):
         self.info_layout.addWidget( self.card_info_lines_holder )
         
         # Horizintal line under the "Year/Length/Country" line
-        self.horizontal_line = QHLine()
-        self.info_layout.addWidget( self.horizontal_line )
+#        self.horizontal_line = QHLine()
+#        self.info_layout.addWidget( self.horizontal_line )
 
     def set_title(self, title ):
         self.card_info_title.set_title(title)
@@ -662,6 +671,10 @@ class CardInformation(QLabel):
     def get_title(self):
         return self.card_info_title.get_title()
 
+#    def set_storyline(self, storyline):
+#        self.info_layout.addWidget( CardInfoLine(label,value))
+        
+        
     def add_separator(self):
         self.info_layout.addWidget( QHLine() )
         
@@ -674,9 +687,17 @@ class CardInformation(QLabel):
     def add_element_to_collector_line( self, label, value ):
         self.card_info_lines_holder.add_element( label, value )
 
+
+# ================
+#
+# Card Image
+#
+# ================
 class CardImage(QLabel):
-    def __init__(self):
+    def __init__(self, card ):
         super().__init__()
+        
+        self.card = card
         
         image_layout = QHBoxLayout(self)
         image_layout.setContentsMargins(2,2,2,2)
@@ -694,10 +715,12 @@ class CardImage(QLabel):
         self.setMaximumWidth(PICTURE_WIDTH)
         self.setMinimumHeight(PICTURE_HEIGHT)      
 
+    # Mouse Hover in
     def enterEvent(self, event):
         self.update()
         QApplication.setOverrideCursor(Qt.PointingHandCursor)
 
+    # MOuse Hover out
     def leaveEvent(self, event):
         self.update()
         QApplication.restoreOverrideCursor()
@@ -728,6 +751,24 @@ class CardImage(QLabel):
     def get_sub_cards( self ):        
         return self.sub_cards      
         
+    def mousePressEvent(self, event):
+        
+        # Play media
+        if self.get_media_path():
+            
+            switch_list = media_player_video_param.split(" ")
+            param_list = []
+            param_list.append(media_player_video)
+            param_list += switch_list
+            param_list.append(self.get_media_path())
+
+            thread = Thread(target = call, args = (param_list, ))
+            thread.start()
+            #call( param_list )
+            
+        else:
+            self.card.get_card_holder().go_deeper(self.get_sub_cards(), self.card.get_title() )
+
 
 # ===================================================
 #

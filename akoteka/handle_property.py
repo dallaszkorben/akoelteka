@@ -3,18 +3,6 @@ import configparser
 from pathlib import Path
 
 class Property(object):
-    """
-    This singleton handles the package's ini file.
-    The object is created by calling the get_instance() method.
-    If the ini file is not existing then it will be generated with default values
-
-    It is possible to get a string value of a key by calling the get() method
-    If the key is not existing then it will be generated with default value
-    The get_boolean() method is to get the boolean values.
-
-    update() method is to update a value of a key. If the key is not existing
-    then it will be generated with default value
-    """
        
     def __init__(self, file, writable=False, folder=None):
         self.writable = writable
@@ -135,8 +123,10 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PATH = ("media", "media-path", ".")
     DEFAULT_MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
     DEFAULT_MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
+    DEFAULT_MEDIA_PLAYER_VIDEO_EXT = ("media", "player-video-ext", "mkv,avi,mp4")
     DEFAULT_MEDIA_PLAYER_AUDIO = ("media", "player-audio", "rhythmbox")
     DEFAULT_MEDIA_PLAYER_AUDIO_PARAM = ("media", "player-audio-param", "")
+    DEFAULT_MEDIA_PLAYER_AUDIO_EXT = ("media", "player-audio-ext", "mp3,ogg")
     
     
     __instance = None    
@@ -169,11 +159,18 @@ class ConfigIni( Property ):
     def get_media_player_video_param(self):
         return self.get(self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[1], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[2])
 
+    def get_media_player_video_ext(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_VIDEO_EXT[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_EXT[1], self.DEFAULT_MEDIA_PLAYER_VIDEO_EXT[2])
+
     def get_media_player_audio(self):
         return self.get(self.DEFAULT_MEDIA_PLAYER_AUDIO[0], self.DEFAULT_MEDIA_PLAYER_AUDIO[1], self.DEFAULT_MEDIA_PLAYER_AUDIO[2])
 
     def get_media_player_audio_param(self):
         return self.get(self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[1], self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[2])
+
+    def get_media_player_audio_ext(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[1], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[2])
+
 
     def set_language(self, lang):
         self.update(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], lang)
@@ -187,12 +184,49 @@ class ConfigIni( Property ):
     def set_media_player_video_param(self, param):
         self.update(self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_PARAM[1], param)
 
+    def set_media_player_video_ext(self, param):
+        self.update(self.DEFAULT_MEDIA_PLAYER_VIDEO_EXT[0], self.DEFAULT_MEDIA_PLAYER_VIDEO_EXT[1], param)
+
     def set_media_player_audio(self, player):
         self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO[0], self.DEFAULT_MEDIA_PLAYER_AUDIO[1], player)
 
     def set_media_player_audio_param(self, param):
         self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_PARAM[1], param)
 
+    def set_media_player_audio_ext(self, param):
+        self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[1], param)
+
+
+config_ini = ConfigIni.get_instance()
+
+def re_read_config_ini():
+    global language
+    global media_path
+    global media_player_video
+    global media_player_video_param
+    global media_player_video_ext
+    global media_player_audio
+    global media_player_audio_param
+    global media_player_audio_ext
+    global dic
+    
+    # Read config.ini    
+    language = config_ini.get_language()    
+    media_path = config_ini.get_media_path()
+    media_player_video = config_ini.get_media_player_video()
+    media_player_video_param = config_ini.get_media_player_video_param()
+    media_player_video_ext = config_ini.get_media_player_video_ext()
+    media_player_audio = config_ini.get_media_player_audio()
+    media_player_audio_param = config_ini.get_media_player_audio_param()
+    media_player_audio_ext = config_ini.get_media_player_audio_ext()
+
+    # Get the dictionary
+    dic = Dict.get_instance( language )
+
+re_read_config_ini()
+
+def _(word):
+    return dic._(word)
 
 
 

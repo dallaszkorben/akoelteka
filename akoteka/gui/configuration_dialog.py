@@ -1,18 +1,23 @@
 import sys
 import os
 
-from akoteka.gui.glob import *
-from akoteka.gui.glob import _
-from akoteka.gui.glob import QHLine
-from akoteka.gui import glob
-
 from pkg_resources import resource_string, resource_filename
 
-WINDOW_WIDTH = 400
-WINDOW_HEIGHT = 120
-IMG_SIZE = 16
-LABEL_LENGTH = 120
-LANGUAGE_DROPDOWN_LENGTH = "120"
+from akoteka.gui.glob import *
+#from akoteka.gui.glob import _
+#from akoteka.gui.glob import QHLine
+#from akoteka.gui import glob
+
+from akoteka.constants import *
+from akoteka.handle_property import _
+from akoteka.handle_property import language
+from akoteka.handle_property import media_path
+from akoteka.handle_property import media_player_video
+from akoteka.handle_property import media_player_video_param
+from akoteka.handle_property import media_player_video_ext
+from akoteka.handle_property import media_player_audio
+from akoteka.handle_property import media_player_audio_param
+from akoteka.handle_property import media_player_audio_ext
 
 # ====================
 #
@@ -41,31 +46,37 @@ class ConfigurationDialog(QDialog):
         self.self_layout.addWidget(button_box_section)
         
         # language
-        self.language_selector = LanguageSelector(glob.language)
+#self.language_selector = LanguageSelector(glob.language)
+        self.language_selector = LanguageSelector(language)
         self.content_section.addWidget(self.language_selector)
         
         # media path
-        self.media_path_selector = MediaPathSelector(glob.media_path)
+#self.media_path_selector = MediaPathSelector(glob.media_path)
+        self.media_path_selector = MediaPathSelector(media_path)
         self.content_section.addWidget(self.media_path_selector)
         
         self.content_section.addWidget(QHLine())
 
         # video player 
-        self.media_player_video_selector = MediaPlayerVideoSelector(glob.media_player_video)
+#self.media_player_video_selector = MediaPlayerVideoSelector(glob.media_player_video)
+        self.media_player_video_selector = MediaPlayerVideoSelector(media_player_video)
         self.content_section.addWidget(self.media_player_video_selector)
         
         # video player parameters        
-        self.media_player_video_param = MediaPlayerVideoParam(glob.media_player_video_param)
+#self.media_player_video_param = MediaPlayerVideoParam(glob.media_player_video_param)
+        self.media_player_video_param = MediaPlayerVideoParam(media_player_video_param)
         self.content_section.addWidget(self.media_player_video_param)
 
         self.content_section.addWidget(QHLine())
 
         # audio player 
-        self.media_player_audio_selector = MediaPlayerAudioSelector(glob.media_player_audio)
+#self.media_player_audio_selector = MediaPlayerAudioSelector(glob.media_player_audio)
+        self.media_player_audio_selector = MediaPlayerAudioSelector(media_player_audio)
         self.content_section.addWidget(self.media_player_audio_selector)
         
         # audio player parameters        
-        self.media_player_audio_param = MediaPlayerAudioParam(glob.media_player_audio_param)
+#self.media_player_audio_param = MediaPlayerAudioParam(glob.media_player_audio_param)
+        self.media_player_audio_param = MediaPlayerAudioParam(media_player_audio_param)
         self.content_section.addWidget(self.media_player_audio_param)
     
     def get_media_path(self):
@@ -197,7 +208,8 @@ class MediaPathSelector(LineTemplate):
     
     def select_folder_button_on_click(self):
         
-        folder = QFileDialog.getExistingDirectory(self, _('title_select_media_path'), glob.media_path, QFileDialog.ShowDirsOnly)
+#folder = QFileDialog.getExistingDirectory(self, _('title_select_media_path'), glob.media_path, QFileDialog.ShowDirsOnly)
+        folder = QFileDialog.getExistingDirectory(self, _('title_select_media_path'), media_path, QFileDialog.ShowDirsOnly)
         
         if folder:
             self.folder_field.setText(folder)
