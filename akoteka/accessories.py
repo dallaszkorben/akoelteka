@@ -5,9 +5,8 @@ import re
 import configparser
 import cgi, cgitb
 
-pattern_media = re.compile("^.+[.](avi|mpg|mkv|mp4|flv|mp3)$")
-pattern_image = re.compile( "^image[.]jp(eg|g)$" )
-pattern_card = re.compile("^card.ini$")
+from akoteka.handle_property import media_player_video_ext
+from akoteka.handle_property import media_player_audio_ext
 
 filter_key = {
     "best":{
@@ -56,6 +55,21 @@ filter_key = {
     }
 }
 
+
+def get_pattern_video():
+    ptrn = '|'.join( media_player_video_ext.split(",") )
+    return re.compile( '^.+[.](' + ptrn + ')$' )    
+
+def get_pattern_audio():
+    ptrn = '|'.join( media_player_audio_ext.split(",") )
+    return re.compile( '^.+[.](' + ptrn + ')$' )    
+
+def get_pattern_image():
+    return re.compile( '^image[.]jp(eg|g)$' )
+    
+def get_pattern_card():
+    return re.compile('^card.ini$')
+
 def folder_investigation( actual_dir, json_list):
     
     # Collect files and and dirs in the current directory
@@ -78,16 +92,16 @@ def folder_investigation( actual_dir, json_list):
         #
         
         # find the Card
-        if pattern_card.match( file_name ):
+        if get_pattern_card().match( file_name ):
             card_path_os = os.path.join(actual_dir, file_name)
             
-        # find the Media
-        if pattern_media.match(file_name):            
+        # find the Media (video or audio)
+        if get_pattern_audio().match(file_name) or get_pattern_video().match(file_name):
             media_path_os = os.path.join(actual_dir, file_name)
             media_name = file_name
             
         # find the Image
-        if pattern_image.match( file_name ):
+        if get_pattern_image().match( file_name ):
            image_path_os = os.path.join(actual_dir, file_name)
 
 

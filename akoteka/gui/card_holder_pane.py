@@ -10,6 +10,9 @@ import locale
 from PyQt5.QtCore import pyqtSignal  
 
 from akoteka.accessories import filter_key
+from akoteka.accessories import get_pattern_video
+from akoteka.accessories import get_pattern_audio
+
 
 from akoteka.handle_property import _
 from akoteka.handle_property import dic
@@ -441,25 +444,7 @@ class Card(QLabel):
         card_layout.addWidget( self.card_rating )
  
         self.borderRadius = 5
-       
-#    def mousePressEvent(self, event):
-#        
-#        # Play media
-#        if self.get_media_path():
-#            
-#            switch_list = media_player_video_param.split(" ")
-#            param_list = []
-#            param_list.append(media_player_video)
-#            param_list += switch_list
-#            param_list.append(self.get_media_path())
-#
-#            thread = Thread(target = call, args = (param_list, ))
-#            thread.start()
-#            #call( param_list )
-#            
-#        else:
-#            self.card_holder.go_deeper(self.get_sub_cards(), self.card_information.get_title() )
-       
+      
     def get_card_holder( self ):
         return self.card_holder
 
@@ -753,18 +738,29 @@ class CardImage(QLabel):
         
     def mousePressEvent(self, event):
         
-        # Play media
-        if self.get_media_path():
+        media_path = self.get_media_path()
             
-            switch_list = media_player_video_param.split(" ")
+        # Play media
+        if media_path:
+
             param_list = []
-            param_list.append(media_player_video)
-            param_list += switch_list
-            param_list.append(self.get_media_path())
+
+            # audio
+            if get_pattern_audio().match(media_path):            
+                switch_list = media_player_audio_param.split(" ")
+                param_list.append(media_player_audio)
+                #param_list += switch_list
+                param_list.append(media_path)
+            
+            # video
+            elif get_pattern_video().match(media_path):
+                switch_list = media_player_video_param.split(" ")
+                param_list.append(media_player_video)
+                param_list += switch_list
+                param_list.append(media_path)
 
             thread = Thread(target = call, args = (param_list, ))
             thread.start()
-            #call( param_list )
             
         else:
             self.card.get_card_holder().go_deeper(self.get_sub_cards(), self.card.get_title() )
