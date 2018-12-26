@@ -5,8 +5,7 @@ import re
 import configparser
 import cgi, cgitb
 
-from akoteka.handle_property import media_player_video_ext
-from akoteka.handle_property import media_player_audio_ext
+from akoteka.handle_property import config_ini
 
 filter_key = {
     "best":{
@@ -57,11 +56,11 @@ filter_key = {
 
 
 def get_pattern_video():
-    ptrn = '|'.join( media_player_video_ext.split(",") )
+    ptrn = '|'.join( config_ini['media_player_video_ext'].split(",") )
     return re.compile( '^.+[.](' + ptrn + ')$' )    
 
 def get_pattern_audio():
-    ptrn = '|'.join( media_player_audio_ext.split(",") )
+    ptrn = '|'.join( config_ini['media_player_audio_ext'].split(",") )
     return re.compile( '^.+[.](' + ptrn + ')$' )    
 
 def get_pattern_image():

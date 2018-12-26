@@ -22,17 +22,9 @@ from akoteka.accessories import collect_cards
 from akoteka.constants import *
 
 from akoteka.handle_property import _
-from akoteka.handle_property import language
-from akoteka.handle_property import media_path
-from akoteka.handle_property import media_player_video
-from akoteka.handle_property import media_player_video_param
-from akoteka.handle_property import media_player_video_ext
-from akoteka.handle_property import media_player_audio
-from akoteka.handle_property import media_player_audio_param
-from akoteka.handle_property import media_player_audio_ext
-
 from akoteka.handle_property import re_read_config_ini
 from akoteka.handle_property import config_ini
+from akoteka.handle_property import get_config_ini
 
 class GuiAkoTeka(QWidget):
     
@@ -153,8 +145,7 @@ class GuiAkoTeka(QWidget):
         self.add_holder( [], "" ) 
 
         # Start to collect the Cards
-#paths = [glob.media_path]
-        paths = [media_path]
+        paths = [config_ini['media_path']]
         self.cc = CollectCardThread( paths )
         self.cc.collected.connect(self.actual_card_holder.fill_up_card_holder)
         self.cc.start()
@@ -304,20 +295,27 @@ class ControlPanel(QWidget):
             app = dialog.get_media_player_audio_param()
 
             # Update the config.ini file
-            config_ini.set_media_path(mp) 
-            config_ini.set_language(l)
-            config_ini.set_media_player_video(vp)
-            config_ini.set_media_player_video_param(vpp)
-            config_ini.set_media_player_audio(ap)
-            config_ini.set_media_player_audio_param(app)
+            config_ini_function = get_config_ini()
+            config_ini_function.set_media_path(mp) 
+            config_ini_function.set_language(l)
+            config_ini_function.set_media_player_video(vp)
+            config_ini_function.set_media_player_video_param(vpp)
+            config_ini_function.set_media_player_audio(ap)
+            config_ini_function.set_media_player_audio_param(app)
 
 
 #!!!!!!!!!!!!
             # Re-read the config.ini file
             re_read_config_ini()
+
+            print(config_ini['media_path'])
+            print()
+            
             # Re-import card_holder_pane
             mod = importlib.import_module("akoteka.gui.card_holder_pane")
             importlib.reload(mod)
+            
+
 #!!!!!!!!!!!!
 
 

@@ -15,15 +15,7 @@ from akoteka.accessories import get_pattern_audio
 
 
 from akoteka.handle_property import _
-from akoteka.handle_property import dic
-from akoteka.handle_property import language
-from akoteka.handle_property import media_path
-from akoteka.handle_property import media_player_video
-from akoteka.handle_property import media_player_video_param
-from akoteka.handle_property import media_player_video_ext
-from akoteka.handle_property import media_player_audio
-from akoteka.handle_property import media_player_audio_param
-from akoteka.handle_property import media_player_audio_ext
+from akoteka.handle_property import config_ini
 from akoteka.handle_property import Property
 
 from akoteka.gui.glob import QHLine
@@ -211,14 +203,14 @@ class CardHolder( QLabel ):
             #card.set_sub_cards( crd["sub-cards"] )
             card.set_sub_cards( crd["extra"]["orig-sub-cards"] )
             card.set_media_path( crd["extra"]["media-path"] )
-            card.set_title( crd["title"][language] )
+            card.set_title( crd['title'][config_ini['language']] )
 
             # if MEDIA CARD
             if crd["extra"]["media-path"]:
 
                 card.add_element_to_collector_line( _("title_year"), crd["general"]["year"])
                 card.add_element_to_collector_line( _("title_length"), crd["general"]["length"])
-                card.add_element_to_collector_line( _("title_country"), ", ".join( [ dic._("country_" + a) for a in crd["general"]["country"] ]) )
+                card.add_element_to_collector_line( _("title_country"), ", ".join( [ _("country_" + a) for a in crd["general"]["country"] ]) )
 
                 card.add_separator()
                 if ''.join(crd["general"]["director"]):
@@ -233,9 +225,9 @@ class CardHolder( QLabel ):
                 if ''.join(crd["general"]["theme"]):
                     card.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in crd["general"]["theme"] ] ) )
                 
-                if crd['storyline'][language]:
+                if crd['storyline'][config_ini['language']]:
                     card.add_separator()                
-                    card.add_info_line( _('title_storyline'), crd['storyline'][language])
+                    card.add_info_line( _('title_storyline'), crd['storyline'][config_ini['language']])
                    
                 card.add_info_line_stretch()
                 
@@ -745,19 +737,19 @@ class CardImage(QLabel):
 
             param_list = []
 
-            # audio
-            if get_pattern_audio().match(media_path):            
-                switch_list = media_player_audio_param.split(" ")
-                param_list.append(media_player_audio)
-                #param_list += switch_list
-                param_list.append(media_path)
-            
             # video
-            elif get_pattern_video().match(media_path):
-                switch_list = media_player_video_param.split(" ")
-                param_list.append(media_player_video)
+            if get_pattern_video().match(self.media_path):
+                switch_list = config_ini['media_player_video_param'].split(" ")
+                param_list.append(config_ini['media_player_video'])
                 param_list += switch_list
-                param_list.append(media_path)
+                param_list.append(self.media_path)
+
+            # audio
+            elif get_pattern_audio().match(self.media_path):
+                switch_list = config_ini['media_player_audio_param'].split(" ")
+                param_list.append(config_ini['media_player_audio'])
+                #param_list += switch_list
+                param_list.append(self.media_path)
 
             thread = Thread(target = call, args = (param_list, ))
             thread.start()

@@ -123,7 +123,7 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PATH = ("media", "media-path", ".")
     DEFAULT_MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
     DEFAULT_MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
-    DEFAULT_MEDIA_PLAYER_VIDEO_EXT = ("media", "player-video-ext", "mkv,avi,mp4")
+    DEFAULT_MEDIA_PLAYER_VIDEO_EXT = ("media", "player-video-ext", "divx,mkv,avi,mp4")
     DEFAULT_MEDIA_PLAYER_AUDIO = ("media", "player-audio", "rhythmbox")
     DEFAULT_MEDIA_PLAYER_AUDIO_PARAM = ("media", "player-audio-param", "")
     DEFAULT_MEDIA_PLAYER_AUDIO_EXT = ("media", "player-audio-ext", "mp3,ogg")
@@ -197,36 +197,31 @@ class ConfigIni( Property ):
         self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[1], param)
 
 
-config_ini = ConfigIni.get_instance()
+config_ini = {}
+
+def get_config_ini():
+    return ConfigIni.get_instance()
 
 def re_read_config_ini():
-    global language
-    global media_path
-    global media_player_video
-    global media_player_video_param
-    global media_player_video_ext
-    global media_player_audio
-    global media_player_audio_param
-    global media_player_audio_ext
+    global config_ini
     global dic
     
+    ci = get_config_ini()
+    
     # Read config.ini    
-    language = config_ini.get_language()    
-    media_path = config_ini.get_media_path()
-    media_player_video = config_ini.get_media_player_video()
-    media_player_video_param = config_ini.get_media_player_video_param()
-    media_player_video_ext = config_ini.get_media_player_video_ext()
-    media_player_audio = config_ini.get_media_player_audio()
-    media_player_audio_param = config_ini.get_media_player_audio_param()
-    media_player_audio_ext = config_ini.get_media_player_audio_ext()
+    config_ini['language'] = ci.get_language()
+    config_ini['media_path'] = ci.get_media_path()
+    config_ini['media_player_video'] = ci.get_media_player_video()
+    config_ini['media_player_video_param'] = ci.get_media_player_video_param()
+    config_ini['media_player_video_ext'] = ci.get_media_player_video_ext()
+    config_ini['media_player_audio'] = ci.get_media_player_audio()
+    config_ini['media_player_audio_param'] = ci.get_media_player_audio_param()
+    config_ini['media_player_audio_ext'] = ci.get_media_player_audio_ext()
 
     # Get the dictionary
-    dic = Dict.get_instance( language )
-
+    dic = Dict.get_instance( config_ini['language'] )
+    
 re_read_config_ini()
 
 def _(word):
     return dic._(word)
-
-
-
