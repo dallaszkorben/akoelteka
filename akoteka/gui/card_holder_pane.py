@@ -18,9 +18,8 @@ from akoteka.handle_property import _
 from akoteka.handle_property import config_ini
 from akoteka.handle_property import Property
 
-from akoteka.gui.glob import QHLine
-from akoteka.gui.glob import *
-from akoteka.gui import glob
+from akoteka.gui.pyqt_import import QHLine
+from akoteka.gui.pyqt_import import *
 
 from akoteka.constants import *
 

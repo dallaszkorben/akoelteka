@@ -3,7 +3,7 @@ import os
 
 from pkg_resources import resource_string, resource_filename
 
-from akoteka.gui.glob import *
+from akoteka.gui.pyqt_import import *
 
 from akoteka.constants import *
 from akoteka.handle_property import _
@@ -155,7 +155,6 @@ class LanguageSelector(LineTemplate):
         # select the language from config.ini file
         self.language_combo.setCurrentIndex( self.language_combo.findData(default_language) )
         
-
     def get_language(self):
         return self.language_combo.itemData( self.language_combo.currentIndex() )
 

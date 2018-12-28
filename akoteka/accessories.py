@@ -334,5 +334,4 @@ def collect_cards( rootdirs ):
     for rootdir in rootdirs:
         folder_investigation(rootdir, media_list)
 
-    #print (media_list)
     return media_list

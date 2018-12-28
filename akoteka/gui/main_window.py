@@ -13,7 +13,7 @@ import locale
 
 from akoteka.setup.setup import getSetupIni
     
-from akoteka.gui.glob import *
+from akoteka.gui.pyqt_import import *
 
 from akoteka.gui.card_holder_pane import CardHolder
 from akoteka.gui.configuration_dialog import ConfigurationDialog
@@ -308,14 +308,9 @@ class ControlPanel(QWidget):
             # Re-read the config.ini file
             re_read_config_ini()
 
-            print(config_ini['media_path'])
-            print()
-            
             # Re-import card_holder_pane
             mod = importlib.import_module("akoteka.gui.card_holder_pane")
             importlib.reload(mod)
-            
-
 #!!!!!!!!!!!!
 
 
