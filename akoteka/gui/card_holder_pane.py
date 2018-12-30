@@ -7,7 +7,7 @@ from pkg_resources import resource_string, resource_filename
 from functools import cmp_to_key
 import locale
 
-from PyQt5.QtCore import pyqtSignal  
+#from PyQt5.QtCore import pyqtSignal  
 
 from akoteka.accessories import filter_key
 from akoteka.accessories import get_pattern_video

@@ -26,6 +26,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QCursor
+from PyQt5.QtGui import QDrag
 
 from PyQt5 import QtCore
 
@@ -36,6 +37,7 @@ from PyQt5.QtCore import QModelIndex
 from PyQt5.QtCore import QVariant
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QMimeData
 
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict
