@@ -50,6 +50,7 @@ class App(QWidget):
         previous_button = QPushButton("prev",self)
         previous_button.clicked.connect(self.actual_card_holder.select_previous_card)
         
+        #self.scroll_layout.addStretch(1)
         self.scroll_layout.addWidget(previous_button)
         self.scroll_layout.addWidget(next_button)
         
@@ -181,7 +182,7 @@ class CardHolder( QWidget ):
         self.actual_card_index = index_corr
         self.remove_cards()
         
-        for i in range( index_corr + self.max_overlapped_cards, index_corr - 1, -1):
+        for i in range( index_corr + min(self.max_overlapped_cards, len(self.card_descriptor_list)-1), index_corr - 1, -1):
             i_corr = self.index_correction(i)
             
             if( i_corr < len(self.card_descriptor_list)):
@@ -205,7 +206,14 @@ class CardHolder( QWidget ):
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         qp.end()  
 
-
+    def wheelEvent(self, event):
+        modifiers = QApplication.keyboardModifiers()
+        value = event.angleDelta().y()/8/15
+        if value > 0:
+            self.select_next_card()
+        else:
+            self.select_previous_card()
+        
 # ==================
 #
 # Panel
