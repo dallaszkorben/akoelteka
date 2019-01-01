@@ -23,23 +23,31 @@ class App(QWidget):
         self.scroll_layout.setSpacing(0)
         self.setLayout(self.scroll_layout)
 
-
         self.actual_card_holder = CardHolder(            
             self, 
             [],
             "Kezdocim",
             self.get_new_card
         )
-        self.actual_card_holder.show()
         
-        
+        self.actual_card_holder.set_background_color(QColor(Qt.yellow))
+        self.actual_card_holder.set_border_width(5)
         self.scroll_layout.addWidget(self.actual_card_holder)
-
+        
+        cdl = []        
+        cdl.append("Elso")
+        cdl.append("Masodik")
+        cdl.append("Harmadik")
+        cdl.append("Negyedik")
+        cdl.append("Otodik")
+        self.actual_card_holder.refresh(cdl)
+        
+        
  
-        next_button = QPushButton("next")
+        next_button = QPushButton("next",self)
         next_button.clicked.connect(self.actual_card_holder.select_next_card)
         
-        previous_button = QPushButton("prev")
+        previous_button = QPushButton("prev",self)
         previous_button.clicked.connect(self.actual_card_holder.select_previous_card)
         
         self.scroll_layout.addWidget(previous_button)
@@ -48,7 +56,21 @@ class App(QWidget):
         self.show()
  
     def get_new_card(self, card_data, local_index, index):
-        return Card(card_data, self.actual_card_holder, local_index, index)
+        card = Card(card_data, self.actual_card_holder, local_index, index)
+        #card.set_border_color(QColor(Qt.blue))
+        #card.set_background_color(QColor(Qt.green))
+        #card.set_border_radius( 15 )
+        #card.set_border_width(8)
+        
+        panel = card.get_panel()
+        layout = panel.get_layout()
+        
+        # Construct the Card
+        label=QLabel(card_data + "\n\n\n\n\n\n\n\n\n\nHello")
+        layout.addWidget(label)
+        layout.addWidget(QPushButton("hello"))
+        
+        return card
 
  
  
@@ -56,19 +78,22 @@ class App(QWidget):
  
  
  
-MAX_OVERLAPPED_CARDS = 4
+
  
 # =========================
 #
 # Card Holder
 #
 # =========================
-class CardHolder( QLabel ):
+class CardHolder( QWidget ):
     
     resized = QtCore.pyqtSignal(int,int)
     moved_to_front = QtCore.pyqtSignal(int)
-    
-    MARGIN = 20    
+
+    DEFAULT_MAX_OVERLAPPED_CARDS = 4    
+    DEFAULT_BORDER_WIDTH = 5
+    DEFAULT_BACKGROUND_COLOR = QColor(Qt.red)
+    DEFAULT_BORDER_RADIUS = 10
     
     def __init__(self, parent, recent_card_structure, title_hierarchy, get_new_card):
         super().__init__()
@@ -78,47 +103,66 @@ class CardHolder( QLabel ):
         self.title_hierarchy = title_hierarchy
         self.recent_card_structure = recent_card_structure
         
-        self.cards = []
-        self.card_list = []
-        #self.pool_card_list = cycle(self,card_list)
+        self.shown_card_list = []
+        self.card_descriptor_list = []
 
-        # -------------
-        #
-        # Main Panel
-        #
-        # ------------
+        self.set_max_overlapped_cards(CardHolder.DEFAULT_MAX_OVERLAPPED_CARDS, False)        
+        self.set_border_width(CardHolder.DEFAULT_BORDER_WIDTH, False)
+        self.set_border_radius(CardHolder.DEFAULT_BORDER_RADIUS, False)
+        self.set_background_color(CardHolder.DEFAULT_BACKGROUND_COLOR, False)
+        
         self.self_layout = QVBoxLayout(self)
         self.setLayout(self.self_layout)
-        self.setStyleSheet('background: ' + "#756789")  
 
-        self.fill_up_card_holder()
-        
-        # start index
         self.actual_card_index = 0
+        self.show()
 
-    def show(self):
-        self.select_actual_card()
+    def refresh(self, filtered_card_list): 
+        self.fill_up_card_descriptor_list(filtered_card_list)
+        self.select_actual_card()        
+
+    def set_border_width(self, width, update=True):
+        self.border_width = width
+        if update:
+            self.update()
         
-   
+    def get_border_width(self):
+        return self.border_width
+
+    def set_background_color(self, color, update=True):
+        self.background_color = color
+        ## without this line it wont paint the background, but the children get the background color info
+        ## with this line, the rounded corners will be ruined
+        #self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        #self.setStyleSheet('background-color: ' + self.background_color.name())
+        if update:
+            self.update()
+        
+    def set_max_overlapped_cards(self, number, update=True):
+        self.max_overlapped_cards = number
+        if update:
+            self.select_index(self.actual_card_index)
+        
+    def set_border_radius(self, radius, update=True):
+        self.border_radius = radius
+        if update:
+            self.update()
+        
+    def get_max_overlapped_cards(self):
+        return self.max_overlapped_cards
+  
     def resizeEvent(self, event):
         self.resized.emit(event.size().width(),event.size().height())
         return super(CardHolder, self).resizeEvent(event)
      
-    def fill_up_card_holder(self, recent_card_structure = []):
-
-        self.card_list.append("Elso")
-        self.card_list.append("Masodik")
-        self.card_list.append("Harmadik")
-        self.card_list.append("Negyedik")
-        self.card_list.append("Otodik")
-        self.card_list.append("hatodik")
-        self.card_list.append("hetedik")
-        self.card_list.append("Nyolcadik")
-        self.card_list.append("Kilencedik")
-        self.card_list.append("Tizedik")
+    def fill_up_card_descriptor_list(self, filtered_card_list = []):
+        
+        self.card_descriptor_list = []
+        for c in filtered_card_list:
+            self.card_descriptor_list.append(c)
  
     def remove_cards(self):
-        for card in self.cards:
+        for card in self.shown_card_list:
             card.setParent(None)
             card = None
 
@@ -137,20 +181,87 @@ class CardHolder( QLabel ):
         self.actual_card_index = index_corr
         self.remove_cards()
         
-        for i in range( index_corr + MAX_OVERLAPPED_CARDS, index_corr - 1, -1):
+        for i in range( index_corr + self.max_overlapped_cards, index_corr - 1, -1):
             i_corr = self.index_correction(i)
             
-            if( i_corr < len(self.card_list)):
+            if( i_corr < len(self.card_descriptor_list)):
 
-                #card = Card(self.card_list[i_corr], self, i-index_corr, i_corr )
-                card = self.get_new_card(self.card_list[i_corr], i-index_corr, i_corr )
+                local_index = i-index_corr
+                card = self.get_new_card(self.card_descriptor_list[i_corr], local_index, i_corr )                                
+                card.place(local_index)
                 
-                self.cards.append(card)
+                self.shown_card_list.append(card)
 
     def index_correction(self, index):
-        return (len(self.card_list) - abs(index) if index < 0 else index) % len(self.card_list)
+        return (len(self.card_descriptor_list) - abs(index) if index < 0 else index) % len(self.card_descriptor_list)
+
+    def paintEvent(self, event):
+        s = self.size()
+        qp = QPainter()
+        qp.begin(self)
+        qp.setRenderHint(QPainter.Antialiasing, True)
+        qp.setBrush( self.background_color )
+
+        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
+        qp.end()  
 
 
+# ==================
+#
+# Panel
+#
+# ==================
+class Panel(QWidget):
+    DEFAULT_BORDER_WIDTH = 5
+    DEFAULT_BACKGROUND_COLOR = QColor(Qt.lightGray)
+    
+    def __init__(self):
+        super().__init__()
+        
+        self.self_layout = QVBoxLayout()
+        self.self_layout.setSpacing(1)
+        self.setLayout(self.self_layout)
+
+        self.set_background_color(Panel.DEFAULT_BACKGROUND_COLOR, False)        
+        self.set_border_width(Panel.DEFAULT_BORDER_WIDTH, False)
+        #self.set_border_radius(border_radius, False)
+
+
+    def get_layout(self):
+        return self.self_layout
+    
+    def set_border_radius(self, radius, update=True):
+        self.border_radius = radius
+        if update:
+            self.update()
+        
+    def set_border_width(self, width, update=True):
+        self.border_width = width
+        self.self_layout.setContentsMargins( self.border_width, self.border_width, self.border_width, self.border_width )
+        if update:
+            self.update()
+
+    def set_background_color(self, color, update=True):
+        self.background_color = color
+        
+        ## without this line it wont paint the background, but the children get the background color info
+        ## with this line, the rounded corners will be ruined
+        #self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        self.setStyleSheet('background-color: ' + self.background_color.name())
+        
+        if update:            
+            self.update()
+    
+    def paintEvent(self, event):
+        s = self.size()
+        qp = QPainter()
+        qp.begin(self)
+        qp.setRenderHint(QPainter.Antialiasing, True)
+        qp.setBrush( self.background_color )
+
+        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
+        qp.end()    
+    
 
 # ==================
 #
@@ -159,8 +270,10 @@ class CardHolder( QLabel ):
 # ==================
 class Card(QWidget):
     
-    MARGIN = 4
-    RATE_OF_WIDTH_DECLINE = 10
+    DEFAULT_RATE_OF_WIDTH_DECLINE = 10
+    DEFAULT_BORDER_WIDTH = 2
+    DEFAULT_BORDER_RADIUS = 10    
+    DEFAULT_BORDER_COLOR = QColor(Qt.green)
     
     def __init__(self, card_data, parent, local_index, index):
         super().__init__(parent)
@@ -170,37 +283,90 @@ class Card(QWidget):
         self.local_index = local_index
         self.parent = parent
         self.actual_position = 0
+
+        
         self.self_layout = QVBoxLayout(self)
         self.setLayout(self.self_layout)
-        self.self_layout.setContentsMargins(Card.MARGIN, Card.MARGIN, Card.MARGIN, Card.MARGIN)  
-        self.self_layout.setSpacing(5)
-        self.setStyleSheet('background: ' + "#ccaaaa")   
+        #self.self_layout.setContentsMargins(self.border_width,self.border_width,self.border_width,self.border_width)
+        self.self_layout.setSpacing(0)
         
-        self.borderRadius = 10
+        ## without this line it wont paint the background, but the children get the background color info
+        ## with this line, the rounded corners will be ruined
+        #self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        #self.setStyleSheet('background-color: ' + "yellow")  
+
+
+
+
+
+        # Panel where the content could be placed
+        self.panel = Panel()
+        self.panel_layout = self.panel.get_layout()
+        self.self_layout.addWidget(self.panel)
         
-        label=QLabel(card_data + "\n\n\n\n\n\n\n\n\n\nHello")
-        self.self_layout.addWidget(label)
+        self.border_radius = Card.DEFAULT_BORDER_RADIUS
+        self.set_border_width(Card.DEFAULT_BORDER_WIDTH, False)
+        self.set_border_radius(Card.DEFAULT_BORDER_RADIUS, False)        
+        self.set_rate_of_width_decline(Card.DEFAULT_RATE_OF_WIDTH_DECLINE, False)
+        self.set_border_color(Card.DEFAULT_BORDER_COLOR, False)
         
-        # Place the Card to the right position
-        self.place(local_index)
+        
+        
+        
+        
         
         # Connect the widget to the Container's Resize-Event
         self.parent.resized.connect(self.resized)
         
-        # Show the Card in the right position
-        self.show()
-        
         #self.setDragEnabled(True)
-        self.setAcceptDrops(True)
+#        self.setAcceptDrops(True)
+ 
+ 
+    def set_background_color(self, color):
+        #self.background_color = color
+        #self.setStyleSheet('background-color: ' + self.background_color.name())
+        #self.update()
+        self.panel.set_background_color(color)
+
+    def set_border_color(self,color, update=True):
+        self.border_color = color
+        if update:
+            self.update()      
+
+    def set_border_width(self, width, update=True):
+        self.border_width = width
+        self.self_layout.setContentsMargins(self.border_width,self.border_width,self.border_width,self.border_width)
+        self.panel.set_border_radius(self.border_radius - self.border_width, update)
+        if update:
+            self.update()
+
+    def set_border_radius(self, radius, update=True):
+        self.border_radius = radius
+        self.panel.set_border_radius(self.border_radius - self.border_width, update)
+        if update:
+            self.update()
+
+    def set_rate_of_width_decline(self, rate, update=True):
+        self.rate_of_width_decline = rate
+    
+    
+    def get_panel(self):
+        return self.panel
+ 
+    # -----------------------------------------------------
+    # Overwrite the rate of the width's decline if you will
+    # -----------------------------------------------------
+    def get_rate_of_width_decline(self):
+        return self.RATE_OF_WIDTH_DECLINE
  
     def paintEvent(self, event):
         s = self.size()
         qp = QPainter()
         qp.begin(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
-        qp.setBrush( QColor( "#00cc00" ))
+        qp.setBrush( self.border_color)
 
-        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
+        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         qp.end()
  
     def mouseMoveEvent(self, event):
@@ -242,7 +408,7 @@ class Card(QWidget):
     # 'The farther the card is the narrower it is'
     # ---------------------------------------------
     def get_x_offset(self):
-        return  self.local_index * self.RATE_OF_WIDTH_DECLINE
+        return  self.local_index * self.rate_of_width_decline
  
     # ----------------------------------------
     #
@@ -255,7 +421,7 @@ class Card(QWidget):
     # ----------------------------------------
     def resized(self, width, height):
         # The farther the card is the narrower it is
-        standard_width = width - 2*CardHolder.MARGIN - 2*self.get_x_offset()
+        standard_width = width - 2*self.parent.get_border_width() - 2*self.get_x_offset()
         self.resize( standard_width, self.sizeHint().height() )
 
     # ---------------------------------------
@@ -270,14 +436,20 @@ class Card(QWidget):
         
         # Need to resize and reposition the Car as 'The farther the card is the narrower it is'
         self.resized(self.parent.width(), self.parent.height())
-        #y_position = CardHolder.MARGIN + ( MAX_OVERLAPPED_CARDS - local_index ) * 30
-        y_position = CardHolder.MARGIN + ( MAX_OVERLAPPED_CARDS - local_index ) * ( MAX_OVERLAPPED_CARDS - local_index ) * 6
-        self.move( CardHolder.MARGIN + self.get_x_offset(), y_position )
+        y_position = self.parent.get_border_width() + ( self.parent.get_max_overlapped_cards() - local_index ) * ( self.parent.get_max_overlapped_cards() - local_index ) * 6
+        self.move( self.parent.get_border_width() + self.get_x_offset(), y_position )
+        
+        self.show()
 
-class MyCard(Card):
-   def __init__(self, card_daa, parent, local_index, index):
-        super().__init__(card_data, parent, local_index, index)
-    
+
+
+
+
+
+
+
+
+        
 
   
 if __name__ == '__main__':
