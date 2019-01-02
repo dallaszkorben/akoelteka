@@ -38,6 +38,7 @@ from PyQt5.QtCore import QVariant
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QMimeData
+from PyQt5.QtCore import QPoint
 
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict
