@@ -48,15 +48,12 @@ class App(QWidget):
         cdl.append("10")
         self.actual_card_holder.refresh(cdl)
         
-        self.animateRoll = AnimateRoll(self.actual_card_holder)
         
- 
         next_button = QPushButton("next",self)
-        #next_button.clicked.connect(self.actual_card_holder.select_next_card)
-        next_button.clicked.connect(self.animateRoll.start)
+        next_button.clicked.connect(self.actual_card_holder.animated_move_to_next)
         
         previous_button = QPushButton("prev",self)
-        previous_button.clicked.connect(self.actual_card_holder.select_previous_card)
+        previous_button.clicked.connect(self.actual_card_holder.animated_move_to_previous)
         
         self.scroll_layout.addStretch(1)
         self.scroll_layout.addWidget(previous_button)
@@ -81,26 +78,32 @@ class App(QWidget):
         
         return card
 
-import time
+import time 
+ 
+ 
  
 class AnimateRoll(QThread):
+    positionChanged = pyqtSignal(int)
 
-    def __init__(self, card_holder):
+    def __init__(self, loop, value, sleep=0.05):
         QThread.__init__(self)
-        self.card_holder = card_holder
+        self.loop = loop
+        self.value = value
+        self.sleep = sleep
+            
+        print('animation: ', loop, value, sleep)
 
     def __del__(self):
         self.wait()
-
     
     def run(self): 
-        print('enindult')
-        for i in range(50):
-            time.sleep(0.005)
-            self.card_holder.rolling_forward(i/50)
- 
- 
- 
+        for i in range(self.loop):
+            time.sleep(self.sleep)
+            #self.sleep(2)
+            self.positionChanged.emit(self.value)
+            
+        print('finished')
+
 
  
 # =========================
@@ -138,6 +141,8 @@ class CardHolder( QWidget ):
         self.setLayout(self.self_layout)
 
         self.actual_card_index = 0
+        self.rate_of_movement =0
+        
         self.show()
 
     def refresh(self, filtered_card_list): 
@@ -184,10 +189,78 @@ class CardHolder( QWidget ):
         for c in filtered_card_list:
             self.card_descriptor_list.append(c)
  
-    def remove_cards(self):
+    def remove_all_cards(self):
         for card in self.shown_card_list:
             card.setParent(None)
             card = None
+
+    def remove_card(self, card):
+        card.setParent(None)
+        card = None
+
+    def get_rate_of_movement(self):
+        return self.rate_of_movement
+    
+
+    def animated_move_to_next(self):
+        rate = self.get_rate_of_movement()
+        
+        if rate > 0:
+            loop = 10 - rate
+        elif rate < 0:
+            loop = -rate
+        else:
+            loop = 10
+            
+        self.animate = AnimateRoll(int(loop), 1, 0.05)
+        self.animate.positionChanged.connect(self.rolling)
+        self.animate.start()
+        
+    def animated_move_to_previous(self):
+        rate = self.get_rate_of_movement()
+        
+        if rate > 0:
+            loop = rate
+        elif rate < 0:
+            loop = 10+rate
+        else:
+            loop = 10
+            
+        self.animate = AnimateRoll(int(loop), -1, 0.05)
+        self.animate.positionChanged.connect(self.rolling)
+        self.animate.start()        
+        
+    
+    def animated_move_to_closest_descreet_position(self):
+        rate = self.get_rate_of_movement()
+        
+        if rate != 0:
+            if rate > 0:
+                if rate >= 6:
+                    value = 1
+                    loop = 10 - rate                    
+                else:
+                    value = -1
+                    loop = rate
+        
+            elif rate < 0:
+                if rate <= -6:
+                    value = -1
+                    loop = 10 + rate
+                else:
+                    value = 1
+                    loop = -rate
+            
+            self.animate = AnimateRoll(int(loop), value, 0.01)
+            self.animate.positionChanged.connect(self.rolling)
+            self.animate.start()
+            
+        
+        
+
+
+
+
 
     def select_next_card(self):
         self.select_index(self.actual_card_index + 1)
@@ -202,7 +275,7 @@ class CardHolder( QWidget ):
         index_corr = self.index_correction(index)
         
         self.actual_card_index = index_corr
-        self.remove_cards()
+        self.remove_all_cards()
         position = None
         self.shown_card_list = [None for i in range(index_corr + min(self.max_overlapped_cards, len(self.card_descriptor_list)-1), index_corr - 1, -1) ]
         
@@ -221,6 +294,15 @@ class CardHolder( QWidget ):
         self.setMinimumHeight(position[0].y() + position[1].y() + self.border_width )
 
 
+
+
+
+
+
+
+
+
+
     # ------------------------------
     #
     # ROLLING
@@ -231,106 +313,113 @@ class CardHolder( QWidget ):
             self.rate_of_movement = 0
 
         self.rate_of_movement = self.rate_of_movement + delta_rate
-        
-        
-        if self.rate_of_movement >= 0:
-            self.rolling_forward(self.rate_of_movement / 10)
-        else:
-            self.rolling_back(self.rate_of_movement / 10)
-        
-    # ---------------
-    #
-    # ROLLING FORWARD
-    #
-    # ---------------
-    def rolling_forward(self,rate):
 
-#        if self.shown_card_list[0].local_index == -1:
-#            print("-1 torolve")
-
-
-#        for i, card in enumerate(self.shown_card_list):
-#            card.local_index = i
-#            virtual_index = card.local_index - rate
-#            card.place(virtual_index, not i)    
+#        print(self.rate_of_movement)
         
-        
-        
-        # 1 card position was rolled
-        if rate >= 1.0 or self.shown_card_list[0].local_index == -1:
-            
-            
-            self.rate_of_movement = 0
-            
-            # remove the first card from the list and from CardHolder
-            card_to_remove = self.shown_card_list.pop(0)
-            card_to_remove.setParent(None)
-            
-            # add a new card to the end
-            last_card = self.shown_card_list[len(self.shown_card_list)-1]                
-            last_card_index = self.index_correction(last_card.index + 1)
-            card = self.get_new_card(self.card_descriptor_list[last_card_index], 0, last_card_index ) 
-            self.shown_card_list.append(card)        
-        
-            # re-index the cards + show them in the right order not to overlap the last
-            for card in self.shown_card_list[::-1]:
-                card.local_index = self.shown_card_list.index(card)
-                
-                card.place(card.local_index)
-                card.setParent(None)
-                card.setParent(self)
-                card.show()        
-
-        else:
-            for i, card in enumerate(self.shown_card_list):
-                card.local_index = i
-                virtual_index = card.local_index - rate
-                card.place(virtual_index, not i)    
-
-    # ---------------
-    #
-    # ROLLING BACK
-    #
-    # ---------------
-    def rolling_back(self,rate):
-
-        # If there was no Card added to the -1 position
-        if self.shown_card_list[0].local_index >= 0:
-
-            # remove the last card from the list and from CardHolder
-            card_to_remove = self.shown_card_list.pop(len(self.shown_card_list) - 1)
-            card_to_remove.setParent(None)
+        # Did not start to roll
+        if len(self.shown_card_list) <= self.get_max_overlapped_cards() + 1:
             
             # add new card to the beginning
             first_card = self.shown_card_list[0]                
             first_card_index = self.index_correction(first_card.index - 1)
             card = self.get_new_card(self.card_descriptor_list[first_card_index], -1, first_card_index ) 
             self.shown_card_list.insert(0, card)
+            
+            # add a new card to the end
+            last_card = self.shown_card_list[len(self.shown_card_list)-1]                
+            last_card_index = self.index_correction(last_card.index + 1)
+            card = self.get_new_card(self.card_descriptor_list[last_card_index], self.get_max_overlapped_cards() + 1, last_card_index ) 
+            self.shown_card_list.append(card)
+            
+            # Re-print to avoid the wrong-overlapping
+            for card in self.shown_card_list[::-1]:
+                card.setParent(None)
+                card.setParent(self)
+                card.show()        
 
-#        print( [c.local_index for c in self.shown_card_list])
+#        print( "after add: ", [(c.local_index, c.card_data) for c in self.shown_card_list])
+            
+        # adjust the 
+        rate = self.rate_of_movement / 10
+        if self.rate_of_movement >= 0:
+            self.rolling_adjust_forward(rate)
+        else:
+            self.rolling_adjust_backward(rate)
 
+        # show the cards in the right position
+        rate = self.rate_of_movement / 10
         for i, card in enumerate(self.shown_card_list):
-#            print(card.local_index, rate)
-
             virtual_index = card.local_index - rate
-            card.place(virtual_index, not i)        
+            card.place(virtual_index, True)
+        print( [(c.local_index, c.card_data) for c in self.shown_card_list])
+#        print()
+
+    def rolling_adjust_forward(self,rate):
         
-        # 1 card position was rolled
-        if rate <= -1.0:
+        if rate >= 1.0:
             self.rate_of_movement = 0
             
-            # re-index the cards + show them in the right order not to overlap the last
-            for card in self.shown_card_list[::-1]:
-                card.local_index = self.shown_card_list.index(card)
+            # remove the first 2 cards from the list and from CardHolder
+            for i in range(2):
+                card_to_remove = self.shown_card_list.pop(0)
+                card_to_remove.setParent(None)
+
+            # re-index
+            for i, card in enumerate(self.shown_card_list):
+                card.local_index = i
+                
+        elif rate == 0:
+            # remove the first card from the list and from CardHolder
+            card_to_remove = self.shown_card_list.pop(0)
+            card_to_remove.setParent(None)
+            
+            # remove the last card from the list and from CardHolder
+            card_to_remove = self.shown_card_list.pop(len(self.shown_card_list) - 1)
+            card_to_remove.setParent(None)
+            
+
+    def rolling_adjust_backward(self,rate):
+        
+        if rate <= -1.0:
+            self.rate_of_movement = 0
+        
+            # remove the 2 last cards from the list and from CardHolder
+            for i in range(2):
+                card_to_remove = self.shown_card_list.pop(len(self.shown_card_list) - 1)
+                card_to_remove.setParent(None)
+#            print( "after remove:", [(c.local_index, c.card_data) for c in self.shown_card_list])
+            
+            # re-index
+            for i, card in enumerate(self.shown_card_list):
+                card.local_index = i
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         
-    def enterEvent(self, event):
-        self.rate_of_movement = 0
+#    def enterEvent(self, event):
+#        self.rate_of_movement = 0
 
     # Mouse Hover out
-    def leaveEvent(self, event):
-        self.rate_of_movement = 0
+#    def leaveEvent(self, event):
+#        self.rate_of_movement = 0
 
     def index_correction(self, index):
         return (len(self.card_descriptor_list) - abs(index) if index < 0 else index) % len(self.card_descriptor_list)
