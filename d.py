@@ -1,5 +1,6 @@
 import sys
 import math
+import time 
 from akoteka.gui.pyqt_import import *
 from itertools import cycle
 
@@ -41,20 +42,22 @@ class App(QWidget):
         cdl.append("Harmadik")
         cdl.append("Negyedik")
         cdl.append("Otodik")
-        cdl.append("6")
-        cdl.append("7")
-        cdl.append("8")
-        cdl.append("9")
-        cdl.append("10")
+        cdl.append("Hatodik")
+        cdl.append("Hetedik")
+        cdl.append("Nyolcadik")
+        cdl.append("Kilencedik")
+        cdl.append("Tizedik")
         self.actual_card_holder.refresh(cdl)
-        
+        self.actual_card_holder.setFocus()
         
         next_button = QPushButton("next",self)
-        next_button.clicked.connect(self.actual_card_holder.animated_move_to_next)
+        next_button.clicked.connect(self.actual_card_holder.button_animated_move_to_next)
+        next_button.setFocusPolicy(Qt.NoFocus)
         
         previous_button = QPushButton("prev",self)
-        previous_button.clicked.connect(self.actual_card_holder.animated_move_to_previous)
-        
+        previous_button.clicked.connect(self.actual_card_holder.button_animated_move_to_previous)
+        previous_button.setFocusPolicy(Qt.NoFocus)
+                
         self.scroll_layout.addStretch(1)
         self.scroll_layout.addWidget(previous_button)
         self.scroll_layout.addWidget(next_button)
@@ -63,8 +66,9 @@ class App(QWidget):
  
     def get_new_card(self, card_data, local_index, index):
         card = Card(card_data, self.actual_card_holder, local_index, index)
-        #card.set_border_color(QColor(Qt.blue))
-        #card.set_background_color(QColor(Qt.green))
+        
+        card.set_border_selected_color(QColor(Qt.blue))
+        #card.set_background_color(QColor(Qt.white))
         #card.set_border_radius( 15 )
         #card.set_border_width(8)
         
@@ -74,35 +78,91 @@ class App(QWidget):
         # Construct the Card
         label=QLabel(card_data + "\n\n\n\n\n\n\n\n\n\nHello")
         layout.addWidget(label)
-        layout.addWidget(QPushButton("hello"))
+        #layout.addWidget(QPushButton("hello"))
         
         return card
 
-import time 
  
  
- 
-class AnimateRoll(QThread):
+# =========================
+#
+# Rolling Animation
+#
+# ========================= 
+class AnimateRolling(QThread):
+    
     positionChanged = pyqtSignal(int)
-
-    def __init__(self, loop, value, sleep=0.05):
+    __instance = None
+    __run = False
+    
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance    
+    
+    @classmethod
+    def get_instance(cls, loop, value, sleep=0.01):
+        if not cls.__run:
+            inst = cls.__new__(cls)
+            cls.__init__(cls.__instance, loop, value, sleep) 
+            return inst
+        else:
+            return None
+    
+    def __init__(self, loop, value, sleep):
         QThread.__init__(self)
         self.loop = loop
         self.value = value
         self.sleep = sleep
             
-        print('animation: ', loop, value, sleep)
-
     def __del__(self):
         self.wait()
     
     def run(self): 
+        
+        # blocks to call again
+        AnimateRolling.__run = True
         for i in range(self.loop):
             time.sleep(self.sleep)
-            #self.sleep(2)
             self.positionChanged.emit(self.value)
+        
+        # release blocking
+        AnimateRolling.__run = False
+
+
+# =========================
+#
+# CountDOwn Timer
+#
+# =========================
+class CountDown(QThread):
+    
+    timeOver = pyqtSignal()
+    __timer = 0    
+    
+    def __init__(self):
+        QThread.__init__(self)
             
-        print('finished')
+    def __del__(self):
+        self.wait()
+    
+    def run(self): 
+
+        # Ha meg mukodik
+        if CountDown.__timer > 0:
+            CountDown.__timer = 10
+
+        # Ha mar nem mukodik
+        else:
+            CountDown.__timer = 10
+        
+            while CountDown.__timer > 0:
+                time.sleep(0.04)
+                CountDown.__timer = CountDown.__timer - 1
+                #print(CountDown.__timer)
+               
+            #print("most emital")
+            self.timeOver.emit()
 
 
  
@@ -120,6 +180,9 @@ class CardHolder( QWidget ):
     DEFAULT_BORDER_WIDTH = 5
     DEFAULT_BACKGROUND_COLOR = QColor(Qt.red)
     DEFAULT_BORDER_RADIUS = 10
+    
+    CARD_TRESHOLD = 6
+    MAX_CARD_ROLLING_RATE = 10
     
     def __init__(self, parent, recent_card_structure, title_hierarchy, get_new_card):
         super().__init__()
@@ -141,7 +204,11 @@ class CardHolder( QWidget ):
         self.setLayout(self.self_layout)
 
         self.actual_card_index = 0
-        self.rate_of_movement =0
+        self.rate_of_movement = 0
+        self.delta_rate = 0
+        
+        self.countDown = CountDown()
+        self.countDown.timeOver.connect(self.animated_move_to_closest_descreet_position)
         
         self.show()
 
@@ -201,59 +268,9 @@ class CardHolder( QWidget ):
     def get_rate_of_movement(self):
         return self.rate_of_movement
     
+    def get_delta_rate(self):
+        return self.delta_rate
 
-    def animated_move_to_next(self):
-        rate = self.get_rate_of_movement()
-        
-        if rate > 0:
-            loop = 10 - rate
-        elif rate < 0:
-            loop = -rate
-        else:
-            loop = 10
-            
-        self.animate = AnimateRoll(int(loop), 1, 0.05)
-        self.animate.positionChanged.connect(self.rolling)
-        self.animate.start()
-        
-    def animated_move_to_previous(self):
-        rate = self.get_rate_of_movement()
-        
-        if rate > 0:
-            loop = rate
-        elif rate < 0:
-            loop = 10+rate
-        else:
-            loop = 10
-            
-        self.animate = AnimateRoll(int(loop), -1, 0.05)
-        self.animate.positionChanged.connect(self.rolling)
-        self.animate.start()        
-        
-    
-    def animated_move_to_closest_descreet_position(self):
-        rate = self.get_rate_of_movement()
-        
-        if rate != 0:
-            if rate > 0:
-                if rate >= 6:
-                    value = 1
-                    loop = 10 - rate                    
-                else:
-                    value = -1
-                    loop = rate
-        
-            elif rate < 0:
-                if rate <= -6:
-                    value = -1
-                    loop = 10 + rate
-                else:
-                    value = 1
-                    loop = -rate
-            
-            self.animate = AnimateRoll(int(loop), value, 0.01)
-            self.animate.positionChanged.connect(self.rolling)
-            self.animate.start()
             
         
         
@@ -292,32 +309,156 @@ class CardHolder( QWidget ):
 
         # Control the Height of the CardHolder
         self.setMinimumHeight(position[0].y() + position[1].y() + self.border_width )
+        
+        self.rolling(0)
 
 
 
 
+    # for some reason the 2nd parameter is False from connect
+    # that is why I cant connect it to directly
+    def button_animated_move_to_next(self):
+        self.animated_move_to_next()
+
+    def button_animated_move_to_previous(self):
+        self.animated_move_to_previous()
 
 
+    # ---------------------------------
+    #
+    # Animated shows the next card
+    #
+    # ---------------------------------
+    def animated_move_to_next(self, sleep=0.01):
+        rate = self.get_rate_of_movement()
+        
+        if rate > 0:
+            loop = self.MAX_CARD_ROLLING_RATE - rate
+        elif rate < 0:
+            loop = -rate
+        else:
+            loop = self.MAX_CARD_ROLLING_RATE
+            
+        self.animate = AnimateRolling.get_instance(int(loop), 1, sleep)
+        if self.animate:
+            self.animate.positionChanged.connect(self.rolling)
+            self.animate.start()
+       
+    # ---------------------------------
+    #
+    # Animated shows the previous card
+    #
+    # ---------------------------------
+    def animated_move_to_previous(self, sleep=0.01):
+        rate = self.get_rate_of_movement()
+        
+        if rate > 0:
+            loop = rate
+        elif rate < 0:
+            loop = self.MAX_CARD_ROLLING_RATE + rate
+        else:
+            loop = self.MAX_CARD_ROLLING_RATE
+            
+        self.animate = AnimateRolling.get_instance(int(loop), -1, sleep)
+        if self.animate:
+            self.animate.positionChanged.connect(self.rolling)
+            self.animate.start()
+    
+    # ------------------------------------------------
+    #
+    # Animated moves to the closest descreet position
+    #
+    # ------------------------------------------------
+    def animated_move_to_closest_descreet_position(self):
+        rate = self.get_rate_of_movement()
+        delta_rate = self.get_delta_rate()
+        
+        if rate != 0:
+            
+            if rate > 0:
+                
+                if delta_rate < 0:
+                    value = -1
+                    loop = rate
+                else:
+                    value = 1
+                    loop = self.MAX_CARD_ROLLING_RATE - rate                    
+                
+                #if rate >= self.CARD_TRESHOLD:
+                #    value = 1
+                #    loop = self.MAX_CARD_ROLLING_RATE - rate                    
+                #else:
+                #    value = -1
+                #    loop = rate
+        
+            elif rate < 0:
+                
+                if delta_rate < 0:
+                    value = -1
+                    loop = self.MAX_CARD_ROLLING_RATE + rate
+                else:
+                    value = 1
+                    loop = -rate
+                
+                #if rate <= -self.CARD_TRESHOLD:
+                #    value = -1
+                #    loop = self.MAX_CARD_ROLLING_RATE + rate
+                #else:
+                #    value = 1
+                #    loop = -rate
+                
+            self.animate = AnimateRolling.get_instance(int(loop), value, 0.02)
+            if self.animate:
+                self.animate.positionChanged.connect(self.rolling)
+                self.animate.start()
 
 
+    def animated_move_to(self, order, sleep=0.01):
+        self.animate = AnimateRolling.get_instance(order * self.MAX_CARD_ROLLING_RATE, 1, sleep)
+        if self.animate:
+            self.animate.positionChanged.connect(self.rolling)
+            self.animate.start()
+        
+        
+        
 
 
+    def rolling_wheel(self, delta_rate):
+        self.rolling(delta_rate)
+        
+        if self.rate_of_movement != 0:
+            self.countDown.start()
 
-    # ------------------------------
+    # --------------------------------------------------------------------
     #
     # ROLLING
     #
-    # ------------------------------
+    # Rolls the cards according to the self.rate_of_movement + delta_rate
+    #
+    # delta_rate:   In normal case it is +1 or -1
+    #               Adding this value to the self.rate_of_movement, it
+    #               shows that how far the cards moved negativ (up) or
+    #               positive (down) direction compared to the default
+    #               (local_index) value
+    #               -10 means (-100%) it moved to the next position, 
+    #               +10 means (+100%) it moved to the previous position
+    #
+    # -------------------------------------------------------------------
     def rolling(self, delta_rate):
-        if self.rate_of_movement >= 10 or self.rate_of_movement <= -10:
+        
+        self.delta_rate = delta_rate
+        
+        if self.rate_of_movement >= self.MAX_CARD_ROLLING_RATE or self.rate_of_movement <= -self.MAX_CARD_ROLLING_RATE:
             self.rate_of_movement = 0
 
         self.rate_of_movement = self.rate_of_movement + delta_rate
 
-#        print(self.rate_of_movement)
-        
         # Did not start to roll
         if len(self.shown_card_list) <= self.get_max_overlapped_cards() + 1:
+            
+            # indicates that the first card is not the selected anymore
+            card = self.shown_card_list[0]
+            card.set_not_selected()
             
             # add new card to the beginning
             first_card = self.shown_card_list[0]                
@@ -337,22 +478,26 @@ class CardHolder( QWidget ):
                 card.setParent(self)
                 card.show()        
 
-#        print( "after add: ", [(c.local_index, c.card_data) for c in self.shown_card_list])
-            
-        # adjust the 
-        rate = self.rate_of_movement / 10
+        # adjust
+        rate = self.rate_of_movement / self.MAX_CARD_ROLLING_RATE
         if self.rate_of_movement >= 0:
             self.rolling_adjust_forward(rate)
         else:
             self.rolling_adjust_backward(rate)
 
+        # indicates that the first card is the selected            
+        if self.rate_of_movement == 0:
+            card = self.shown_card_list[0]
+            card.set_selected()
+
         # show the cards in the right position
-        rate = self.rate_of_movement / 10
+        rate = self.rate_of_movement / self.MAX_CARD_ROLLING_RATE
         for i, card in enumerate(self.shown_card_list):
             virtual_index = card.local_index - rate
             card.place(virtual_index, True)
-        print( [(c.local_index, c.card_data) for c in self.shown_card_list])
-#        print()
+
+
+#print( [(c.local_index, c.card_data) for c in self.shown_card_list])
 
     def rolling_adjust_forward(self,rate):
         
@@ -377,6 +522,7 @@ class CardHolder( QWidget ):
             card_to_remove = self.shown_card_list.pop(len(self.shown_card_list) - 1)
             card_to_remove.setParent(None)
             
+            
 
     def rolling_adjust_backward(self,rate):
         
@@ -387,13 +533,25 @@ class CardHolder( QWidget ):
             for i in range(2):
                 card_to_remove = self.shown_card_list.pop(len(self.shown_card_list) - 1)
                 card_to_remove.setParent(None)
-#            print( "after remove:", [(c.local_index, c.card_data) for c in self.shown_card_list])
             
             # re-index
             for i, card in enumerate(self.shown_card_list):
                 card.local_index = i
 
-
+    # -----------------------------------------------------------
+    #
+    # INDEX CORRECTION
+    #
+    # if the index > numbers of the cards then it gives back 0
+    #    as the next index
+    # if the index < 0 then it gives back the index of the last
+    #    card as the previous index
+    #
+    # that is how it actually accomplishes an endless loop
+    #
+    # -----------------------------------------------------------
+    def index_correction(self, index):
+        return (len(self.card_descriptor_list) - abs(index) if index < 0 else index) % len(self.card_descriptor_list)
 
 
 
@@ -421,8 +579,6 @@ class CardHolder( QWidget ):
 #    def leaveEvent(self, event):
 #        self.rate_of_movement = 0
 
-    def index_correction(self, index):
-        return (len(self.card_descriptor_list) - abs(index) if index < 0 else index) % len(self.card_descriptor_list)
 
     def paintEvent(self, event):
         s = self.size()
@@ -436,26 +592,29 @@ class CardHolder( QWidget ):
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
-        value = event.angleDelta().y()/8/15
-        self.rolling(value)
-        #if value > 0:
-            #self.select_next_card()            
-        #else:
-            #self.select_previous_card()
+        value = event.angleDelta().y()/8/15   # in normal case it is +1 or -1
+        self.rolling_wheel(value)
   
-  #---
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Up:
+            self.animated_move_to_next(sleep=0.03)
+        elif event.key() == QtCore.Qt.Key_Down:
+            self.animated_move_to_previous(sleep=0.03)
+        event.accept()
   
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.drag_start_position = event.pos()
-            self.card_start_position = self.geometry().topLeft()
+            #self.drag_start_position = event.pos()
+            #self.card_start_position = self.geometry().topLeft()
+            order = sum([i if c.underMouse() else 0 for i, c in enumerate(self.shown_card_list)])
+            self.animated_move_to( order )
 
     def mouseMoveEvent(self, event):
         if not (event.buttons() & Qt.LeftButton):
             return
-        delta_y = self.get_delta_y(event.pos().y())        
+        #delta_y = self.get_delta_y(event.pos().y())        
         
-        self.drag_card(delta_y)        
+        #self.drag_card(delta_y)        
         
 #        #self.move( tl.x(), tl.y() +  (event.pos().y() - self.drag_start_position.y()) )
 
@@ -478,11 +637,16 @@ class CardHolder( QWidget ):
   
   
   
-# ==================
+# ==========================================================
 #
 # Panel
 #
-# ==================
+# This Panel is inside the Card and contains all widget
+# what the user what to show on a Card.
+# This Panel has rounded corner which is calculated by the
+# radius of the Card and the widht of the border.
+#
+# ==========================================================
 class Panel(QWidget):
     DEFAULT_BORDER_WIDTH = 5
     DEFAULT_BACKGROUND_COLOR = QColor(Qt.lightGray)
@@ -540,11 +704,21 @@ class Panel(QWidget):
 #
 # ==================
 class Card(QWidget):
+
+    STATUS_NORMAL = 0
+    STATUS_SELECTED = 1
+    DTATUS_DISABLED = 2
     
     DEFAULT_RATE_OF_WIDTH_DECLINE = 10
     DEFAULT_BORDER_WIDTH = 2
-    DEFAULT_BORDER_RADIUS = 10    
-    DEFAULT_BORDER_COLOR = QColor(Qt.green)
+    DEFAULT_BORDER_RADIUS = 10
+    
+    DEFAULT_BORDER_NORMAL_COLOR = QColor(Qt.green)
+    DEFAULT_BORDER_SELECTED_COLOR = QColor(Qt.red)
+    DEFAULT_BORDER_DISABLED_COLOR = QColor(Qt.lightGray)
+    
+    DEFAULT_STATUS = STATUS_NORMAL
+    
     
     def __init__(self, card_data, card_holder, local_index, index):
         super().__init__(card_holder)
@@ -560,6 +734,10 @@ class Card(QWidget):
         #self.self_layout.setContentsMargins(self.border_width,self.border_width,self.border_width,self.border_width)
         self.self_layout.setSpacing(0)
         
+        self.set_border_normal_color(Card.DEFAULT_BORDER_NORMAL_COLOR)
+        self.set_border_selected_color(Card.DEFAULT_BORDER_SELECTED_COLOR)
+        self.set_border_disabled_color(Card.DEFAULT_BORDER_DISABLED_COLOR)
+        
         ## without this line it wont paint the background, but the children get the background color info
         ## with this line, the rounded corners will be ruined
         #self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
@@ -574,26 +752,66 @@ class Card(QWidget):
         self.set_border_width(Card.DEFAULT_BORDER_WIDTH, False)
         self.set_border_radius(Card.DEFAULT_BORDER_RADIUS, False)        
         self.set_rate_of_width_decline(Card.DEFAULT_RATE_OF_WIDTH_DECLINE, False)
-        self.set_border_color(Card.DEFAULT_BORDER_COLOR, False)
+        
+        self.set_status(Card.STATUS_NORMAL)
         
         # Connect the widget to the Container's Resize-Event
         self.card_holder.resized.connect(self.resized)
         
         self.drag_start_position = None
         #self.setDragEnabled(True)
-#        self.setAcceptDrops(True)
+        #self.setAcceptDrops(True)
  
+    def set_selected(self):
+        self.set_status(Card.STATUS_SELECTED, True)
+        
+    def set_not_selected(self):
+        self.set_status(Card.STATUS_NORMAL, True)
+        
+    def set_status(self, status, update=False):
+        self.status = status
+
+        if status == Card.STATUS_NORMAL:        
+            self.set_border_color(self.get_border_normal_color(), update)
+        elif status == Card.STATUS_SELECTED:
+            self.set_border_color(self.get_border_selected_color(), update)
+        elif status == Card.STATUS_DISABLED:
+            self.set_border_color(self.get_border_disabled_color(), update)
+
+    def refresh_color(self):
+        self.update()
+
+    def set_border_color(self, color, update):
+        self.border_color = color
+        if update:
+            self.update()
+
+    def get_border_normal_color(self):
+        return self.border_normal_color
+    
+    def get_border_selected_color(self):
+        return self.border_selected_color
+    
+    def get_border_disabled_color(self):
+        return self.border_disabled_color
+    
+    def set_border_normal_color(self, color):
+        self.border_normal_color = color
+        
+    def set_border_selected_color(self, color):
+        self.border_selected_color = color
+        
+    def set_border_disabled_color(self, color):
+        self.border_disabled_color = color
+        
+        
+        
  
     def set_background_color(self, color):
         #self.background_color = color
         #self.setStyleSheet('background-color: ' + self.background_color.name())
         #self.update()
         self.panel.set_background_color(color)
-
-    def set_border_color(self,color, update=True):
-        self.border_color = color
-        if update:
-            self.update()      
 
     def set_border_width(self, width, update=True):
         self.border_width = width
@@ -620,7 +838,7 @@ class Card(QWidget):
         qp = QPainter()
         qp.begin(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
-        qp.setBrush( self.border_color)
+        qp.setBrush(self.border_color)
 
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         qp.end()
