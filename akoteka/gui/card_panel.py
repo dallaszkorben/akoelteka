@@ -428,6 +428,11 @@ class CardImage(QWidget):
         return self.sub_cards      
      
 
+    # --------------------
+    #
+    # Mouse Press on Image
+    #
+    # --------------------
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton and self.panel.card.get_status() == Card.STATUS_SELECTED:
             self.mouse_pressed_for_click = True

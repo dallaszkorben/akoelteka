@@ -873,6 +873,9 @@ class Card(QWidget):
     def get_status(self):
         return self.status
 
+    def is_selected(self):
+        return True if self.status == Card.STATUS_SELECTED else False
+
     def refresh_color(self):
         self.update()
 

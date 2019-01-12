@@ -28,7 +28,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QCursor
 from PyQt5.QtGui import QDrag
 from PyQt5.QtGui import QPen
-
+from PyQt5.QtGui import QMouseEvent
 
 from PyQt5 import QtCore
 
@@ -41,6 +41,8 @@ from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QMimeData
 from PyQt5.QtCore import QPoint
+from PyQt5.QtCore import QEvent
+
 
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict

@@ -270,11 +270,37 @@ class GuiAkoTeka(QWidget):
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
       
-  
-  
-  
-    def akeyPressEvent(self, event):
-        print("KeyPressEvent", "GuiAkoTeka")
+    # ----------------------------
+    #
+    # Key Press Event: Enter/Space
+    #
+    # ----------------------------
+    def keyPressEvent(self, event):
+
+        #
+        # Enter / Return / Space
+        #
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter or event.key() == Qt.Key_Space:
+
+            # Simulate a Mouse Press / Release Event on the Image
+            if self.actual_card_holder.shown_card_list and len(self.actual_card_holder.shown_card_list) > 0:
+                card=self.actual_card_holder.shown_card_list[0]
+                if card.is_selected():
+                    
+                    event_press = QMouseEvent(QEvent.MouseButtonPress, QPoint(10,10), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+                    event_release = QMouseEvent(QEvent.MouseButtonRelease, QPoint(10,10), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+
+                    layout=card.get_panel().get_layout()                    
+                    card_panel = layout.itemAt(0).widget()
+                    card_panel.card_image.mousePressEvent(event_press)
+                    card_panel.card_image.mouseReleaseEvent(event_release)            
+
+        #
+        # Escape
+        #
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter or event.key() == Qt.Key_Space:
+
+
         event.ignore()
 
   
@@ -633,7 +659,7 @@ class FilterCheckBox(QCheckBox):
             }
         '''
         self.setStyleSheet( style_checkbox )
-        self.setFocusPolicy(Qt.NoFocus)
+#        self.setFocusPolicy(Qt.NoFocus)
 
     def is_checked(self):
         return 'y' if self.isChecked() else None        
