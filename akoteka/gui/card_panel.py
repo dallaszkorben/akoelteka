@@ -371,10 +371,11 @@ class CardImage(QWidget):
         #self.setPalette(p)
         self.setStyleSheet('background: black')
 
-        image_panel = QLabel(self)
-        self.panel_layout = QHBoxLayout(image_panel)
-        self.panel_layout.setContentsMargins(0,0,0,0)
-        self_layout.addWidget(image_panel)
+        self.image_panel = QLabel(self)
+        self.image_panel.setAlignment(Qt.AlignCenter)
+        panel_layout = QHBoxLayout(self.image_panel)
+        panel_layout.setContentsMargins(0,0,0,0)
+        self_layout.addWidget(self.image_panel)
 
         self.media_path = None
         self.sub_cards = json.loads('[]')
@@ -412,7 +413,7 @@ class CardImage(QWidget):
             smaller_pixmap = pixmap.scaledToHeight(PICTURE_WIDTH)
             #print("magas", smaller_pixmap.width(), smaller_pixmap.height(), self.panel.card_holder.title)
         #smaller_pixmap = pixmap.scaled(PICTURE_WIDTH, PICTURE_WIDTH, Qt.KeepAspectRatio, Qt.FastTransformation)
-        self.panel_layout.setPixmap(smaller_pixmap)        
+        self.image_panel.setPixmap(smaller_pixmap)        
 
     def set_media_path( self, media_path ):
         self.media_path = media_path
