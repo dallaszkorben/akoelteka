@@ -166,6 +166,14 @@ class CardPanel(QWidget):
     def set_folder( self, folder ):
         self.card_rating.set_folder(folder)
         
+
+
+
+
+
+
+
+
    
         
         
@@ -370,6 +378,7 @@ class CardImage(QLabel):
         self.setMinimumWidth(PICTURE_WIDTH)
         self.setMaximumWidth(PICTURE_WIDTH)
         self.setMinimumHeight(PICTURE_HEIGHT)
+        self.setMaximumHeight(PICTURE_HEIGHT)
         
         self.mouse_pressed_for_click = False
 
@@ -393,8 +402,12 @@ class CardImage(QLabel):
         
     def set_image_path( self, image_path ):
         pixmap = QPixmap( image_path )
-        #smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
-        smaller_pixmap = pixmap.scaled(PICTURE_WIDTH, PICTURE_WIDTH, Qt.KeepAspectRatio, Qt.FastTransformation)
+        if pixmap.width() >= pixmap.height():
+            smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
+        else:
+            smaller_pixmap = pixmap.scaledToHeight(PICTURE_WIDTH)
+            #print("magas", smaller_pixmap.width(), smaller_pixmap.height(), self.panel.card_holder.title)
+        #smaller_pixmap = pixmap.scaled(PICTURE_WIDTH, PICTURE_WIDTH, Qt.KeepAspectRatio, Qt.FastTransformation)
         self.setPixmap(smaller_pixmap)        
 
     def set_media_path( self, media_path ):
@@ -525,6 +538,8 @@ class CardRating(QLabel):
         self.rating_new_button.setCursor(QCursor(Qt.PointingHandCursor))
         self.rating_new_button.setStyleSheet("background:transparent; border:none") 
         self.rating_layout.addWidget( self.rating_new_button )
+        
+        #self.rating_layout.addStretch(1)
 
     def set_folder(self, folder):
         self.folder = folder

@@ -139,6 +139,8 @@ class CardHolder( QLabel ):
 
         self.mouse_already_pressed = False
 
+        # The CardHolder will accept Focus by Tabbing and Clicking
+        self.setFocusPolicy(Qt.StrongFocus)
 
         # it hides the CardHolder until it is filled up with cards
         self.select_index(0)
@@ -502,6 +504,8 @@ class CardHolder( QLabel ):
     #
     # -------------------------------------------------------------------
     def rolling(self, delta_rate):
+        if not self.shown_card_list:
+            return        
         
         self.delta_rate = delta_rate
         
@@ -644,8 +648,13 @@ class CardHolder( QLabel ):
         value = event.angleDelta().y()/8/15   # in normal case it is +1 or -1
         self.rolling_wheel(value)
   
+  
+    # ------------------------------
+    #
+    # Key Press Event: Up-Down arrow
+    #
+    # ------------------------------
     def keyPressEvent(self, event):
-#        print(event.key())
 
         if event.key() == QtCore.Qt.Key_Up:
             self.animated_move_to_next(sleep=0.03)
@@ -769,6 +778,7 @@ class Panel(QWidget):
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         qp.end()    
     
+
 
 # ==================
 #

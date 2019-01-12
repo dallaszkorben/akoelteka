@@ -45,26 +45,39 @@ class GuiAkoTeka(QWidget):
         box_layout.setContentsMargins(0, 0, 0, 0)
         box_layout.setSpacing(0)
     
-        # control line
+        # control panel
         self.control_panel = ControlPanel(self)
         self.control_panel.set_back_button_method(self.restore_previous_holder)
         box_layout.addWidget( self.control_panel)
     
+    
+    
+    
         # scroll_content where you can add your widgets - has scroll
-        scroll = QScrollArea(self)
-        box_layout.addWidget(scroll)
-        scroll.setWidgetResizable(True)
-        scroll_content = QWidget(scroll)
-        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)  
-
-        # layout of the content with margins
+#        scroll = QScrollArea(self)
+#        box_layout.addWidget(scroll)
+#        scroll.setWidgetResizable(True)
+#        scroll_content = QWidget(scroll)
+#        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
+#        scroll.setFocusPolicy(Qt.NoFocus)
+    
+    
+        scroll_content = QWidget(self)
+        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
+        box_layout.addWidget(scroll_content)
         scroll_layout = QVBoxLayout(scroll_content)
-        scroll.setWidget(scroll_content)
-        # vertical distance between cards - Vertical
-        scroll_layout.setSpacing(5)
-        # spaces between the added Widget and this top, right, bottom, left side
-        scroll_layout.setContentsMargins(15,15,15,15)
         scroll_content.setLayout(scroll_layout)
+        
+    
+
+#        # layout of the content with margins
+#        scroll_layout = QVBoxLayout(scroll_content)        
+#        scroll.setWidget(scroll_content)        
+#        # vertical distance between cards - Vertical
+#        scroll_layout.setSpacing(5)
+#        # spaces between the added Widget and this top, right, bottom, left side
+#        scroll_layout.setContentsMargins(15,15,15,15)
+#        scroll_content.setLayout(scroll_layout)
 
         # -------------------------------
         # Title
@@ -151,6 +164,9 @@ class GuiAkoTeka(QWidget):
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
         self.actual_card_holder.setAlignment(Qt.AlignBottom)
+        
+        # Make the CardHolder to be in Focus
+        self.actual_card_holder.setFocus()
 
         self.hierarchy_title.set_title(self.card_holder_list, self.actual_card_holder)
 
@@ -245,12 +261,7 @@ class GuiAkoTeka(QWidget):
         
         return card
     
-    
-    
-       
-       
-            
-
+  
 
   
     def set_filter_listener(self, listener):
@@ -259,7 +270,13 @@ class GuiAkoTeka(QWidget):
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
       
-      
+  
+  
+  
+    def akeyPressEvent(self, event):
+        print("KeyPressEvent", "GuiAkoTeka")
+        event.ignore()
+
   
 
 # =========================================
