@@ -298,8 +298,8 @@ class GuiAkoTeka(QWidget):
         #
         # Escape
         #
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter or event.key() == Qt.Key_Space:
-
+        if event.key() == Qt.Key_Escape:
+            self.restore_previous_holder()
 
         event.ignore()
 
