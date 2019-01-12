@@ -6,7 +6,6 @@ from threading import Thread
 
 from pkg_resources import resource_string, resource_filename
 
-
 from functools import cmp_to_key
 
 import locale
@@ -15,7 +14,12 @@ from akoteka.setup.setup import getSetupIni
     
 from akoteka.gui.pyqt_import import *
 
-from akoteka.gui.card_holder_pane import CardHolder
+#from akoteka.gui.card_holder_pane import CardHolder
+from cardholder.cardholder import CardHolder
+from cardholder.cardholder import Card
+
+from akoteka.gui.card_panel import CardPanel
+
 from akoteka.gui.configuration_dialog import ConfigurationDialog
 
 from akoteka.accessories import collect_cards
@@ -43,6 +47,7 @@ class GuiAkoTeka(QWidget):
     
         # control line
         self.control_panel = ControlPanel(self)
+        self.control_panel.set_back_button_method(self.restore_previous_holder)
         box_layout.addWidget( self.control_panel)
     
         # scroll_content where you can add your widgets - has scroll
@@ -50,18 +55,39 @@ class GuiAkoTeka(QWidget):
         box_layout.addWidget(scroll)
         scroll.setWidgetResizable(True)
         scroll_content = QWidget(scroll)
-        scroll_content.setStyleSheet('background: black')  
+        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)  
 
         # layout of the content with margins
-        self.scroll_layout = QVBoxLayout(scroll_content)
+        scroll_layout = QVBoxLayout(scroll_content)
         scroll.setWidget(scroll_content)
         # vertical distance between cards - Vertical
-        self.scroll_layout.setSpacing(0)
+        scroll_layout.setSpacing(5)
         # spaces between the added Widget and this top, right, bottom, left side
-        self.scroll_layout.setContentsMargins(0,0,0,0)
-        scroll_content.setLayout(self.scroll_layout)
+        scroll_layout.setContentsMargins(15,15,15,15)
+        scroll_content.setLayout(scroll_layout)
+
+        # -------------------------------
+        # Title
+        # -------------------------------
+        self.hierarchy_title = HierarchyTitle(scroll_content)
+        self.hierarchy_title.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
+        self.hierarchy_title.set_border_radius(RADIUS_CARDHOLDER)
+
+        # -------------------------------
+        # Here comes later the CardHolder
+        # -------------------------------
+        self.card_holder_panel = QWidget(scroll_content)
+        
+        scroll_layout.addWidget(self.hierarchy_title)
+        scroll_layout.addWidget(self.card_holder_panel)
+        scroll_layout.addStretch(1)
+        
+        self.card_holder_panel_layout = QVBoxLayout(self.card_holder_panel)
+        self.card_holder_panel_layout.setContentsMargins(0,0,0,0)
+        self.card_holder_panel_layout.setSpacing(0)
 
         self.back_button_listener = None
+        card_holder_list = []
 
         # --- Window ---
         sp=getSetupIni()
@@ -76,63 +102,7 @@ class GuiAkoTeka(QWidget):
         fg=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()
         fg.moveCenter(cp)
-        self.move(fg.topLeft())     
-
-
-    # ---------------------------
-    #
-    # Go deeper in the hierarchy
-    #
-    # ---------------------------
-    def add_holder( self, card_structure, card_title ):
-
-        # if there is already a CardHolder
-        if self.actual_card_holder:        
-            title_hierarchy = self.actual_card_holder.get_title_hierarchy()
-            
-            # hide it
-            self.actual_card_holder.setHidden(True)
-            
-            # save it in the list of card holder
-            self.card_holder_list.append(self.actual_card_holder)
-            
-        else:
-            title_hierarchy = ""
-        
-        self.actual_card_holder = CardHolder(            
-            self, 
-            card_structure,
-            title_hierarchy + (" > " if title_hierarchy else "") + card_title
-        )        
-
-        # add the new holder
-        self.scroll_layout.addWidget(self.actual_card_holder)
-        
-    # -------------------------
-    #
-    # Come up in the hierarchy
-    #
-    # -------------------------
-    def restore_previous_holder(self):
-        
-        size = len(self.card_holder_list)
-        if  size >= 1:
-            previous_card_holder = self.card_holder_list[size - 1]            
-            self.card_holder_list.remove(previous_card_holder)
-            
-            # hide the old CardHolder
-            self.actual_card_holder.setHidden(True)            
-            
-            # remove from the layout the old CardHolder
-            self.scroll_layout.removeWidget(self.actual_card_holder)
-        
-            # the current card holder is the previous
-            self.actual_card_holder = previous_card_holder
-            
-            # show the current card holder
-            self.actual_card_holder.setHidden(False)
-            
-            self.actual_card_holder.fill_up_card_holder()
+        self.move(fg.topLeft())
 
     # --------------------------
     #
@@ -142,42 +112,226 @@ class GuiAkoTeka(QWidget):
     def start_card_holder(self):
 
         # Create the first Card Holder
-        self.add_holder( [], "" ) 
+        self.go_down_in_hierarchy( [], "" ) 
 
         # Start to collect the Cards
         paths = [config_ini['media_path']]
-        self.cc = CollectCardThread( paths )
-        self.cc.collected.connect(self.actual_card_holder.fill_up_card_holder)
-        self.cc.start()
+        
+        self.actual_card_holder.start_card_collection(paths)
+        
+
+    # ---------------------------
+    #
+    # Go deeper in the hierarchy
+    #
+    # ---------------------------
+    def go_down_in_hierarchy( self, card_structure, title ):
+        
+        # if there is already a CardHolder
+        if self.actual_card_holder:        
+            
+            # hide the old CardHolder it
+            self.actual_card_holder.setHidden(True)
+            
+            # save the old CardHolder it in a list
+            self.card_holder_list.append(self.actual_card_holder)
+        
+        self.actual_card_holder = CardHolder(            
+            self, 
+            card_structure,
+            self.get_new_card,
+            self.collect_cards
+        )
+        
+        self.actual_card_holder.title = title
+        self.actual_card_holder.set_max_overlapped_cards(4)
+        self.actual_card_holder.set_y_coordinate_by_reverse_index_method(self.get_y_coordinate_by_reverse_index)
+        self.actual_card_holder.set_x_offset_by_index_method(self.get_x_offset_by_index)
+        self.actual_card_holder.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
+        self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
+        self.actual_card_holder.set_border_width(15)        
+        self.actual_card_holder.setAlignment(Qt.AlignBottom)
+
+        self.hierarchy_title.set_title(self.card_holder_list, self.actual_card_holder)
+
+        # add the new holder
+        self.card_holder_panel_layout.addWidget(self.actual_card_holder)
+        #self.scroll_layout.addStretch(1)
+        
+        # TODO get the filtered list !!!!!!!!!!!!!!!!!!!
+        self.actual_card_holder.refresh_by_filtered_descriptor_list(card_structure)
+
+
+    # -------------------------
+    #
+    # Come up in the hierarchy
+    #
+    # -------------------------
+    def restore_previous_holder(self):
+        
+        size = len(self.card_holder_list)
+        if  size >= 1:
+
+            # get the previous CardHolder
+            previous_card_holder = self.card_holder_list[size - 1]
+            
+            # remove the previous CardHolder from the history list
+            self.card_holder_list.remove(previous_card_holder)
+            
+            # hide the old CardHolder
+            self.actual_card_holder.setHidden(True)            
+            
+            # remove from the layout the old CardHolder
+            self.card_holder_panel_layout.removeWidget(self.actual_card_holder)
+        
+            # the current card holder is the previous
+            self.actual_card_holder = previous_card_holder
+            
+            # show the current card holder
+            self.actual_card_holder.setHidden(False)
+
+            self.hierarchy_title.set_title(self.card_holder_list, self.actual_card_holder)
+            #self.hierarchy_title.set_title(self.card_holder_list + [[None,self.actual_title]])
+            
+            # TODO fill up with filtered list
+            #self.actual_card_holder.fill_up_card_holder()
+            card_structure = self.actual_card_holder.card_descriptor_list
+            self.actual_card_holder.refresh_by_filtered_descriptor_list(card_structure)
+
+    # ----------------------------------------------------------
+    #
+    # Calculates the Y coordinate of a Card using reverse index
+    #
+    # ----------------------------------------------------------
+    def get_y_coordinate_by_reverse_index(self, reverse_index):
+        return reverse_index * reverse_index * 8
+    
+    # -----------------------------------------------
+    #
+    # Calculates the X coordinate of a Card by index
+    #
+    # -----------------------------------------------
+    def get_x_offset_by_index(self, index):
+        return index * 4
        
+       
+    # TODO remove it
+    def collect_cards(self, paths):
+        cdl = collect_cards(paths)
+        return cdl
+    
+    # --------------------
+    #
+    # Generates a new Card
+    #
+    # --------------------
+    def get_new_card(self, card_data, local_index, index):
 
-    def set_back_button_listener(self, listener):
-        self.control_panel.set_back_button_listener(listener)
+        card = Card(self.actual_card_holder, card_data, local_index, index)
+        
+        card.set_background_color(QColor(COLOR_CARD_BACKGROUND))
+        card.set_border_normal_color(QColor(COLOR_CARD_BORDER_NORMAL_BACKGROUND))
+        card.set_border_selected_color(QColor(COLOR_CARD_BORDER_SELECTED_BACKGROUND))
+        
+        card.set_not_selected()
+        card.set_border_radius( RADIUS_CARD )
+        card.set_border_width( WIDTH_BORDER_CARD )
+ 
+        panel = card.get_panel()        
+        layout = panel.get_layout()
 
+        card_panel = CardPanel(card, card_data)
+        layout.addWidget(card_panel)
+        
+        return card
+    
+    
+    
+       
+       
+            
+
+
+  
     def set_filter_listener(self, listener):
         self.control_panel.set_filter_listener(listener)
         
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
       
+      
+  
 
-class CollectCardThread(QtCore.QThread):
-    collected = pyqtSignal(list)
+# =========================================
+# 
+# This Class represents the title
+#
+# =========================================
+#
+class HierarchyTitle(QWidget):
+    DEFAULT_BACKGROUND_COLOR = Qt.lightGray
+    DEFAULT_BORDER_RADIUS = 10
+    
+    def __init__(self, parent):
+        QWidget.__init__(self, parent)
 
-    def __init__(self, paths=None):
-        super().__init__()
-        #self.start()
+        self_layout = QHBoxLayout(self)
+        self_layout.setContentsMargins(5, 5, 5, 5)
+        self_layout.setSpacing(1)
+        self.setLayout( self_layout )
         
-        self.paths = paths
+        self.label = QLabel("", self)
+        self.label.setWordWrap(True)
+        self.label.setAlignment(Qt.AlignHCenter)
+        self.label.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Bold))
+
+        self_layout.addWidget(self.label)
         
-    def run(self):
+        self.title = ""
+        self.set_background_color(QColor(HierarchyTitle.DEFAULT_BACKGROUND_COLOR), False)
+        self.set_border_radius(HierarchyTitle.DEFAULT_BORDER_RADIUS, False)
+        
+#        self.setHidden(True)
 
-        card_list = collect_cards( self.paths)
-        self.collected.emit(card_list)
+    def set_title(self, card_holder_list, actual_card_holder):
+        
+        title = " > ".join( [ ch.title for ch in card_holder_list + [actual_card_holder] if ch.title ]  )
+        
+        self.label.setText(title)
+        self.title = title
+        
+#        if title:
+#            self.setHidden(False)
+#        else:
+#            self.setHidden(True)
 
-    def __del__(self):
-        self.exiting = True
-        self.wait()
+    def get_title(self):
+        return self.title
+        
+    def set_background_color(self, color, update=False):
+        self.background_color = color
+        self.label.setStyleSheet('background: ' + color.name()) 
+        if update:
+            self.update()
+            
+    def set_border_radius(self, radius, update=True):
+        self.border_radius = radius
+        if update:
+            self.update()            
+        
+    def paintEvent(self, event):
+        s = self.size()
+        qp = QPainter()
+        qp.begin(self)
+        qp.setRenderHint(QPainter.Antialiasing, True)
+        qp.setBrush( self.background_color )
+
+        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
+        qp.end()  
+        
+
+
+
 
 
 
@@ -210,8 +364,10 @@ class ControlPanel(QWidget):
         #
         # Back Button
         #
-        # -------------        
+        # -------------     
+        self.back_button_method = None
         back_button = QPushButton()
+        back_button.setFocusPolicy(Qt.NoFocus)
         back_button.clicked.connect(self.back_button_on_click)
         
         back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", IMG_BACK_BUTTON)) ))
@@ -230,6 +386,7 @@ class ControlPanel(QWidget):
         #
         # -------------------
         self.config_button = QPushButton()
+        self.config_button.setFocusPolicy(Qt.NoFocus)
         self.config_button.setCheckable(False)
         self.config_button.clicked.connect(self.config_button_on_click)
         
@@ -261,15 +418,15 @@ class ControlPanel(QWidget):
     def refresh_label(self):
         self.filter_holder.refresh_label()
 
-    def set_back_button_listener(self, listener):
-        self.back_button_listener = listener
+    def set_back_button_method(self, method):
+        self.back_button_method = method
         
     def set_filter_listener(self, listener):
         self.filter_listener = listener
         
     def back_button_on_click(self):
-        if self.back_button_listener:
-            self.back_button_listener.go_back()
+        if self.back_button_method:
+            self.back_button_method()
 
 
     # -----------------------
@@ -280,12 +437,11 @@ class ControlPanel(QWidget):
     def config_button_on_click(self):
 
         dialog = ConfigurationDialog()
-        
 #!!!!!        
 
         # if OK was clicked
         if dialog.exec_() == QDialog.Accepted:        
-            
+
             # get the values from the DIALOG
             l = dialog.get_language()
             mp = dialog.get_media_path()
@@ -309,10 +465,9 @@ class ControlPanel(QWidget):
             re_read_config_ini()
 
             # Re-import card_holder_pane
-            mod = importlib.import_module("akoteka.gui.card_holder_pane")
+            mod = importlib.import_module("akoteka.gui.card_panel")
             importlib.reload(mod)
 #!!!!!!!!!!!!
-
 
             # remove history
             for card_holder in self.gui.card_holder_list:
@@ -322,7 +477,7 @@ class ControlPanel(QWidget):
                 
             # Remove recent CardHolder as well
             self.gui.actual_card_holder.setHidden(True)
-            self.gui.scroll_layout.removeWidget(self.gui.actual_card_holder)
+            self.gui.card_holder_panel_layout.removeWidget(self.gui.actual_card_holder)
             self.gui.actual_card_holder = None
             
             # reload the cards
@@ -390,6 +545,7 @@ class FilterDropDownSimple(QWidget):
         self_layout.addWidget( self.label_widget )
 
         self.dropdown = QComboBox(self)
+        self.dropdown.setFocusPolicy(Qt.NoFocus)
         
         self.dropdown.currentIndexChanged.connect(self.current_index_changed)
 
@@ -459,7 +615,8 @@ class FilterCheckBox(QCheckBox):
                 min-height: 15px; max-height: 15px; border: 0px solid gray;
             }
         '''
-        self.setStyleSheet( style_checkbox )        
+        self.setStyleSheet( style_checkbox )
+        self.setFocusPolicy(Qt.NoFocus)
 
     def is_checked(self):
         return 'y' if self.isChecked() else None        
@@ -626,6 +783,22 @@ class FilterHolder(QWidget):
     
     def state_changed(self):
         self.changed.emit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
 def main():   
     

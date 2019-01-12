@@ -27,6 +27,8 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QCursor
 from PyQt5.QtGui import QDrag
+from PyQt5.QtGui import QPen
+
 
 from PyQt5 import QtCore
 
