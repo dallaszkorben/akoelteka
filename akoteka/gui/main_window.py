@@ -14,9 +14,9 @@ from akoteka.setup.setup import getSetupIni
     
 from akoteka.gui.pyqt_import import *
 
-#from akoteka.gui.card_holder_pane import CardHolder
 from cardholder.cardholder import CardHolder
 from cardholder.cardholder import Card
+from cardholder.cardholder import CollectCardsThread
 
 from akoteka.gui.card_panel import CardPanel
 
@@ -30,10 +30,12 @@ from akoteka.handle_property import re_read_config_ini
 from akoteka.handle_property import config_ini
 from akoteka.handle_property import get_config_ini
 
-class GuiAkoTeka(QWidget):
+class GuiAkoTeka(QWidget, QObject):
     
     def __init__(self):
-        super().__init__()     
+        #super().__init__()  
+        QWidget.__init__(self)
+        QObject.__init__(self)
         
         self.actual_card_holder = None
         self.card_holder_list = []
@@ -50,9 +52,6 @@ class GuiAkoTeka(QWidget):
         self.control_panel.set_back_button_method(self.restore_previous_holder)
         box_layout.addWidget( self.control_panel)
     
-    
-    
-    
         # scroll_content where you can add your widgets - has scroll
 #        scroll = QScrollArea(self)
 #        box_layout.addWidget(scroll)
@@ -61,14 +60,11 @@ class GuiAkoTeka(QWidget):
 #        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
 #        scroll.setFocusPolicy(Qt.NoFocus)
     
-    
         scroll_content = QWidget(self)
         scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
         box_layout.addWidget(scroll_content)
         scroll_layout = QVBoxLayout(scroll_content)
         scroll_content.setLayout(scroll_layout)
-        
-    
 
 #        # layout of the content with margins
 #        scroll_layout = QVBoxLayout(scroll_content)        
@@ -119,18 +115,19 @@ class GuiAkoTeka(QWidget):
 
     # --------------------------
     #
-    # Start Card Holder
+    # Start CardHolder
     #
     # --------------------------
     def start_card_holder(self):
 
         # Create the first Card Holder
-        self.go_down_in_hierarchy( [], "" ) 
+        self.go_down_in_hierarchy( [], "Media" ) 
 
-        # Start to collect the Cards
+        # Retreive the media path
         paths = [config_ini['media_path']]
         
-        self.actual_card_holder.start_card_collection(paths)
+        # Start to collect the Cards from the media path
+        self.actual_card_holder.startCardCollection(paths)
         
 
     # ---------------------------
@@ -151,9 +148,11 @@ class GuiAkoTeka(QWidget):
         
         self.actual_card_holder = CardHolder(            
             self, 
-            card_structure,
+            #card_structure,
             self.get_new_card,
-            self.collect_cards
+            self.collect_cards,
+            self.collecting_spinner_start,
+            self.collecting_spinner_stop
         )
         
         self.actual_card_holder.title = title
@@ -163,7 +162,7 @@ class GuiAkoTeka(QWidget):
         self.actual_card_holder.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
-        self.actual_card_holder.setAlignment(Qt.AlignBottom)
+#        self.actual_card_holder.setAlignment(Qt.AlignBottom)
         
         # Make the CardHolder to be in Focus
         self.actual_card_holder.setFocus()
@@ -175,7 +174,7 @@ class GuiAkoTeka(QWidget):
         #self.scroll_layout.addStretch(1)
         
         # TODO get the filtered list !!!!!!!!!!!!!!!!!!!
-        self.actual_card_holder.refresh_by_filtered_descriptor_list(card_structure)
+        self.actual_card_holder.fillUpCardHolderByDescriptorList(card_structure)
 
 
     # -------------------------
@@ -212,7 +211,13 @@ class GuiAkoTeka(QWidget):
             # TODO fill up with filtered list
             #self.actual_card_holder.fill_up_card_holder()
             card_structure = self.actual_card_holder.card_descriptor_list
-            self.actual_card_holder.refresh_by_filtered_descriptor_list(card_structure)
+            self.actual_card_holder.fillUpCardHolderByDescriptorList(card_structure)
+
+    def collecting_spinner_start(self):
+        self.hierarchy_title.setHidden(True)
+
+    def collecting_spinner_stop(self):
+        self.hierarchy_title.setHidden(False)
 
     # ----------------------------------------------------------
     #
@@ -245,7 +250,11 @@ class GuiAkoTeka(QWidget):
 
         card = Card(self.actual_card_holder, card_data, local_index, index)
         
-        card.set_background_color(QColor(COLOR_CARD_BACKGROUND))
+        if card_data["extra"]["media-path"]:
+            card.set_background_color(QColor(COLOR_CARD_MOVIE_BACKGROUND))
+        else:
+            card.set_background_color(QColor(COLOR_CARD_COLLECTOR_BACKGROUND))
+            
         card.set_border_normal_color(QColor(COLOR_CARD_BORDER_NORMAL_BACKGROUND))
         card.set_border_selected_color(QColor(COLOR_CARD_BORDER_SELECTED_BACKGROUND))
         

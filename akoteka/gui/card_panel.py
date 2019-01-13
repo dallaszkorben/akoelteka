@@ -49,7 +49,6 @@ class CardPanel(QWidget):
         #self.setStyleSheet('background: ' + COLOR_CARD_BACKGROUND)
         #self.setStyleSheet('border:none')
 
-
         #
         # Containers in the Card
         #
@@ -60,16 +59,10 @@ class CardPanel(QWidget):
         self.card_rating = CardRating()
         panel_layout.addWidget( self.card_rating )
  
- 
         self.set_image_path( card_data["extra"]["image-path"] )
-            
-        
         
         #self.set_sub_cards( card_data["extra"]["orig-sub-cards"] )
         self.set_sub_cards( card_data['extra']['sub-cards'])
-        
-        
-        
         
         self.set_media_path( card_data["extra"]["media-path"] )
         self.set_title( card_data['title'][config_ini['language']] )
@@ -112,6 +105,7 @@ class CardPanel(QWidget):
             # Show the RATING section
             self.card_rating.setHidden(False)
 
+        # if it is a Collector
         else:
             
             # TODO
@@ -119,9 +113,9 @@ class CardPanel(QWidget):
             
             # Hide the RATING section
             self.card_rating.setHidden(True)
- 
+            
+            self.add_info_line_stretch()
 
- 
  
       
     def get_card_holder( self ):
@@ -204,6 +198,9 @@ class CardInfoTitle(QLabel):
         # font, colors
         self.setFont(QFont( FONT_TYPE, INFO_TITLE_FONT_SIZE, weight=QFont.Bold))
         self.text = None
+                
+        #self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        #self.setStyleSheet('background-color: yellow')
     
     def set_title(self, title):
         self.setText(title)
@@ -337,7 +334,6 @@ class CardInformation(QWidget):
 
 #    def set_storyline(self, storyline):
 #        self.info_layout.addWidget( CardInfoLine(label,value))
-        
         
     def add_separator(self):
         self.info_layout.addWidget( QHLine() )

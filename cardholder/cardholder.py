@@ -57,7 +57,7 @@ from pkg_resources import resource_string, resource_filename
 # Card Holder
 #
 # =========================
-class CardHolder( QLabel ):
+class CardHolder( QWidget ):
     
     resized = QtCore.pyqtSignal(int,int)
     moved_to_front = QtCore.pyqtSignal(int)
@@ -77,19 +77,20 @@ class CardHolder( QLabel ):
     
     def __init__(self, 
                  parent, 
-                 card_descriptor_list, 
-#                 title, 
+                 #card_descriptor_list, 
                  get_new_card_method, 
-                 get_collected_cards_method
+                 get_collected_cards_method,
+                 collecting_start_method = None,
+                 collecting_finish_method = None,
                  ):
-        #super(CardHolder, self).__init__(parent)
         QWidget.__init__(self, parent)
 
         self.parent = parent
-#        self.title = title
-        self.card_descriptor_list = card_descriptor_list
+        #self.card_descriptor_list = card_descriptor_list
         self.get_new_card_method = get_new_card_method
         self.get_collected_cards_method = get_collected_cards_method
+        self.collecting_start_method = collecting_start_method
+        self.collecting_finish_method = collecting_finish_method
         
         self.shown_card_list = []
         self.card_descriptor_list = []
@@ -105,24 +106,6 @@ class CardHolder( QLabel ):
         self.self_layout = QVBoxLayout(self)
         self.setLayout(self.self_layout)
 
-        # -----
-        # Title
-        # -----
-        #title_label = QLabel(self)
-        #title_label.setFont(QFont( "Comic Sans MS", 23, weight=QFont.Bold))
-        #title_label.setAlignment(Qt.AlignHCenter)        
-        #title_label.setText(self.title)
-        #self.self_layout.addWidget( title_label )
-        
-        # ------------
-        # holder_panel
-        # ------------
-        #self.holder_panel = QLabel(self)
-        #self.self_layout.addWidget(self.holder_panel)        
-        #self.self_layout.addStretch(1)
-        
-        
-
         self.actual_card_index = 0
         self.rate_of_movement = 0
         self.delta_rate = 0
@@ -132,7 +115,7 @@ class CardHolder( QLabel ):
         
         self.collecting_spinner = None
         spinner_file_name = resource_filename(__name__,os.path.join("img", CardHolder.DEFAULT_SPINNER_NAME))
-        self.set_spinner(spinner_file_name)
+        self.setup_spinner(spinner_file_name)
 
         self.set_y_coordinate_by_reverse_index_method(self.get_y_coordinate_by_reverse_index)
         self.set_x_offset_by_index_method(self.get_x_offset_by_index)
@@ -147,9 +130,9 @@ class CardHolder( QLabel ):
         #self.setHidden(True)
         #self.show()
         
-#    def get_title(self):
-#        return self.title
-    
+        
+        
+        
     def set_y_coordinate_by_reverse_index_method(self, method):
         self.get_y_coordinate_by_reverse_index_method = method
         
@@ -164,10 +147,10 @@ class CardHolder( QLabel ):
 
     # ----------------
     #
-    # set spinner
+    # setup Spinner
     #
     # ----------------
-    def set_spinner(self, file_name):
+    def setup_spinner(self, file_name):
 
         # remove the old spinner
         if self.collecting_spinner != None:
@@ -182,7 +165,7 @@ class CardHolder( QLabel ):
 
         self.spinner_movie.setCacheMode(QMovie.CacheAll)
         self.spinner_movie.setSpeed(100)
-        self.spinner_movie.start()          # if I do not start it, it stays hidden
+        self.spinner_movie.start()          # if I do not start it, it stays hidden later
         self.spinner_movie.stop()
         self.collecting_spinner.move(0,0)
         self.collecting_spinner.show()
@@ -190,15 +173,42 @@ class CardHolder( QLabel ):
 
         img_size = self.spinner_movie.currentPixmap().size()
         self.collecting_spinner.resize(img_size.width(), img_size.height())      
+
+
+
+
+
+
+
+
+
+
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    #
+    # start card collection
+    #
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    def startCardCollection(self, parameters):
+        """
+        This method should be called when you want a new collection of cards
+        """
+
+#        self.start_spinner()
+
+        self.cc = CollectCardsThread.get_instance( self, self.get_collected_cards_method, parameters )
+        if self.cc:
+            self.cc.collectionStarted.connect(self.card_collection_started)
+            self.cc.collectionFinished.connect(self.card_collection_finished)
+            self.cc.start()   
+
+    def card_collection_started(self):
+        """
+        This method is emitted by the CollectCardsThread when it starts
+        """
         
-    # --------------------------------------
-    # Shows the spinner + removes all Cards
-    # --------------------------------------
-    def start_spinner(self):
-
-        # remove all cards
-        self.refresh_by_filtered_descriptor_list([])
-
+        # Start the Spinner
         self.collecting_spinner.move(
             (self.parent.geometry().width()-self.collecting_spinner.width()) / 2,
             (self.parent.geometry().height()-self.collecting_spinner.width()) / 2
@@ -206,50 +216,72 @@ class CardHolder( QLabel ):
         self.spinner_movie.start()
         self.collecting_spinner.setHidden(False)        
 
-    # ------------------------------
-    # Hides the spinner
-    # ------------------------------
-    def stop_spinner(self):
+        # Remove everything from the CardHolder
+        self.fillUpCardHolderByDescriptorList([])
+        
+        # Inform the parent if it is necessary
+        if self.collecting_start_method:
+            self.collecting_start_method()
+        
+
+    def card_collection_finished(self, card_descriptor_list):
+        """
+        This method is emitted by the CollectCardsThread when it finishes
+        """
+        
+        # Stop the Spinner
         self.collecting_spinner.setHidden(True)
         self.spinner_movie.stop()
 
-        
+        # Fill up the CardHolder with the new Cards
+        self.fillUpCardHolderByDescriptorList(card_descriptor_list)
+
+        # Inform the parent if it is necessary
+        if self.collecting_finish_method:
+           self.collecting_finish_method() 
+
+    # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
     #
-    # start card collection
-    #
-    # this method should be called when you want a new collection of cards
+    # Fill-up Card Descriptor List
     #
     # ---------------------------------------------------------------------
-    def start_card_collection(self, parameters):
-
-        self.start_spinner()
-
-        self.cc = CollectCardsThread.get_instance( self, self.get_collected_cards_method, parameters )
-        if self.cc:
-            self.cc.cards_collected.connect(self.refresh_by_filtered_descriptor_list)
-            self.cc.start()   
+    # ---------------------------------------------------------------------
+    def fillUpCardHolderByDescriptorList(self, filtered_card_list):
+        """
+        This method fill up the card_descriptor_list and then fill up the CardHolder
+        with the new Cards
+        """
         
-    # -------------------------------------------------------
-    # refres card collection - used by the CollectCardsThread
-    # -------------------------------------------------------
-    def refresh_by_filtered_descriptor_list(self, filtered_card_list): 
-        self.stop_spinner()
-        self.fill_up_filtered_descriptor_list(filtered_card_list)
-        self.select_actual_card()
-        
-        
-        #if self.shown_card_list:
-        #    self.setHidden(False)
-
-    # ----------------------------------------------------------------------------------
-    # fill up card descriptor - used by the refresh_by_filtered_descriptor_list() method
-    # ----------------------------------------------------------------------------------
-    def fill_up_filtered_descriptor_list(self, filtered_card_list = []):        
+        # Fill up the card_descriptor_list
         self.card_descriptor_list = []
         for c in filtered_card_list:
             self.card_descriptor_list.append(c)
+        
+        # Build up the CardHolder and select the actual card
+        self.select_actual_card()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        
     def set_border_width(self, width, update=True):
         self.border_width = width
         if update:
@@ -299,33 +331,32 @@ class CardHolder( QLabel ):
     def get_delta_rate(self):
         return self.delta_rate
 
-            
-        
-        
-
-
-
-
-
-    def select_next_card(self):
-        self.select_index(self.actual_card_index + 1)
-
-    def select_previous_card(self):
-        self.select_index(self.actual_card_index - 1)
-        
+      
+    # --------------------------------------------------------------------------
+    #
+    # Select Actual Card
+    #
+    # --------------------------------------------------------------------------
     def select_actual_card(self):
+        """
+        It builds up from scrach the shown_card_list from the card_descriptor_list
+        In the 0. position will be the Card identified by the actual_card_index.
+        The card in the 0. position will be indicated as the "selected"        
+        """
+        
         self.select_index(self.actual_card_index)
     
     # --------------------------------------------------------------------------
     #
     # Select Index
     #
-    # It builds up from scrach the shown_card_list from the card_descriptor_list
-    # In the 0. position will be the Card identified by the "index" parameter
-    # The card in the 0. position will be indicated as the "selected"
-    #
     # --------------------------------------------------------------------------
     def select_index(self, index):
+        """
+        It builds up from scrach the shown_card_list from the card_descriptor_list
+        In the 0. position will be the Card identified by the "index" parameter
+        The card in the 0. position will be indicated as the "selected"
+        """
         index_corr = self.index_correction(index)
         
         self.actual_card_index = index_corr
@@ -362,14 +393,37 @@ class CardHolder( QLabel ):
             self.setMinimumHeight(0)
             self.setMaximumHeight(0)
 
-    # for some reason the 2nd parameter is False from connect
-    # that is why I cant connect it to directly
-    def button_animated_move_to_next(self):
+    # -----------------------------------
+    # -----------------------------------
+    #
+    # Animated Move To The Next Card
+    #
+    # -----------------------------------
+    # -----------------------------------    
+    def animatedMoveToNextCard(self):
+        """
+        for some reason the 2nd parameter is
+        False when the animated_move_to_next
+        is connected and emited, so that is
+        why this intermediary method is needed
+        """
         self.animated_move_to_next()
 
-    def button_animated_move_to_previous(self):
+    # -----------------------------------
+    # -----------------------------------
+    #
+    # Animated Move To The Previous Card
+    #
+    # -----------------------------------
+    # -----------------------------------
+    def animatedMoveToPreviousCard(self):
+        """
+        for some reason the 2nd parameter is
+        False when the animated_move_to_next
+        is connected and emited, so that is
+        why this intermediary method is needed
+        """
         self.animated_move_to_previous()
-
 
     # ---------------------------------
     #
@@ -529,21 +583,12 @@ class CardHolder( QLabel ):
             card = self.get_new_card_method(self.card_descriptor_list[first_card_index], -1, first_card_index ) 
             self.shown_card_list.insert(0, card)
             
-            
-            
-            
-            
             # add a new card to the end
             last_card = self.shown_card_list[len(self.shown_card_list)-1]                
             last_card_index = self.index_correction(last_card.index + 1)
             #card = self.get_new_card_method(self.card_descriptor_list[last_card_index], self.get_max_overlapped_cards() + 1, last_card_index ) 
             card = self.get_new_card_method(self.card_descriptor_list[last_card_index], min(self.max_overlapped_cards + 1, len(self.card_descriptor_list)), last_card_index ) 
             self.shown_card_list.append(card)
-            
-            
-            
-            
-            
             
             # Re-print to avoid the wrong-overlapping
             for card in self.shown_card_list[::-1]:
@@ -569,10 +614,6 @@ class CardHolder( QLabel ):
             virtual_index = card.local_index - rate
 #            card.refresh_color()
             card.place(virtual_index, True)
-        
-
-
-#print( [(c.local_index, c.card_data) for c in self.shown_card_list])
 
     def rolling_adjust_forward(self,rate):
         
@@ -596,8 +637,6 @@ class CardHolder( QLabel ):
             # remove the last card from the list and from CardHolder
             card_to_remove = self.shown_card_list.pop(len(self.shown_card_list) - 1)
             card_to_remove.setParent(None)
-            
-            
 
     def rolling_adjust_backward(self,rate):
         
@@ -1149,7 +1188,10 @@ class Card(QWidget):
 #
 # ========================= 
 class CollectCardsThread(QtCore.QThread):
-    cards_collected = pyqtSignal(list)
+    
+    collectionStarted = pyqtSignal()
+    collectionFinished = pyqtSignal(list)    
+    
     __instance = None
     __run = False
 
@@ -1176,12 +1218,21 @@ class CollectCardsThread(QtCore.QThread):
         
     def run(self):
         CollectCardsThread.__run = True
-        ####
+
+        # Emits the collectionStarted Event
+        self.collectionStarted.emit()
+
+        #### for TEST reason
         #time.sleep(5)
         ####
         
-        card_list = self.collect_cards_method( self.paths)
-        self.cards_collected.emit(card_list)
+        # Here Collects the Cards Info
+        card_list = self.collect_cards_method(self.paths)
+        
+        # Emits the collectionFinished Event
+        self.collectionFinished.emit(card_list)
+
+        # Indicates that the Thread is ready to start again
         CollectCardsThread.__run = False
 
     def __del__(self):

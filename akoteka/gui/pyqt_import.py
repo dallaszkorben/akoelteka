@@ -42,7 +42,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QMimeData
 from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import QEvent
-
+from PyQt5.QtCore import QObject
 
 from akoteka.handle_property import ConfigIni
 from akoteka.handle_property import Dict
