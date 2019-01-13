@@ -27,15 +27,23 @@ from cardholder.cardholder import Card
 
 # =========================================
 # 
-# This Class represents a Card of a movie
+# Card Panel
 #
 # =========================================
-#
-# It contains an image and many characteristics of a movie on a card
-#
 class CardPanel(QWidget):
-    
+    """
+    This class represents the Content of a Card.
+    It is divided into three parts. Left to right:
+        -Image
+        -Information
+        -Rating    
+    """
     def __init__(self, card, card_data):
+        """
+        Constructor of the CardPanel
+        card:       Card object, which should be used to present data
+        card_data:  The descriptor of the Card
+        """
         QWidget.__init__(self, card)
         
         self.card = card
@@ -388,7 +396,7 @@ class CardImage(QWidget):
         self.update()
         QApplication.setOverrideCursor(Qt.PointingHandCursor)
 
-    # MOuse Hover out
+    # Mouse Hover out
     def leaveEvent(self, event):
         self.update()
         QApplication.restoreOverrideCursor()
@@ -407,8 +415,6 @@ class CardImage(QWidget):
             smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
         else:
             smaller_pixmap = pixmap.scaledToHeight(PICTURE_WIDTH)
-            #print("magas", smaller_pixmap.width(), smaller_pixmap.height(), self.panel.card_holder.title)
-        #smaller_pixmap = pixmap.scaled(PICTURE_WIDTH, PICTURE_WIDTH, Qt.KeepAspectRatio, Qt.FastTransformation)
         self.image_panel.setPixmap(smaller_pixmap)        
 
     def set_media_path( self, media_path ):

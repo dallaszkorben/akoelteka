@@ -77,7 +77,6 @@ class CardHolder( QWidget ):
     
     def __init__(self, 
                  parent, 
-                 #card_descriptor_list, 
                  get_new_card_method, 
                  get_collected_cards_method,
                  collecting_start_method = None,
@@ -86,7 +85,6 @@ class CardHolder( QWidget ):
         QWidget.__init__(self, parent)
 
         self.parent = parent
-        #self.card_descriptor_list = card_descriptor_list
         self.get_new_card_method = get_new_card_method
         self.get_collected_cards_method = get_collected_cards_method
         self.collecting_start_method = collecting_start_method
@@ -127,11 +125,6 @@ class CardHolder( QWidget ):
 
         # it hides the CardHolder until it is filled up with cards
         self.select_index(0)
-        #self.setHidden(True)
-        #self.show()
-        
-        
-        
         
     def set_y_coordinate_by_reverse_index_method(self, method):
         self.get_y_coordinate_by_reverse_index_method = method
@@ -192,10 +185,10 @@ class CardHolder( QWidget ):
     # ---------------------------------------------------------------------
     def startCardCollection(self, parameters):
         """
-        This method should be called when you want a new collection of cards
+        This method should be called from outside when you want a totally new collection of cards
+        Usualy that happens only once, at the beginning.
+        The process could take lot of time, so a Spinner will indicate that the loding is in-process
         """
-
-#        self.start_spinner()
 
         self.cc = CollectCardsThread.get_instance( self, self.get_collected_cards_method, parameters )
         if self.cc:
@@ -217,16 +210,19 @@ class CardHolder( QWidget ):
         self.collecting_spinner.setHidden(False)        
 
         # Remove everything from the CardHolder
-        self.fillUpCardHolderByDescriptorList([])
+        self.fillUpCardHolderByDescriptor([])
         
         # Inform the parent if it is necessary
         if self.collecting_start_method:
             self.collecting_start_method()
         
 
-    def card_collection_finished(self, card_descriptor_list):
+    def card_collection_finished(self, card_descriptor_structure):
         """
-        This method is emitted by the CollectCardsThread when it finishes
+        This method is emitted by the CollectCardsThread when it finishes the
+        collection of the cards descriptor
+        parameters:
+                    card_descriptor_structure:  the collected descriptor without filtering
         """
         
         # Stop the Spinner
@@ -234,11 +230,11 @@ class CardHolder( QWidget ):
         self.spinner_movie.stop()
 
         # Fill up the CardHolder with the new Cards
-        self.fillUpCardHolderByDescriptorList(card_descriptor_list)
+        self.fillUpCardHolderByDescriptor(card_descriptor_structure)
 
         # Inform the parent if it is necessary
         if self.collecting_finish_method:
-           self.collecting_finish_method() 
+           self.collecting_finish_method(self, card_descriptor_structure) 
 
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
@@ -247,32 +243,19 @@ class CardHolder( QWidget ):
     #
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
-    def fillUpCardHolderByDescriptorList(self, filtered_card_list):
+    def fillUpCardHolderByDescriptor(self, card_descriptor_list):
         """
-        This method fill up the card_descriptor_list and then fill up the CardHolder
+        This method fill up the card_descriptor_structure and then fill up the CardHolder
         with the new Cards
         """
-        
-        # Fill up the card_descriptor_list
+       
+        # Fill up the card_descriptor_structure
         self.card_descriptor_list = []
-        for c in filtered_card_list:
+        for c in card_descriptor_list:
             self.card_descriptor_list.append(c)
         
         # Build up the CardHolder and select the actual card
         self.select_actual_card()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -339,7 +322,7 @@ class CardHolder( QWidget ):
     # --------------------------------------------------------------------------
     def select_actual_card(self):
         """
-        It builds up from scrach the shown_card_list from the card_descriptor_list
+        It builds up from scrach the shown_card_list from the card_descriptor_structure
         In the 0. position will be the Card identified by the actual_card_index.
         The card in the 0. position will be indicated as the "selected"        
         """
@@ -586,7 +569,6 @@ class CardHolder( QWidget ):
             # add a new card to the end
             last_card = self.shown_card_list[len(self.shown_card_list)-1]                
             last_card_index = self.index_correction(last_card.index + 1)
-            #card = self.get_new_card_method(self.card_descriptor_list[last_card_index], self.get_max_overlapped_cards() + 1, last_card_index ) 
             card = self.get_new_card_method(self.card_descriptor_list[last_card_index], min(self.max_overlapped_cards + 1, len(self.card_descriptor_list)), last_card_index ) 
             self.shown_card_list.append(card)
             
@@ -670,8 +652,6 @@ class CardHolder( QWidget ):
         else:
             return index
 
-
-
     def paintEvent(self, event):
         s = self.size()
         qp = QPainter()
@@ -703,9 +683,10 @@ class CardHolder( QWidget ):
   
         
     # --------------
+    #
     # MOUSE handling
-    # --------------
-        
+    #
+    # --------------        
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.mouse_already_pressed = True
@@ -726,32 +707,11 @@ class CardHolder( QWidget ):
         event.ignore()
                
     def mouseReleaseEvent(self, event):
-
         if event.button() == Qt.LeftButton and self.mouse_already_pressed:
-            self.mouse_already_pressed = False
-        
+            self.mouse_already_pressed = False        
         event.ignore()
                
-#            #QCursor.setPos( QCursor.pos().x() + 1, QCursor.pos().y() )
-#        self.mouse_pressed = False#
-#
-#        # Rolling Cards
-#        delta_y = event.pos().y() - self.drag_start_position.y()
-#        self.drag_start_position = event.pos()
-#        self.rolling_wheel(delta_y)
-#       
-#
-#    def mouseReleaseEvent(self, event):
-#        #QCursor.setPos( QCursor.pos().x() + 1, QCursor.pos().y())
-#
-#        if event.button() == Qt.LeftButton:
-#            pass
-#            #if self.mouse_pressed:
-#            #    self.animated_move_to( self.clicked_card )
 
-        
-  
-  
   
   
   
@@ -830,13 +790,12 @@ class Card(QWidget):
     STATUS_SELECTED = 1
     STATUS_DISABLED = 2
     
-#    DEFAULT_RATE_OF_WIDTH_DECLINE = 10
     DEFAULT_BORDER_WIDTH = 2
     DEFAULT_BORDER_RADIUS = 10
     
-    DEFAULT_BORDER_NORMAL_COLOR = None #QColor(Qt.green)
-    DEFAULT_BORDER_SELECTED_COLOR = None #QColor(Qt.red)
-    DEFAULT_BORDER_DISABLED_COLOR = None #QColor(Qt.lightGray)
+    DEFAULT_BORDER_NORMAL_COLOR = None
+    DEFAULT_BORDER_SELECTED_COLOR = None
+    DEFAULT_BORDER_DISABLED_COLOR = None
     
     DEFAULT_STATUS = STATUS_NORMAL
     
@@ -957,9 +916,6 @@ class Card(QWidget):
         if update:
             self.update()
 
-#    def set_rate_of_width_decline(self, rate, update=True):
-#        self.rate_of_width_decline = rate
-    
     def get_panel(self):
         return self.panel
  
@@ -978,7 +934,9 @@ class Card(QWidget):
  
  
     # --------------
+    #
     # MOUSE handling
+    #
     # --------------
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -993,15 +951,6 @@ class Card(QWidget):
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
             self.already_mouse_pressed = False
-
-#            # Rolling Cards
-#            delta_y = event.pos().y() - self.drag_start_position.y()
-#            self.drag_start_position = event.pos()
-#
-#            if delta_y > 0:
-#                self.onMouseDragged.emit(1)
-#            elif delta_y < 0:
-#                self.onMouseDragged.emit(-1)
         event.ignore()
        
 
@@ -1020,99 +969,6 @@ class Card(QWidget):
 
  
  
- 
- 
- 
- 
- 
- 
- 
-
- 
- 
- 
-#    def mousePressEvent(self, event):
-#        if event.button() == Qt.LeftButton:
-#            self.drag_start_position = event.pos()
-#            self.card_start_position = self.geometry().topLeft()
-#
-#    def mouseMoveEvent(self, event):
-#        if not (event.buttons() & Qt.LeftButton):
-#            return
-#        delta_y = self.get_delta_y(event.pos().y())        
-#        self.parent.drag_card(self.local_index, self.index, delta_y)        
-#        
-#        #self.move( tl.x(), tl.y() +  (event.pos().y() - self.drag_start_position.y()) )
-#
-#    def mouseReleaseEvent(self, event):
-#        #delta_y = self.get_delta_y(event.pos().y())
-#        self.parent.drop_card(self.local_index, self.index)
-#        self.drag_start_position = None
-#        self.card_start_position = None
-#        
-#
-#    def get_delta_y(self, y):
-#        tl=self.geometry().topLeft()
-#        return tl.y() +  (y - self.drag_start_position.y()) - self.card_start_position.y()
-
-
-
-        
- 
-#    def mouseMoveEvent(self, event):
-#        if not (event.buttons() & Qt.LeftButton):
-#            return
-#        if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
-#            return
-#        drag = QDrag(self)
-#        mimedata = QMimeData()
-#        
-#        #mimedata.setText(self.text())
-#        mimedata.setText(str(self.index))
-#        
-#        drag.setMimeData(mimedata)
-#        pixmap = QPixmap(self.size())
-#        painter = QPainter(pixmap)
-##        painter.drawPixmap(self.rect(), self.grab())
-#        painter.end()
-#        drag.setPixmap(pixmap)
-#        drag.setHotSpot(event.pos())
-#        drag.exec_(Qt.CopyAction | Qt.MoveAction)
-
- 
-#    def mousePressEvent(self, event):
-#        if event.button() == Qt.LeftButton:
-#            self.drag_start_position = event.pos()
-#        #self.parent.resized.connect(self.resized)
-#        #self.parent.moved_to_front.emit(self.index)
-#        
-#        if self.local_index != 0:
-#            self.parent.select_index(self.index)
-        
-#    def dragEnterEvent(self, e):
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-           
-   
-    # ---------------------------------------------
-    # The offset of the Card from the left side as 
-    # 'The farther the card is the narrower it is'
-    # ---------------------------------------------
-#    def get_x_offset(self, local_index):
-#        return  local_index * self.rate_of_width_decline
  
     # ----------------------------------------
     #
@@ -1162,9 +1018,6 @@ class Card(QWidget):
     def get_y_coordinate(self, local_index):
         max_card = min(self.card_holder.max_overlapped_cards, len(self.card_holder.card_descriptor_list) - 1)
         reverse_index = max_card - min(local_index, max_card)  #0->most farther
-        #print(max_card)
-        #return ( max_card - min(local_index, max_card) ) * ( self.card_holder.get_max_overlapped_cards() - local_index ) * 16
-
         return self.card_holder.get_y_coordinate_by_reverse_index_method(reverse_index)
 
     

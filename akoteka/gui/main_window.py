@@ -1,29 +1,23 @@
 import sys
 import os
 import importlib
-
 from threading import Thread
-
 from pkg_resources import resource_string, resource_filename
-
 from functools import cmp_to_key
-
 import locale
-
-from akoteka.setup.setup import getSetupIni
-    
-from akoteka.gui.pyqt_import import *
 
 from cardholder.cardholder import CardHolder
 from cardholder.cardholder import Card
 from cardholder.cardholder import CollectCardsThread
 
+from akoteka.gui.pyqt_import import *
 from akoteka.gui.card_panel import CardPanel
-
 from akoteka.gui.configuration_dialog import ConfigurationDialog
 
 from akoteka.accessories import collect_cards
+from akoteka.accessories import filter_key
 from akoteka.constants import *
+from akoteka.setup.setup import getSetupIni
 
 from akoteka.handle_property import _
 from akoteka.handle_property import re_read_config_ini
@@ -38,7 +32,7 @@ class GuiAkoTeka(QWidget, QObject):
         QObject.__init__(self)
         
         self.actual_card_holder = None
-        self.card_holder_list = []
+        self.card_holder_history = []
         
         # most outer container, just right in the Main Window
         box_layout = QVBoxLayout(self)
@@ -96,7 +90,6 @@ class GuiAkoTeka(QWidget, QObject):
         self.card_holder_panel_layout.setSpacing(0)
 
         self.back_button_listener = None
-        card_holder_list = []
 
         # --- Window ---
         sp=getSetupIni()
@@ -118,24 +111,23 @@ class GuiAkoTeka(QWidget, QObject):
     # Start CardHolder
     #
     # --------------------------
-    def start_card_holder(self):
+    def startCardHolder(self):
 
-        # Create the first Card Holder
+        # Create the first Card Holder - 
         self.go_down_in_hierarchy( [], "Media" ) 
 
         # Retreive the media path
         paths = [config_ini['media_path']]
         
         # Start to collect the Cards from the media path
-        self.actual_card_holder.startCardCollection(paths)
-        
+        self.actual_card_holder.startCardCollection(paths)        
 
     # ---------------------------
     #
     # Go deeper in the hierarchy
     #
     # ---------------------------
-    def go_down_in_hierarchy( self, card_structure, title ):
+    def go_down_in_hierarchy( self, card_descriptor_structure, title ):
         
         # if there is already a CardHolder
         if self.actual_card_holder:        
@@ -144,15 +136,14 @@ class GuiAkoTeka(QWidget, QObject):
             self.actual_card_holder.setHidden(True)
             
             # save the old CardHolder it in a list
-            self.card_holder_list.append(self.actual_card_holder)
+            self.card_holder_history.append(self.actual_card_holder)
         
         self.actual_card_holder = CardHolder(            
             self, 
-            #card_structure,
             self.get_new_card,
             self.collect_cards,
-            self.collecting_spinner_start,
-            self.collecting_spinner_stop
+            self.collecting_start,
+            self.collecting_finish
         )
         
         self.actual_card_holder.title = title
@@ -162,20 +153,20 @@ class GuiAkoTeka(QWidget, QObject):
         self.actual_card_holder.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
-#        self.actual_card_holder.setAlignment(Qt.AlignBottom)
         
         # Make the CardHolder to be in Focus
         self.actual_card_holder.setFocus()
 
-        self.hierarchy_title.set_title(self.card_holder_list, self.actual_card_holder)
+        # Set the title of the CardHolder - The actual level of the hierarchy
+        self.hierarchy_title.set_title(self.card_holder_history, self.actual_card_holder)
 
         # add the new holder
         self.card_holder_panel_layout.addWidget(self.actual_card_holder)
         #self.scroll_layout.addStretch(1)
         
-        # TODO get the filtered list !!!!!!!!!!!!!!!!!!!
-        self.actual_card_holder.fillUpCardHolderByDescriptorList(card_structure)
-
+        # Fill-up the CardHolder with Cards using the parameter as list of descriptor
+        self.actual_card_holder.fillUpCardHolderByDescriptor(card_descriptor_structure)
+        
 
     # -------------------------
     #
@@ -184,14 +175,14 @@ class GuiAkoTeka(QWidget, QObject):
     # -------------------------
     def restore_previous_holder(self):
         
-        size = len(self.card_holder_list)
+        size = len(self.card_holder_history)
         if  size >= 1:
 
             # get the previous CardHolder
-            previous_card_holder = self.card_holder_list[size - 1]
+            previous_card_holder = self.card_holder_history[size - 1]
             
             # remove the previous CardHolder from the history list
-            self.card_holder_list.remove(previous_card_holder)
+            self.card_holder_history.remove(previous_card_holder)
             
             # hide the old CardHolder
             self.actual_card_holder.setHidden(True)            
@@ -205,19 +196,47 @@ class GuiAkoTeka(QWidget, QObject):
             # show the current card holder
             self.actual_card_holder.setHidden(False)
 
-            self.hierarchy_title.set_title(self.card_holder_list, self.actual_card_holder)
-            #self.hierarchy_title.set_title(self.card_holder_list + [[None,self.actual_title]])
+            # set the title
+            self.hierarchy_title.set_title(self.card_holder_history, self.actual_card_holder)
             
             # TODO fill up with filtered list
             #self.actual_card_holder.fill_up_card_holder()
             card_structure = self.actual_card_holder.card_descriptor_list
             self.actual_card_holder.fillUpCardHolderByDescriptorList(card_structure)
 
-    def collecting_spinner_start(self):
+    # ------------------
+    # Collecting Started
+    # ------------------
+    def collecting_start(self):
+        """
+        Indicates that the CardCollection process started.
+        The CardHolder calls this method
+        Jobs to do:
+            -Hide the title
+        """
         self.hierarchy_title.setHidden(True)
 
-    def collecting_spinner_stop(self):
+    # -------------------
+    # Collecting Finished
+    # -------------------
+    def collecting_finish(self, card_holder, orig_card_descriptor_hierarchy):
+        """
+        Indicates that the CardCollection process finished.
+        The CardHolder calls this method
+        Jobs to do:
+            -Show the title
+            -Save the Collected Card Descriptor Hierarchy
+            -Set up the filters
+        """        
+        # Show the title of the CardHolder (the certain level)
         self.hierarchy_title.setHidden(False)
+        
+        # Save the whole card descriptor hierarchy (we use it for filter)
+        #self.orig_card_descriptor_hierarchy = orig_card_descriptor_hierarchy
+        card_holder.orig_card_descriptor_hierarchy = orig_card_descriptor_hierarchy
+        
+        # Set-up the Filters
+        self.set_up_filters(orig_card_descriptor_hierarchy)
 
     # ----------------------------------------------------------
     #
@@ -269,9 +288,10 @@ class GuiAkoTeka(QWidget, QObject):
         layout.addWidget(card_panel)
         
         return card
-    
-  
 
+
+
+# 1111111111
   
     def set_filter_listener(self, listener):
         self.control_panel.set_filter_listener(listener)
@@ -312,6 +332,133 @@ class GuiAkoTeka(QWidget, QObject):
 
         event.ignore()
 
+    # ----------------
+    # Set-up Filters
+    # ----------------
+    def set_up_filters(self, card_descriptor_structure):
+        """
+        Based on the list that received as parameter, 
+        it selects the possible filter elements
+        """
+        
+        # Turn OFF the listener to the Filter
+        
+        # Setup Filters
+        
+        filtered_card_structure = [] #json.loads('[]')
+        filter_hit_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set(),
+            "favorite": set(),
+            "new": set(),
+            "best": set()
+        }
+        self.generate_filtered_card_structure(card_descriptor_structure, filtered_card_structure, filter_hit_list)
+
+        
+        self.get_filter_holder().clear_genre()
+        self.get_filter_holder().add_genre("", "")
+        for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_filter_holder().add_genre(element[0], element[1])
+        
+        self.get_filter_holder().clear_theme()
+        self.get_filter_holder().add_theme("", "")
+        for element in sorted([(_("theme_" + e), e) for e in filter_hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_filter_holder().add_theme(element[0], element[1])
+
+        self.get_filter_holder().clear_director()
+        self.get_filter_holder().add_director("")
+        for element in sorted( filter_hit_list['director'], key=cmp_to_key(locale.strcoll) ):
+            self.get_filter_holder().add_director(element)
+
+        self.get_filter_holder().clear_actor()
+        self.get_filter_holder().add_actor("")
+        for element in sorted( filter_hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
+            self.get_filter_holder().add_actor(element)
+        
+        # Turn back ON the listener to the Filter
+
+
+    # ================================
+    # 
+    # Generates Filtered CardStructure
+    #
+    # ================================   
+    def generate_filtered_card_structure(self, card_structure, filtered_card_structure, filter_hit_list):
+        """
+        This method serves a dual task:
+            -Based on the Filter it generates a new, filtered list: filtered_card_structure
+            -Collects the new Filter, based on the filtered list:   filter_hit_list
+        """
+        mediaFits = False
+        collectorFits = False
+            
+        for crd in card_structure:            
+            
+            card = {}
+            card['title'] = crd['title']
+            card['storyline'] = crd['storyline']
+            card['general'] = crd['general']
+            card['rating'] = crd['rating']
+
+            card['extra'] = {}            
+            card['extra']['image-path'] = crd['extra']['image-path']
+            card['extra']['media-path'] = crd['extra']['media-path']
+            card['extra']['recent-folder'] = crd['extra']['recent-folder']            
+            card['extra']['sub-cards'] = [] #json.loads('[]')
+            card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
+
+            # in case of MEDIA CARD
+            if crd['extra']['media-path']:
+
+                fits = True
+                
+                # go through the filters
+                for category, value in self.get_filter_holder().get_filter_selection().items():
+            
+                    # if the specific filter is set
+                    if value != None and value != "":
+
+                        if filter_key[category]['store-mode'] == 'v':
+                            if value != crd[filter_key[category]['section']][category]:
+                                fits = False
+                                
+                        elif filter_key[category]['store-mode'] == 'a':
+                            if value not in crd[filter_key[category]['section']][category]:
+                                fits = False
+                        else:
+                            fits = False
+
+                # let's keep this MEDIA CARD as it fits
+                if fits:
+
+                    # Collect the filters
+                    for category, value in self.get_filter_holder().get_filter_selection().items():
+                        if filter_key[category]['store-mode'] == 'v':
+                            if card[filter_key[category]['section']][category]:
+                                filter_hit_list[category].add(card[filter_key[category]['section']][category])
+                                
+                        elif filter_key[category]['store-mode'] == 'a':
+                            for cat in card[filter_key[category]['section']][category]:
+                                if cat.strip():
+                                    filter_hit_list[category].add(cat.strip())
+                    
+                    filtered_card_structure.append(card)                    
+                    mediaFits = True
+                    
+            # in case of COLLECTOR CARD
+            else:                     
+                     
+                # then it depends on the next level
+                fits = self.generate_filtered_card_structure(crd['extra']['sub-cards'], card['extra']['sub-cards'], filter_hit_list)
+                
+                if fits:
+                    filtered_card_structure.append(card)
+                    collectorFits = True
+        
+        return (mediaFits or collectorFits)
   
 
 # =========================================
@@ -345,9 +492,9 @@ class HierarchyTitle(QWidget):
         
 #        self.setHidden(True)
 
-    def set_title(self, card_holder_list, actual_card_holder):
+    def set_title(self, card_holder_history, actual_card_holder):
         
-        title = " > ".join( [ ch.title for ch in card_holder_list + [actual_card_holder] if ch.title ]  )
+        title = " > ".join( [ ch.title for ch in card_holder_history + [actual_card_holder] if ch.title ]  )
         
         self.label.setText(title)
         self.title = title
@@ -522,10 +669,11 @@ class ControlPanel(QWidget):
 #!!!!!!!!!!!!
 
             # remove history
-            for card_holder in self.gui.card_holder_list:
+            for card_holder in self.gui.card_holder_history:
                 card_holder.setHidden(True)
-                self.gui.scroll_layout.removeWidget(card_holder)
-            self.gui.card_holder_list.clear()
+                self.gui.card_holder_panel_layout.removeWidget(card_holder)
+                #self.gui.scroll_layout.removeWidget(card_holder)
+            self.gui.card_holder_history.clear()
                 
             # Remove recent CardHolder as well
             self.gui.actual_card_holder.setHidden(True)
@@ -533,7 +681,7 @@ class ControlPanel(QWidget):
             self.gui.actual_card_holder = None
             
             # reload the cards
-            self.gui.start_card_holder()
+            self.gui.startCardHolder()
             
             # refresh the Control Panel
             self.refresh_label()
@@ -856,7 +1004,7 @@ def main():
     
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
-    ex.start_card_holder()
+    ex.startCardHolder()
     sys.exit(app.exec_())
     
     
