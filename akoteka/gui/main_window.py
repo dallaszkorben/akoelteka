@@ -128,6 +128,8 @@ class GuiAkoTeka(QWidget, QObject):
     #
     # ---------------------------
     def go_down_in_hierarchy( self, card_descriptor_structure, title ):
+ 
+#        previous_original_card_descriptor_structure = None
         
         # if there is already a CardHolder
         if self.actual_card_holder:        
@@ -137,7 +139,7 @@ class GuiAkoTeka(QWidget, QObject):
             
             # save the old CardHolder it in a list
             self.card_holder_history.append(self.actual_card_holder)
-        
+                    
         self.actual_card_holder = CardHolder(            
             self, 
             self.get_new_card,
@@ -154,19 +156,24 @@ class GuiAkoTeka(QWidget, QObject):
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
         
+        # Save the original card desctiptor structure into the CardHolder
+        self.actual_card_holder.orig_card_descriptor_structure = card_descriptor_structure
+        
         # Make the CardHolder to be in Focus
         self.actual_card_holder.setFocus()
 
         # Set the title of the CardHolder - The actual level of the hierarchy
         self.hierarchy_title.set_title(self.card_holder_history, self.actual_card_holder)
 
-        # add the new holder
+        # add the new holder to the panel
         self.card_holder_panel_layout.addWidget(self.actual_card_holder)
         #self.scroll_layout.addStretch(1)
         
-        # Fill-up the CardHolder with Cards using the parameter as list of descriptor
-        self.actual_card_holder.fillUpCardHolderByDescriptor(card_descriptor_structure)
+        # filter the list by the filters
+        filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
         
+        # Fill-up the CardHolder with Cards using the parameter as list of descriptor
+        self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
 
     # -------------------------
     #
@@ -199,10 +206,20 @@ class GuiAkoTeka(QWidget, QObject):
             # set the title
             self.hierarchy_title.set_title(self.card_holder_history, self.actual_card_holder)
             
+            card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
+            
+            # filter the list by the filters
+            filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
+        
+            # Fill-up the CardHolder with Cards using the parameter as list of descriptor
+            self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
+
+            
+            
             # TODO fill up with filtered list
             #self.actual_card_holder.fill_up_card_holder()
-            card_structure = self.actual_card_holder.card_descriptor_list
-            self.actual_card_holder.fillUpCardHolderByDescriptorList(card_structure)
+            #card_structure = self.actual_card_holder.card_descriptor_list
+            #self.actual_card_holder.fillUpCardHolderByDescriptor(card_structure)
 
     # ------------------
     # Collecting Started
@@ -219,24 +236,20 @@ class GuiAkoTeka(QWidget, QObject):
     # -------------------
     # Collecting Finished
     # -------------------
-    def collecting_finish(self, card_holder, orig_card_descriptor_hierarchy):
+    def collecting_finish(self, card_holder, card_descriptor_structure):
         """
         Indicates that the CardCollection process finished.
         The CardHolder calls this method
         Jobs to do:
             -Show the title
-            -Save the Collected Card Descriptor Hierarchy
             -Set up the filters
         """        
         # Show the title of the CardHolder (the certain level)
         self.hierarchy_title.setHidden(False)
         
-        # Save the whole card descriptor hierarchy (we use it for filter)
-        #self.orig_card_descriptor_hierarchy = orig_card_descriptor_hierarchy
-        card_holder.orig_card_descriptor_hierarchy = orig_card_descriptor_hierarchy
-        
         # Set-up the Filters
-        self.set_up_filters(orig_card_descriptor_hierarchy)
+        card_holder.orig_card_descriptor_structure = card_descriptor_structure
+        self.set_up_filters(card_descriptor_structure)
 
     # ----------------------------------------------------------
     #
@@ -258,7 +271,21 @@ class GuiAkoTeka(QWidget, QObject):
     # TODO remove it
     def collect_cards(self, paths):
         cdl = collect_cards(paths)
-        return cdl
+        
+        # Preparation for collecting the filtered_card_structure and filters
+        filtered_card_structure = []
+        filter_hit_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set(),
+            "favorite": set(),
+            "new": set(),
+            "best": set()
+        }
+        self.generate_filtered_card_structure(cdl, filtered_card_structure, filter_hit_list)
+        
+        return filtered_card_structure
     
     # --------------------
     #
@@ -289,8 +316,6 @@ class GuiAkoTeka(QWidget, QObject):
         
         return card
 
-
-
 # 1111111111
   
     def set_filter_listener(self, listener):
@@ -299,38 +324,14 @@ class GuiAkoTeka(QWidget, QObject):
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
       
-    # ----------------------------
-    #
-    # Key Press Event: Enter/Space
-    #
-    # ----------------------------
-    def keyPressEvent(self, event):
 
-        #
-        # Enter / Return / Space
-        #
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter or event.key() == Qt.Key_Space:
 
-            # Simulate a Mouse Press / Release Event on the Image
-            if self.actual_card_holder.shown_card_list and len(self.actual_card_holder.shown_card_list) > 0:
-                card=self.actual_card_holder.shown_card_list[0]
-                if card.is_selected():
-                    
-                    event_press = QMouseEvent(QEvent.MouseButtonPress, QPoint(10,10), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-                    event_release = QMouseEvent(QEvent.MouseButtonRelease, QPoint(10,10), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-
-                    layout=card.get_panel().get_layout()                    
-                    card_panel = layout.itemAt(0).widget()
-                    card_panel.card_image.mousePressEvent(event_press)
-                    card_panel.card_image.mouseReleaseEvent(event_release)            
-
-        #
-        # Escape
-        #
-        if event.key() == Qt.Key_Escape:
-            self.restore_previous_holder()
-
-        event.ignore()
+    # ----------------
+    # Filter the Cards
+    # ----------------
+    def filter_the_cards(self):
+        filtered_card_structure = self.set_up_filters(self.actual_card_holder.orig_card_descriptor_structure)
+        self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
 
     # ----------------
     # Set-up Filters
@@ -340,12 +341,38 @@ class GuiAkoTeka(QWidget, QObject):
         Based on the list that received as parameter, 
         it selects the possible filter elements
         """
+        #if card_descriptor_structure == None:
+        #    #card_descriptor_structure = self.card_holder_history[len(self.card_holder_history)-1].card_descriptor_list
+        #    card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
+
         
+        # ###################################
         # Turn OFF the listener to the Filter
+        # ###################################
+        self.set_filter_listener(None)
         
+        # ####################################
+        # Save the recent state of the filters
+        # ####################################
+        filters = {
+            "genre": "",
+            "theme": "",
+            "director": "",
+            "actor": "",
+            "favorite": "",
+            "new": "",
+            "best": ""
+        }
+        for category, value in self.get_filter_holder().get_filter_selection().items():            
+            if value != None and value != "":
+                filters[category] = value
+        
+        # #############
         # Setup Filters
-        
-        filtered_card_structure = [] #json.loads('[]')
+        # #############
+
+        # Preparation for collecting the filtered_card_structure and filters
+        filtered_card_structure = []
         filter_hit_list = {
             "genre": set(),
             "theme": set(),
@@ -356,31 +383,49 @@ class GuiAkoTeka(QWidget, QObject):
             "best": set()
         }
         self.generate_filtered_card_structure(card_descriptor_structure, filtered_card_structure, filter_hit_list)
-
         
+        # Fill up GENRE dropdown
         self.get_filter_holder().clear_genre()
         self.get_filter_holder().add_genre("", "")
         for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_filter_holder().add_genre(element[0], element[1])
         
+        # Fill up THEME dropdown
         self.get_filter_holder().clear_theme()
         self.get_filter_holder().add_theme("", "")
         for element in sorted([(_("theme_" + e), e) for e in filter_hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_filter_holder().add_theme(element[0], element[1])
 
+        # Fill up DIRECTOR dropdown
         self.get_filter_holder().clear_director()
         self.get_filter_holder().add_director("")
         for element in sorted( filter_hit_list['director'], key=cmp_to_key(locale.strcoll) ):
             self.get_filter_holder().add_director(element)
 
+        # Fill up ACTOR dropdown
         self.get_filter_holder().clear_actor()
         self.get_filter_holder().add_actor("")
         for element in sorted( filter_hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
             self.get_filter_holder().add_actor(element)
         
+        # ####################
+        # Reselect the Filters
+        # ####################
+        self.get_filter_holder().select_genre(filters["genre"])
+        self.get_filter_holder().select_theme(filters["theme"])
+        self.get_filter_holder().select_director(filters["director"])
+        self.get_filter_holder().select_actor(filters["actor"])
+        
+        # #######################################
         # Turn back ON the listener to the Filter
+        # #######################################
+        self.set_filter_listener(self)
 
+        #self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
 
+        return filtered_card_structure
+    
+    
     # ================================
     # 
     # Generates Filtered CardStructure
@@ -402,6 +447,7 @@ class GuiAkoTeka(QWidget, QObject):
             card['storyline'] = crd['storyline']
             card['general'] = crd['general']
             card['rating'] = crd['rating']
+            card['links'] = crd['links']
 
             card['extra'] = {}            
             card['extra']['image-path'] = crd['extra']['image-path']
@@ -459,6 +505,39 @@ class GuiAkoTeka(QWidget, QObject):
                     collectorFits = True
         
         return (mediaFits or collectorFits)
+  
+    # ----------------------------
+    #
+    # Key Press Event: Enter/Space
+    #
+    # ----------------------------
+    def keyPressEvent(self, event):
+
+        #
+        # Enter / Return / Space
+        #
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter or event.key() == Qt.Key_Space:
+
+            # Simulate a Mouse Press / Release Event on the Image
+            if self.actual_card_holder.shown_card_list and len(self.actual_card_holder.shown_card_list) > 0:
+                card=self.actual_card_holder.shown_card_list[0]
+                if card.is_selected():
+                    
+                    event_press = QMouseEvent(QEvent.MouseButtonPress, QPoint(10,10), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+                    event_release = QMouseEvent(QEvent.MouseButtonRelease, QPoint(10,10), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+
+                    layout=card.get_panel().get_layout()                    
+                    card_panel = layout.itemAt(0).widget()
+                    card_panel.card_image.mousePressEvent(event_press)
+                    card_panel.card_image.mouseReleaseEvent(event_release)            
+
+        #
+        # Escape
+        #
+        if event.key() == Qt.Key_Escape:
+            self.restore_previous_holder()
+
+        event.ignore()
   
 
 # =========================================
@@ -690,7 +769,7 @@ class ControlPanel(QWidget):
  
     def filter_on_change(self):
         if self.filter_listener:
-            self.filter_listener.fill_up_card_holder()
+            self.filter_listener.filter_the_cards()
     
     def get_filter_holder(self):
         return self.filter_holder

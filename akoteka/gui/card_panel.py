@@ -69,8 +69,8 @@ class CardPanel(QWidget):
  
         self.set_image_path( card_data["extra"]["image-path"] )
         
-        #self.set_sub_cards( card_data["extra"]["orig-sub-cards"] )
-        self.set_sub_cards( card_data['extra']['sub-cards'])
+        self.set_sub_cards( card_data["extra"]["orig-sub-cards"] )
+        #self.set_sub_cards( card_data['extra']['sub-cards'])
         
         self.set_media_path( card_data["extra"]["media-path"] )
         self.set_title( card_data['title'][config_ini['language']] )
@@ -482,7 +482,7 @@ class CardImage(QWidget):
             thread.start()
             
         else:
-            # go deeper
+            # go deeper            
             self.panel.card_holder.parent.go_down_in_hierarchy(self.get_sub_cards(), self.panel.get_title() )
             
         event.accept()
