@@ -51,7 +51,7 @@ class CardPanel(QWidget):
         self.card_holder = card.get_card_holder()
 
         panel_layout = QHBoxLayout(self)
-        panel_layout.setContentsMargins(6, 6, 6, 6)
+        panel_layout.setContentsMargins(WIDTH_PANEL_MARGIN_LEFT, WIDTH_PANEL_MARGIN_TOP, WIDTH_PANEL_MARGIN_RIGHT, WIDTH_PANEL_MARGIN_BOTTOM)
         panel_layout.setSpacing(10)
         self.setLayout( panel_layout )
         #self.setStyleSheet('background: ' + COLOR_CARD_BACKGROUND)

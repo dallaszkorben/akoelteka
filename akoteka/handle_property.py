@@ -9,6 +9,9 @@ class Property(object):
         self.file = file
         self.folder = folder
         self.parser = configparser.RawConfigParser()
+        
+        # !!! make it CASE SENSITIVE !!! otherwise it duplicates the hit if there was a key with upper and lower cases. Now it throws an exception
+        self.parser.optionxform = str
 
     def __write_file(self):
         

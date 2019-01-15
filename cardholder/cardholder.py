@@ -906,13 +906,13 @@ class Card(QWidget):
     def set_border_width(self, width, update=True):
         self.border_width = width
         self.self_layout.setContentsMargins(self.border_width,self.border_width,self.border_width,self.border_width)
-        self.panel.set_border_radius(self.border_radius - self.border_width, update)
+        self.panel.set_border_radius(max(0, self.border_radius - self.border_width), update)
         if update:
             self.update()
 
     def set_border_radius(self, radius, update=True):
         self.border_radius = radius
-        self.panel.set_border_radius(self.border_radius - self.border_width, update)
+        self.panel.set_border_radius(max(0, self.border_radius - self.border_width), update)
         if update:
             self.update()
 

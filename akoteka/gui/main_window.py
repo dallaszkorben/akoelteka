@@ -310,6 +310,7 @@ class GuiAkoTeka(QWidget, QObject):
  
         panel = card.get_panel()        
         layout = panel.get_layout()
+        layout.setContentsMargins(0, 0, 0, 0)
 
         card_panel = CardPanel(card, card_data)
         layout.addWidget(card_panel)
@@ -387,6 +388,7 @@ class GuiAkoTeka(QWidget, QObject):
         # Fill up GENRE dropdown
         self.get_filter_holder().clear_genre()
         self.get_filter_holder().add_genre("", "")
+        #print([_(i) for i in filter_hit_list['genre']])
         for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_filter_holder().add_genre(element[0], element[1])
         
