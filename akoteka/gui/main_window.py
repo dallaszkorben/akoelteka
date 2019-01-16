@@ -47,27 +47,27 @@ class GuiAkoTeka(QWidget, QObject):
         box_layout.addWidget( self.control_panel)
     
         # scroll_content where you can add your widgets - has scroll
-#        scroll = QScrollArea(self)
-#        box_layout.addWidget(scroll)
-#        scroll.setWidgetResizable(True)
-#        scroll_content = QWidget(scroll)
-#        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
-#        scroll.setFocusPolicy(Qt.NoFocus)
-    
-        scroll_content = QWidget(self)
+        scroll = QScrollArea(self)
+        box_layout.addWidget(scroll)
+        scroll.setWidgetResizable(True)
+        scroll_content = QWidget(scroll)
         scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
-        box_layout.addWidget(scroll_content)
-        scroll_layout = QVBoxLayout(scroll_content)
-        scroll_content.setLayout(scroll_layout)
-
-#        # layout of the content with margins
-#        scroll_layout = QVBoxLayout(scroll_content)        
-#        scroll.setWidget(scroll_content)        
-#        # vertical distance between cards - Vertical
-#        scroll_layout.setSpacing(5)
-#        # spaces between the added Widget and this top, right, bottom, left side
-#        scroll_layout.setContentsMargins(15,15,15,15)
+        scroll.setFocusPolicy(Qt.NoFocus)
+    
+#        scroll_content = QWidget(self)
+#        scroll_content.setStyleSheet('background: ' + COLOR_MAIN_BACKGROUND)
+#        box_layout.addWidget(scroll_content)
+#        scroll_layout = QVBoxLayout(scroll_content)
 #        scroll_content.setLayout(scroll_layout)
+
+        # layout of the content with margins
+        scroll_layout = QVBoxLayout(scroll_content)        
+        scroll.setWidget(scroll_content)        
+        # vertical distance between cards - Vertical
+        scroll_layout.setSpacing(5)
+        # spaces between the added Widget and this top, right, bottom, left side
+        scroll_layout.setContentsMargins(15,15,15,15)
+        scroll_content.setLayout(scroll_layout)
 
         # -------------------------------
         # Title
@@ -149,7 +149,7 @@ class GuiAkoTeka(QWidget, QObject):
         )
         
         self.actual_card_holder.title = title
-        self.actual_card_holder.set_max_overlapped_cards(4)
+        self.actual_card_holder.set_max_overlapped_cards( MAX_OVERLAPPED_CARDS )
         self.actual_card_holder.set_y_coordinate_by_reverse_index_method(self.get_y_coordinate_by_reverse_index)
         self.actual_card_holder.set_x_offset_by_index_method(self.get_x_offset_by_index)
         self.actual_card_holder.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
@@ -258,6 +258,7 @@ class GuiAkoTeka(QWidget, QObject):
     # ----------------------------------------------------------
     def get_y_coordinate_by_reverse_index(self, reverse_index):
         return reverse_index * reverse_index * 8
+        #return reverse_index * 220
     
     # -----------------------------------------------
     #
@@ -388,7 +389,6 @@ class GuiAkoTeka(QWidget, QObject):
         # Fill up GENRE dropdown
         self.get_filter_holder().clear_genre()
         self.get_filter_holder().add_genre("", "")
-        #print([_(i) for i in filter_hit_list['genre']])
         for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_filter_holder().add_genre(element[0], element[1])
         
@@ -827,6 +827,7 @@ class FilterDropDownSimple(QWidget):
 
         self.dropdown = QComboBox(self)
         self.dropdown.setFocusPolicy(Qt.NoFocus)
+        #self.dropdown.setEditable(True)
         
         self.dropdown.currentIndexChanged.connect(self.current_index_changed)
 
@@ -868,8 +869,17 @@ class FilterDropDownSimple(QWidget):
     def add_element(self, value, id):
         self.dropdown.addItem(value, id)
 
-    def get_selected(self):
+    # -------------------------------------
+    # get the index of the selected element
+    # -------------------------------------
+    def get_selected_index(self):
         return self.dropdown.itemData( self.dropdown.currentIndex() )
+
+    # -------------------------------------
+    # get the value of the selected element
+    # -------------------------------------
+    def get_selected_value(self):
+        return self.dropdown.itemText( self.dropdown.currentIndex() )
     
     def select_element(self, id):
         self.dropdown.setCurrentIndex( self.dropdown.findData(id) )
@@ -998,6 +1008,13 @@ class FilterHolder(QWidget):
         
         self_layout.addWidget(holder_dropdown_da)
 
+
+        #mydd = QComboBox(self)
+        #self_layout.addWidget(mydd)
+        #mydd.setEditable(True)
+
+
+
         # Listeners
         self.filter_dd_genre.state_changed.connect(self.state_changed)
         self.filter_dd_theme.state_changed.connect(self.state_changed)
@@ -1055,10 +1072,10 @@ class FilterHolder(QWidget):
             "best": self.filter_cb_best.is_checked(),
             "new": self.filter_cb_new.is_checked(),
             "favorite": self.filter_cb_favorite.is_checked(),
-            "genre": self.filter_dd_genre.get_selected(),
-            "theme": self.filter_dd_theme.get_selected(),
-            "director": self.filter_dd_director.get_selected(),
-            "actor": self.filter_dd_actor.get_selected()
+            "genre": self.filter_dd_genre.get_selected_index(),
+            "theme": self.filter_dd_theme.get_selected_index(),
+            "director": self.filter_dd_director.get_selected_value(),
+            "actor": self.filter_dd_actor.get_selected_value()
         }
         return filter_selection
     
