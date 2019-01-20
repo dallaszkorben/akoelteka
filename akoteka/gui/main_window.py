@@ -256,8 +256,10 @@ class GuiAkoTeka(QWidget, QObject):
     # Calculates the Y coordinate of a Card using reverse index
     #
     # ----------------------------------------------------------
-    def get_y_coordinate_by_reverse_index(self, reverse_index):
-        return reverse_index * reverse_index * 8
+    def get_y_coordinate_by_reverse_index(self, reverse_index, diff_to_max):
+        raw_pos = (reverse_index + diff_to_max) * (reverse_index + diff_to_max)
+        offset = diff_to_max * diff_to_max
+        return (raw_pos - offset) * 8
         #return reverse_index * 220
     
     # -----------------------------------------------
@@ -1082,7 +1084,8 @@ class FilterHolder(QWidget):
     def state_changed(self):
         self.changed.emit()
 
-
+    def closeEvent(self, event):
+        print('close filter holder')
 
 
 

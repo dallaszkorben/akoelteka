@@ -129,8 +129,11 @@ class CardHolder( QWidget ):
     def set_y_coordinate_by_reverse_index_method(self, method):
         self.get_y_coordinate_by_reverse_index_method = method
         
-    def get_y_coordinate_by_reverse_index(self, reverse_index):
-        return reverse_index * reverse_index * CardHolder.DEFAULT_RATE_OF_CARD_Y_MULTIPLICATOR
+    def get_y_coordinate_by_reverse_index(self, reverse_index, diff_to_max):
+        
+        raw_pos = (reverse_index + diff_to_max) * (reverse_index + diff_to_max)
+        offset = diff_to_max * diff_to_max
+        return (raw_pos - offset) * CardHolder.DEFAULT_RATE_OF_CARD_Y_MULTIPLICATOR
 
     def set_x_offset_by_index_method(self, method):
         self.get_x_offset_by_index_method = method
@@ -1017,8 +1020,11 @@ class Card(QWidget):
     # ----------------------------------
     def get_y_coordinate(self, local_index):
         max_card = min(self.card_holder.max_overlapped_cards, len(self.card_holder.card_descriptor_list) - 1)
+        
+        dif = self.card_holder.max_overlapped_cards - max_card
+        
         reverse_index = max_card - min(local_index, max_card)  #0->most farther
-        return self.card_holder.get_y_coordinate_by_reverse_index_method(reverse_index)
+        return self.card_holder.get_y_coordinate_by_reverse_index_method(reverse_index, dif)
 
     
     
