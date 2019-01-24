@@ -214,13 +214,6 @@ class GuiAkoTeka(QWidget, QObject):
             # Fill-up the CardHolder with Cards using the parameter as list of descriptor
             self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
 
-            
-            
-            # TODO fill up with filtered list
-            #self.actual_card_holder.fill_up_card_holder()
-            #card_structure = self.actual_card_holder.card_descriptor_list
-            #self.actual_card_holder.fillUpCardHolderByDescriptor(card_structure)
-
     # ------------------
     # Collecting Started
     # ------------------
@@ -244,9 +237,12 @@ class GuiAkoTeka(QWidget, QObject):
             -Show the title
             -Set up the filters
         """        
-        # Show the title of the CardHolder (the certain level)
-        self.hierarchy_title.setHidden(False)
         
+        if card_descriptor_structure:
+            
+            # Show the title of the CardHolder (the certain level)        
+            self.hierarchy_title.setHidden(False)
+       
         # Set-up the Filters
         card_holder.orig_card_descriptor_structure = card_descriptor_structure
         self.set_up_filters(card_descriptor_structure)
@@ -271,7 +267,7 @@ class GuiAkoTeka(QWidget, QObject):
         return index * 4
        
        
-    # TODO remove it
+
     def collect_cards(self, paths):
         cdl = collect_cards(paths)
         

@@ -72,8 +72,8 @@ def get_pattern_card():
 def folder_investigation( actual_dir, json_list):
     
     # Collect files and and dirs in the current directory
-    file_list = [f for f in os.listdir(actual_dir) if os.path.isfile(os.path.join(actual_dir, f))]
-    dir_list = [d for d in os.listdir(actual_dir) if os.path.isdir(os.path.join(actual_dir, d))]
+    file_list = [f for f in os.listdir(actual_dir) if os.path.isfile(os.path.join(actual_dir, f))] if os.path.exists(actual_dir) else []
+    dir_list = [d for d in os.listdir(actual_dir) if os.path.isdir(os.path.join(actual_dir, d))] if os.path.exists(actual_dir) else []
 
     # now I got to a certain level of directory structure
     card_path_os = None
