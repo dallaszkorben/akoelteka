@@ -128,12 +128,10 @@ class GuiAkoTeka(QWidget, QObject):
     #
     # ---------------------------
     def go_down_in_hierarchy( self, card_descriptor_structure, title ):
- 
-#        previous_original_card_descriptor_structure = None
-        
+
         # if there is already a CardHolder
         if self.actual_card_holder:        
-            
+
             # hide the old CardHolder
             self.actual_card_holder.setHidden(True)
             
@@ -147,7 +145,6 @@ class GuiAkoTeka(QWidget, QObject):
             self.collecting_start,
             self.collecting_finish
         )
-        
         
         self.actual_card_holder.title = title
         self.actual_card_holder.set_max_overlapped_cards( MAX_OVERLAPPED_CARDS )
@@ -213,11 +210,8 @@ class GuiAkoTeka(QWidget, QObject):
             # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
             self.filter_the_cards(self.actual_card_holder.orig_card_descriptor_structure)
             
-            ## filter the list by the filters
-            #filtered_card_descriptor_structure = self.set_up_filters(self.actual_card_holder.orig_card_descriptor_structure)
-            #
-            ## Fill-up the CardHolder with Cards using the parameter as list of descriptor
-            #self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
+            # select the Card which was selected to enter
+            self.actual_card_holder.select_actual_card()
 
     # ------------------
     # Collecting Started

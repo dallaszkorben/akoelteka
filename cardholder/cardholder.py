@@ -359,7 +359,6 @@ class CardHolder( QWidget ):
 
                 local_index = i-index_corr
                 card = self.get_new_card_method(self.card_descriptor_list[i_corr], local_index, i_corr )
-#                card.refresh_color()
                 position = card.place(local_index)
                 
                 self.shown_card_list[local_index] = card
@@ -545,7 +544,7 @@ class CardHolder( QWidget ):
     #
     # Rolls the cards according to the self.rate_of_movement + delta_rate
     #
-    # delta_rate:   In normal case it is +1 or -1
+    # delta_rate:   In normal case it is +1 or -1 (1/10 of the move to the next position)
     #               Adding this value to the self.rate_of_movement, it
     #               shows that how far the cards moved negativ (up) or
     #               positive (down) direction compared to the default
@@ -575,7 +574,7 @@ class CardHolder( QWidget ):
             card.set_not_selected()
             
             # add new card to the beginning
-            first_card = self.shown_card_list[0]                
+            first_card = self.shown_card_list[0]
             first_card_index = self.index_correction(first_card.index - 1)
             card = self.get_new_card_method(self.card_descriptor_list[first_card_index], -1, first_card_index ) 
             self.shown_card_list.insert(0, card)
@@ -610,6 +609,8 @@ class CardHolder( QWidget ):
             virtual_index = card.local_index - rate
 #            card.refresh_color()
             card.place(virtual_index, True)
+
+        self.actual_card_index = self.shown_card_list[0].index
 
     def rolling_adjust_forward(self,rate):
         

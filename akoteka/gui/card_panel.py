@@ -491,7 +491,6 @@ class CardImage(QWidget):
             
         else:
             # go deeper
-            #print(self.panel.card_holder.actual_card_index)
             self.panel.card_holder.parent.go_down_in_hierarchy(self.get_sub_cards(), self.panel.get_title() )
             
         event.accept()
