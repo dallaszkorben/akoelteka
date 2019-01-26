@@ -82,6 +82,8 @@ class CardPanel(QWidget):
             self.add_element_to_collector_line( _("title_year"), card_data["general"]["year"])
             self.add_element_to_collector_line( _("title_length"), card_data["general"]["length"])
             self.add_element_to_collector_line( _("title_country"), ", ".join( [ _("country_" + a) for a in card_data["general"]["country"] ]) )
+            self.add_element_to_collector_line( _("title_sound"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sound"] ]) )
+            self.add_element_to_collector_line( _("title_sub"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sub"] ]) )
  
  
             self.add_separator()
@@ -273,21 +275,8 @@ class CardInfoLine(QWidget):
         line_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout( line_layout )
         line_layout.setSpacing(0)
-        
-        # border of the line
-#        self.setFrameShape(QFrame.Panel)
-#        self.setFrameShadow(QFrame.Sunken)
-#        self.setLineWidth(0)
-
-
-#        w = CardInfoLineLabel(label + ":")
-#        w.setAlignment(Qt.AlignRight)
-#        line_layout.addWidget(w,0)
-
-
 
         line_layout.addWidget(CardInfoLineLabel(label + ":"),0)
-#        line_layout.addWidget(CardInfoLineValue(value), 1)
         line_layout.addWidget(CardInfoLineValue(value), 1) 
         
 
@@ -305,15 +294,34 @@ class CardInfoLinesHolder(QWidget):
         self.setLayout( self.line_layout )
         self.line_layout.setSpacing(1)
         
-        # border
-#        self.setFrameShape(QFrame.Panel)
-#        self.setFrameShadow(QFrame.Sunken)
-#        self.setLineWidth(0)
-        
     def add_element(self, label, value ):
         self.line_layout.addWidget( CardInfoLine( label, value) )
+
+#
+# CardCollectorLine
+#
+class CardCollectorLine(QWidget):
+    def __init__(self):
+        super().__init__()
+    
+        self.line_layout = QHBoxLayout(self)
+        self.line_layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout( self.line_layout )
+        self.line_layout.setSpacing(1)
         
-        #line_layout.addStretch(1)
+    def add_element(self, label, value ):
+
+        label_l = QLabel(label + ": ")
+        label_l.setFont(QFont( FONT_TYPE, INFO_FONT_SIZE, weight=QFont.Normal))
+        self.line_layout.addWidget(label_l)
+        
+        value_l = QLabel(value)
+        value_l.setFont(QFont( FONT_TYPE, INFO_FONT_SIZE, weight=QFont.Bold))
+        self.line_layout.addWidget(value_l)
+
+        self.line_layout.addStretch(1)
+
+        
 
 # ---------------------------------------------------
 #
@@ -335,21 +343,15 @@ class CardInformation(QWidget):
         
         self.card_info_title = CardInfoTitle()
         self.info_layout.addWidget( self.card_info_title )
-        self.card_info_lines_holder = CardInfoLinesHolder()
+        #self.card_info_lines_holder = CardInfoLinesHolder()
+        self.card_info_lines_holder = CardCollectorLine()
         self.info_layout.addWidget( self.card_info_lines_holder )
-        
-        # Horizintal line under the "Year/Length/Country" line
-#        self.horizontal_line = QHLine()
-#        self.info_layout.addWidget( self.horizontal_line )
 
     def set_title(self, title ):
         self.card_info_title.set_title(title)
         
     def get_title(self):
         return self.card_info_title.get_title()
-
-#    def set_storyline(self, storyline):
-#        self.info_layout.addWidget( CardInfoLine(label,value))
         
     def add_separator(self):
         self.info_layout.addWidget( QHLine() )
