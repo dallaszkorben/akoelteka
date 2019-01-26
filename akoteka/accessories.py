@@ -1,6 +1,6 @@
 import os
 import sys
-import json
+#import json
 import re
 import configparser
 import cgi, cgitb
@@ -118,14 +118,14 @@ def folder_investigation( actual_dir, json_list):
                 
     general_json_list = {}
     general_json_list['year'] = ""
-    general_json_list['director'] = json.loads('[]')
+    general_json_list['director'] = [] #json.loads('[]')
     general_json_list['length'] = ""
-    general_json_list['sound'] = json.loads('[]')
-    general_json_list['sub'] = json.loads('[]')
-    general_json_list['genre'] = json.loads('[]')
-    general_json_list['theme'] = json.loads('[]')
-    general_json_list['actor'] = json.loads('[]')
-    general_json_list['country'] = json.loads('[]')
+    general_json_list['sound'] = [] #json.loads('[]')
+    general_json_list['sub'] = [] #json.loads('[]')
+    general_json_list['genre'] = [] #json.loads('[]')
+    general_json_list['theme'] = [] #json.loads('[]')
+    general_json_list['actor'] = [] #json.loads('[]')
+    general_json_list['country'] = [] #json.loads('[]')
     card['general'] = general_json_list
                 
     rating_json_list = {}
@@ -140,7 +140,7 @@ def folder_investigation( actual_dir, json_list):
     extra_json_list['image-path'] = ""
     extra_json_list['media-path'] = ""
     extra_json_list['recent-folder'] = actual_dir
-    extra_json_list['sub-cards'] = json.loads('[]')
+    extra_json_list['sub-cards'] = [] #json.loads('[]')
     card['extra'] = extra_json_list
 
 
@@ -190,17 +190,11 @@ def folder_investigation( actual_dir, json_list):
         parser = configparser.RawConfigParser()
         parser.read(card_path_os)
 
-        try:
-            # save the http path of the image
-            card['extra']['image-path'] = image_path_os            
-        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
-            log_msg(nop_err, "in ", card_path_os)
+        # save the os path of the image
+        card['extra']['image-path'] = image_path_os            
 
-        try:
-            # saves the os path of the media
-            card['extra']['media-path'] = media_path_os
-        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
-            log_msg(nop_err, "in ", card_path_os)
+        # saves the os path of the media
+        card['extra']['media-path'] = media_path_os
 
         try:
             card['title']['hu'] = parser.get("titles", "title_hu")
@@ -329,7 +323,7 @@ def log_msg(par1, par2, par3):
     
 
 def collect_cards( rootdirs ):    
-    media_list = json.loads('[]')
+    media_list = [] #json.loads('[]')
 
     for rootdir in rootdirs:
         folder_investigation(rootdir, media_list)

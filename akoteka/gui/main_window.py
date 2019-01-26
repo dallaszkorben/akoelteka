@@ -134,7 +134,7 @@ class GuiAkoTeka(QWidget, QObject):
         # if there is already a CardHolder
         if self.actual_card_holder:        
             
-            # hide the old CardHolder it
+            # hide the old CardHolder
             self.actual_card_holder.setHidden(True)
             
             # save the old CardHolder it in a list
@@ -147,6 +147,7 @@ class GuiAkoTeka(QWidget, QObject):
             self.collecting_start,
             self.collecting_finish
         )
+        
         
         self.actual_card_holder.title = title
         self.actual_card_holder.set_max_overlapped_cards( MAX_OVERLAPPED_CARDS )
@@ -169,11 +170,14 @@ class GuiAkoTeka(QWidget, QObject):
         self.card_holder_panel_layout.addWidget(self.actual_card_holder)
         #self.scroll_layout.addStretch(1)
         
-        # filter the list by the filters
-        filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
+        # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
+        self.filter_the_cards(card_descriptor_structure)
         
-        # Fill-up the CardHolder with Cards using the parameter as list of descriptor
-        self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
+        ## filter the list by the filters
+        #filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
+        #
+        ## Fill-up the CardHolder with Cards using the parameter as list of descriptor
+        #self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
 
     # -------------------------
     #
@@ -206,13 +210,14 @@ class GuiAkoTeka(QWidget, QObject):
             # set the title
             self.hierarchy_title.set_title(self.card_holder_history, self.actual_card_holder)
             
-            card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
+            # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
+            self.filter_the_cards(self.actual_card_holder.orig_card_descriptor_structure)
             
-            # filter the list by the filters
-            filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
-        
-            # Fill-up the CardHolder with Cards using the parameter as list of descriptor
-            self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
+            ## filter the list by the filters
+            #filtered_card_descriptor_structure = self.set_up_filters(self.actual_card_holder.orig_card_descriptor_structure)
+            #
+            ## Fill-up the CardHolder with Cards using the parameter as list of descriptor
+            #self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
 
     # ------------------
     # Collecting Started
@@ -324,13 +329,17 @@ class GuiAkoTeka(QWidget, QObject):
     def get_filter_holder(self):
         return self.control_panel.get_filter_holder()
       
-
-
-    # ----------------
+    # --------------------------------
+    #
     # Filter the Cards
-    # ----------------
-    def filter_the_cards(self):
-        filtered_card_structure = self.set_up_filters(self.actual_card_holder.orig_card_descriptor_structure)
+    #
+    # Filters the Cards and Show them
+    #
+    # --------------------------------
+    def filter_the_cards(self, card_descriptor_structure=None):
+        if card_descriptor_structure is None:
+            card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
+        filtered_card_structure = self.set_up_filters(card_descriptor_structure)
         self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
 
     # ----------------
@@ -341,10 +350,6 @@ class GuiAkoTeka(QWidget, QObject):
         Based on the list that received as parameter, 
         it selects the possible filter elements
         """
-        #if card_descriptor_structure == None:
-        #    #card_descriptor_structure = self.card_holder_history[len(self.card_holder_history)-1].card_descriptor_list
-        #    card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
-
         
         # ###################################
         # Turn OFF the listener to the Filter
@@ -387,6 +392,7 @@ class GuiAkoTeka(QWidget, QObject):
         # Fill up GENRE dropdown
         self.get_filter_holder().clear_genre()
         self.get_filter_holder().add_genre("", "")
+
         for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_filter_holder().add_genre(element[0], element[1])
         
@@ -421,8 +427,6 @@ class GuiAkoTeka(QWidget, QObject):
         # #######################################
         self.set_filter_listener(self)
 
-        #self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
-
         return filtered_card_structure
     
     
@@ -440,7 +444,8 @@ class GuiAkoTeka(QWidget, QObject):
         mediaFits = False
         collectorFits = False
             
-        for crd in card_structure:            
+        # through the SORTED list
+        for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
             
             card = {}
             card['title'] = crd['title']

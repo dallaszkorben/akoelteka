@@ -343,13 +343,14 @@ class CardHolder( QWidget ):
         In the 0. position will be the Card identified by the "index" parameter
         The card in the 0. position will be indicated as the "selected"
         """
+        
         index_corr = self.index_correction(index)
         
         self.actual_card_index = index_corr
         self.remove_all_cards()
         position = None
         self.shown_card_list = [None for i in range(index_corr + min(self.max_overlapped_cards, len(self.card_descriptor_list)-1), index_corr - 1, -1) ]
-        
+
         for i in range( index_corr + min(self.max_overlapped_cards, len(self.card_descriptor_list)-1), index_corr - 1, -1):
             
             i_corr = self.index_correction(i)
@@ -498,6 +499,16 @@ class CardHolder( QWidget ):
             if self.animate:
                 self.animate.positionChanged.connect(self.rolling)
                 self.animate.start()
+
+
+        #selected_card = self.shown_card_list[0]
+        #print(selected_card)
+        #cd = self.card_descriptor_list[0]
+        #print(cd)
+
+        #print(self.card_descriptor_list.index(self.shown_card_list[0]))
+        
+
 
     # ------------------------------------------------
     #

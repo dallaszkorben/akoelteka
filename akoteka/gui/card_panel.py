@@ -1,6 +1,6 @@
 import sys
 import os
-import json
+#import json
 from subprocess import call
 from threading import Thread
 from pkg_resources import resource_string, resource_filename
@@ -49,6 +49,7 @@ class CardPanel(QWidget):
         self.card = card
         self.card_data = card_data
         self.card_holder = card.get_card_holder()
+        self.card_path = None
 
         panel_layout = QHBoxLayout(self)
         panel_layout.setContentsMargins(WIDTH_PANEL_MARGIN_LEFT, WIDTH_PANEL_MARGIN_TOP, WIDTH_PANEL_MARGIN_RIGHT, WIDTH_PANEL_MARGIN_BOTTOM)
@@ -73,6 +74,7 @@ class CardPanel(QWidget):
         #self.set_sub_cards( card_data['extra']['sub-cards'])
         
         self.set_media_path( card_data["extra"]["media-path"] )
+        
         self.set_title( card_data['title'][config_ini['language']] )
  
         if card_data["extra"]["media-path"]:
@@ -88,12 +90,12 @@ class CardPanel(QWidget):
                     
             if ''.join(card_data["general"]["actor"]):
                 self.add_info_line( _("title_actor"), ", ".join( [ a for a in card_data["general"]["actor"] ] ) )
-                    
+
             if ''.join(card_data["general"]["genre"]):
-                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g) if g else "" for g in card_data["general"]["genre"] ] ) )
+                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g ) if g else "" for g in card_data["general"]["genre"] ] ) )
                     
             if ''.join(card_data["general"]["theme"]):
-                self.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a) if a else "" for a in card_data["general"]["theme"] ] ) )
+                self.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a ) if a else "" for a in card_data["general"]["theme"] ] ) )
                 
             if card_data['storyline'][config_ini['language']]:
                 self.add_separator()                
@@ -137,6 +139,12 @@ class CardPanel(QWidget):
 
     def get_media_path( self ):
         return self.card_image.get_media_path( )
+
+    def set_card_path( self, path ):
+        self.card_path = path
+        
+    def get_card_path( self ):
+        return self.card_path
     
     def set_sub_cards( self, sub_cards ):
         self.card_image.set_sub_cards( sub_cards )
@@ -382,7 +390,7 @@ class CardImage(QWidget):
         self_layout.addWidget(self.image_panel)
 
         self.media_path = None
-        self.sub_cards = json.loads('[]')
+        self.sub_cards = [] #json.loads('[]')
         
         self.setMinimumWidth(PICTURE_WIDTH)
         self.setMaximumWidth(PICTURE_WIDTH)
@@ -482,7 +490,8 @@ class CardImage(QWidget):
             thread.start()
             
         else:
-            # go deeper            
+            # go deeper
+            #print(self.panel.card_holder.actual_card_index)
             self.panel.card_holder.parent.go_down_in_hierarchy(self.get_sub_cards(), self.panel.get_title() )
             
         event.accept()

@@ -25,7 +25,7 @@ class Property(object):
 
         # if not existing file
         if not os.path.exists(self.file):
-            print("GET", "No file: ", self.file, " Source: ", __file__)
+            print("GET", "No file: ", self.file)
             
             self.parser[section]={key: default_value}
             self.__write_file()
@@ -34,7 +34,7 @@ class Property(object):
         try:
             result=self.parser.get(section,key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
-            print("GET", e, 'in ', self.file, " Source: ", __file__)
+            print("GET", e, 'in ', self.file)
             if self.writable:
                 self.update(section, key, default_value)
                 result=self.parser.get(section,key)
@@ -61,9 +61,9 @@ class Property(object):
 
         return result
 
-    def update(self, section, key, value):
+    def update(self, section, key, value, source=None):
         if not os.path.exists(self.file):
-            print("UPDATE", "No file: ", self.file, " Source: ", __file__)
+            print("UPDATE", "No file: ", self.file, " Source: " + source if source else "")
             self.parser[section]={key: value}        
         else:
             self.parser.read(self.file)
@@ -71,7 +71,7 @@ class Property(object):
                 # if no section -> NoSectionError | if no key -> Create it
                 self.parser.set(section, key, value)
             except configparser.NoSectionError as e:
-                print("UPDATE", e, "in ", self.file, " Source: ", __file__ )
+                print("UPDATE", e, "in ", self.file, " Source: ", source )
 
                 self.parser[section]={key: value}
 
@@ -226,5 +226,14 @@ def re_read_config_ini():
     
 re_read_config_ini()
 
+# --------------------------------------------------------
+# --------------------------------------------------------
+#
+# Gives back the translation of the word
+#
+# word      word which should be translated
+#
+# --------------------------------------------------------
+# --------------------------------------------------------
 def _(word):
     return dic._(word)
