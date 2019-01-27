@@ -114,7 +114,8 @@ class GuiAkoTeka(QWidget, QObject):
     def startCardHolder(self):
 
         # Create the first Card Holder - 
-        self.go_down_in_hierarchy( [], "Media" ) 
+        #self.go_down_in_hierarchy( [], "" )
+        self.go_down_in_hierarchy() 
 
         # Retreive the media path
         paths = [config_ini['media_path']]
@@ -122,21 +123,42 @@ class GuiAkoTeka(QWidget, QObject):
         # Start to collect the Cards from the media path
         self.actual_card_holder.startCardCollection(paths)        
 
-    # ---------------------------
+    # --------------------------------------------------------------
     #
     # Go deeper in the hierarchy
     #
-    # ---------------------------
-    def go_down_in_hierarchy( self, card_descriptor_structure, title ):
+    # card_descriptor_structure The NOT Filtered card hierarchy list
+    #                           on the recent level
+    # title                     The title what whould be shown above
+    #                           the CardHolder
+    # save                      It controls to save the CardHolder
+    #                           into the history list
+    #                           collecting_finish uses it with False
+    # --------------------------------------------------------------
+    def go_down_in_hierarchy( self, card_descriptor_structure=None, title=None, save=True ):
+
+        # if it is called very first time
+        if card_descriptor_structure is None:
+            self.initialize = True
+            card_descriptor_structure = []
+            title = ""
+            save = False
+        else:
+            self.initialize = False
 
         # if there is already a CardHolder
-        if self.actual_card_holder:        
+        if self.actual_card_holder:
 
             # hide the old CardHolder
             self.actual_card_holder.setHidden(True)
+
+        # if it is said to Save the CardHolder to the history list
+        if save:
             
             # save the old CardHolder it in a list
             self.card_holder_history.append(self.actual_card_holder)
+
+          
                     
         self.actual_card_holder = CardHolder(            
             self, 
@@ -154,6 +176,7 @@ class GuiAkoTeka(QWidget, QObject):
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
         
+        
         # Save the original card desctiptor structure into the CardHolder
         self.actual_card_holder.orig_card_descriptor_structure = card_descriptor_structure
         
@@ -169,6 +192,7 @@ class GuiAkoTeka(QWidget, QObject):
         
         # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
         self.filter_the_cards(card_descriptor_structure)
+
         
         ## filter the list by the filters
         #filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
@@ -238,13 +262,27 @@ class GuiAkoTeka(QWidget, QObject):
         """        
         
         if card_descriptor_structure:
-            
+          
             # Show the title of the CardHolder (the certain level)        
             self.hierarchy_title.setHidden(False)
        
-        # Set-up the Filters
+        
+        # Save the NOT Filtered list
         card_holder.orig_card_descriptor_structure = card_descriptor_structure
+        
+        # Set-up the Filters        
         self.set_up_filters(card_descriptor_structure)
+        
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # This part is tricky
+        # It prevents to show the 0. level of Cards
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        #
+        # if there is only ONE Card and the status of the presentation is "initialize"
+        if len(card_holder.card_descriptor_list) == 1 and self.initialize:
+            print("ujrakuldom")
+            # then I go down ONE level
+            self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["orig-sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
 
     # ----------------------------------------------------------
     #
