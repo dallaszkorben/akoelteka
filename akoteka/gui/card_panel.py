@@ -82,9 +82,8 @@ class CardPanel(QWidget):
             self.add_element_to_collector_line( _("title_year"), card_data["general"]["year"])
             self.add_element_to_collector_line( _("title_length"), card_data["general"]["length"])
             self.add_element_to_collector_line( _("title_country"), ", ".join( [ _("country_" + a) for a in card_data["general"]["country"] ]) )
-            self.add_element_to_collector_line( _("title_sound"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sound"] ]) )
-            self.add_element_to_collector_line( _("title_sub"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sub"] ]) )
- 
+            self.add_element_to_collector_line( _("title_sound"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sound"] ]) if card_data["general"]["sound"] != [''] else "")
+            self.add_element_to_collector_line( _("title_sub"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sub"] ]) if card_data["general"]["sub"] != [''] else "" )
  
             self.add_separator()
             if ''.join(card_data["general"]["director"]):
