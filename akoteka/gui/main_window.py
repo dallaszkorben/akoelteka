@@ -16,6 +16,10 @@ from akoteka.gui.configuration_dialog import ConfigurationDialog
 
 from akoteka.accessories import collect_cards
 from akoteka.accessories import filter_key
+from akoteka.accessories import clearLayout
+from akoteka.accessories import FlowLayout
+
+
 from akoteka.constants import *
 from akoteka.setup.setup import getSetupIni
 
@@ -72,7 +76,7 @@ class GuiAkoTeka(QWidget, QObject):
         # -------------------------------
         # Title
         # -------------------------------
-        self.hierarchy_title = HierarchyTitle(scroll_content)
+        self.hierarchy_title = HierarchyTitle(scroll_content, self)
         self.hierarchy_title.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
         self.hierarchy_title.set_border_radius(RADIUS_CARDHOLDER)
 
@@ -157,8 +161,6 @@ class GuiAkoTeka(QWidget, QObject):
             
             # save the old CardHolder it in a list
             self.card_holder_history.append(self.actual_card_holder)
-
-          
                     
         self.actual_card_holder = CardHolder(            
             self, 
@@ -175,8 +177,7 @@ class GuiAkoTeka(QWidget, QObject):
         self.actual_card_holder.set_background_color(QColor(COLOR_CARDHOLDER_BACKGROUND))
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
-        
-        
+                
         # Save the original card desctiptor structure into the CardHolder
         self.actual_card_holder.orig_card_descriptor_structure = card_descriptor_structure
         
@@ -193,28 +194,24 @@ class GuiAkoTeka(QWidget, QObject):
         # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
         self.filter_the_cards(card_descriptor_structure)
 
-        
-        ## filter the list by the filters
-        #filtered_card_descriptor_structure = self.set_up_filters(card_descriptor_structure)
-        #
-        ## Fill-up the CardHolder with Cards using the parameter as list of descriptor
-        #self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_descriptor_structure)
-
     # -------------------------
     #
     # Come up in the hierarchy
     #
     # -------------------------
-    def restore_previous_holder(self):
+    def restore_previous_holder(self, steps=1):
         
         size = len(self.card_holder_history)
-        if  size >= 1:
+        if  size >= steps:
 
-            # get the previous CardHolder
-            previous_card_holder = self.card_holder_history[size - 1]
+            for i in range(0, steps):
             
-            # remove the previous CardHolder from the history list
-            self.card_holder_history.remove(previous_card_holder)
+                previous_card_holder = self.card_holder_history.pop()
+                # get the previous CardHolder
+                #previous_card_holder = self.card_holder_history[size - 1]
+            
+                # remove the previous CardHolder from the history list
+                #self.card_holder_history.remove(previous_card_holder)
             
             # hide the old CardHolder
             self.actual_card_holder.setHidden(True)            
@@ -280,7 +277,6 @@ class GuiAkoTeka(QWidget, QObject):
         #
         # if there is only ONE Card and the status of the presentation is "initialize"
         if len(card_holder.card_descriptor_list) == 1 and self.initialize:
-            print("ujrakuldom")
             # then I go down ONE level
             self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["orig-sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
 
@@ -301,9 +297,7 @@ class GuiAkoTeka(QWidget, QObject):
     #
     # -----------------------------------------------
     def get_x_offset_by_index(self, index):
-        return index * 4
-       
-       
+        return index * 4       
 
     def collect_cards(self, paths):
         cdl = collect_cards(paths)
@@ -352,8 +346,6 @@ class GuiAkoTeka(QWidget, QObject):
         layout.addWidget(card_panel)
         
         return card
-
-# 1111111111
   
     def set_filter_listener(self, listener):
         self.control_panel.set_filter_listener(listener)
@@ -577,6 +569,30 @@ class GuiAkoTeka(QWidget, QObject):
         event.ignore()
   
 
+class LinkLabel(QLabel):
+    def __init__(self, text, parent, index):
+        QLabel.__init__(self, text, parent)
+        self.parent = parent
+        self.index = index        
+        self.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Bold if index else QFont.Normal))
+
+    # Mouse Hover in
+    def enterEvent(self, event):
+        if self.index:
+            QApplication.setOverrideCursor(Qt.PointingHandCursor)
+
+    # Mouse Hover out
+    def leaveEvent(self, event):
+        if self.index:
+            QApplication.restoreOverrideCursor()
+
+    # Mouse Press
+    def mousePressEvent(self, event):
+        if event.buttons() == Qt.LeftButton and self.index:
+            self.parent.panel.restore_previous_holder(self.index)
+            event.accept()    
+    
+
 # =========================================
 # 
 # This Class represents the title
@@ -587,45 +603,73 @@ class HierarchyTitle(QWidget):
     DEFAULT_BACKGROUND_COLOR = Qt.lightGray
     DEFAULT_BORDER_RADIUS = 10
     
-    def __init__(self, parent):
+    def __init__(self, parent, panel):
         QWidget.__init__(self, parent)
 
+        self.panel = panel
+        
         self_layout = QHBoxLayout(self)
         self_layout.setContentsMargins(5, 5, 5, 5)
         self_layout.setSpacing(1)
-        self.setLayout( self_layout )
-        
-        self.label = QLabel("", self)
-        self.label.setWordWrap(True)
-        self.label.setAlignment(Qt.AlignHCenter)
-        self.label.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Bold))
+        self_layout.setAlignment(Qt.AlignHCenter)
+        self.setLayout(self_layout)
 
-        self_layout.addWidget(self.label)
+        self.text = QWidget(self)
+        #self.text.setWordWrap(True)
+        #self.text.setAlignment(Qt.AlignHCenter)
+        #self.text.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Bold))
+        self_layout.addWidget(self.text)
         
-        self.title = ""
+        #self.text_layout = FlowLayout(self.text)
+        self.text_layout = QHBoxLayout(self.text)
+        self.text_layout.setContentsMargins(0, 0, 0, 0)
+        #self.text_layout.setAlignment(Qt.AlignHCenter)
+        self.text.setLayout(self.text_layout)
+
         self.set_background_color(QColor(HierarchyTitle.DEFAULT_BACKGROUND_COLOR), False)
         self.set_border_radius(HierarchyTitle.DEFAULT_BORDER_RADIUS, False)
-        
-#        self.setHidden(True)
-
+ 
+      
     def set_title(self, card_holder_history, actual_card_holder):
         
-        title = " > ".join( [ ch.title for ch in card_holder_history + [actual_card_holder] if ch.title ]  )
-        
-        self.label.setText(title)
-        self.title = title
+        clearLayout(self.text_layout)
+ 
+        history = []
+        for index, card in enumerate(card_holder_history):
+            if card.title:
+                label = LinkLabel(card.title, self, len(card_holder_history)-index)
+                history.append(label)
+       
+        for cw in history:
+            self.text_layout.addWidget(cw)
+            separator = QLabel('>')
+            separator.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Bold ))
+            self.text_layout.addWidget(separator)
+                                       
+        self.text_layout.addWidget(LinkLabel(actual_card_holder.title, self, 0))
+
+
+
+
+
+
+
+
+        #title = " > ".join( [ ch.title for ch in card_holder_history + [actual_card_holder] if ch.title ]  )        
+        #self.label.setText(title)
+        #self.title = title
         
 #        if title:
 #            self.setHidden(False)
 #        else:
 #            self.setHidden(True)
 
-    def get_title(self):
-        return self.title
+#    def get_title(self):
+#        return self.title
         
     def set_background_color(self, color, update=False):
         self.background_color = color
-        self.label.setStyleSheet('background: ' + color.name()) 
+        self.text.setStyleSheet('background: ' + color.name()) 
         if update:
             self.update()
             
@@ -643,12 +687,6 @@ class HierarchyTitle(QWidget):
 
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         qp.end()  
-        
-
-
-
-
-
 
 
 # =========================================
@@ -752,7 +790,6 @@ class ControlPanel(QWidget):
     def config_button_on_click(self):
 
         dialog = ConfigurationDialog()
-#!!!!!        
 
         # if OK was clicked
         if dialog.exec_() == QDialog.Accepted:        
