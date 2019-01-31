@@ -580,17 +580,19 @@ class LinkLabel(QLabel):
     def enterEvent(self, event):
         if self.index:
             QApplication.setOverrideCursor(Qt.PointingHandCursor)
+        event.ignore()
 
     # Mouse Hover out
     def leaveEvent(self, event):
         if self.index:
             QApplication.restoreOverrideCursor()
+        event.ignore()
 
     # Mouse Press
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton and self.index:
             self.parent.panel.restore_previous_holder(self.index)
-            event.accept()    
+        event.ignore()
     
 
 # =========================================
@@ -610,8 +612,8 @@ class HierarchyTitle(QWidget):
         
         self_layout = QHBoxLayout(self)
         self_layout.setContentsMargins(5, 5, 5, 5)
-        self_layout.setSpacing(1)
-        self_layout.setAlignment(Qt.AlignHCenter)
+        self_layout.setSpacing(0)
+        #self_layout.setAlignment(Qt.AlignHCenter)
         self.setLayout(self_layout)
 
         self.text = QWidget(self)
@@ -621,18 +623,35 @@ class HierarchyTitle(QWidget):
         self_layout.addWidget(self.text)
         
         #self.text_layout = FlowLayout(self.text)
-        self.text_layout = QHBoxLayout(self.text)
+        self.text_layout = QVBoxLayout(self.text)
         self.text_layout.setContentsMargins(0, 0, 0, 0)
-        #self.text_layout.setAlignment(Qt.AlignHCenter)
+        self.text_layout.setSpacing(0)
         self.text.setLayout(self.text_layout)
 
         self.set_background_color(QColor(HierarchyTitle.DEFAULT_BACKGROUND_COLOR), False)
         self.set_border_radius(HierarchyTitle.DEFAULT_BORDER_RADIUS, False)
- 
-      
-    def set_title(self, card_holder_history, actual_card_holder):
         
+        self.card_holder_history = None
+        self.actual_card_holder = None
+        self.no_refresh = False
+        
+#    def resizeEvent(self, event):
+#        if not self.no_refresh:
+#            self.refresh_title()
+#        event.accept()
+    
+    def refresh_title(self):
+        if self.card_holder_history and self.actual_card_holder:
+            self.set_title(self.card_holder_history, self.actual_card_holder)
+    
+    def set_title(self, card_holder_history, actual_card_holder):
+        #self.blockSignals(True)
+        #self.no_refresh = True
+
         clearLayout(self.text_layout)
+ 
+        self.card_holder_history = card_holder_history
+        self.actual_card_holder = actual_card_holder
  
         history = []
         for index, card in enumerate(card_holder_history):
@@ -640,32 +659,73 @@ class HierarchyTitle(QWidget):
                 label = LinkLabel(card.title, self, len(card_holder_history)-index)
                 history.append(label)
        
-        for cw in history:
-            self.text_layout.addWidget(cw)
-            separator = QLabel('>')
-            separator.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Bold ))
-            self.text_layout.addWidget(separator)
-                                       
-        self.text_layout.addWidget(LinkLabel(actual_card_holder.title, self, 0))
-
-
-
-
-
-
-
-
-        #title = " > ".join( [ ch.title for ch in card_holder_history + [actual_card_holder] if ch.title ]  )        
-        #self.label.setText(title)
-        #self.title = title
+        minimumWidth = 0
+        max_width = self.size().width() - 2 * 5        
+        self.create_one_line_container()
         
-#        if title:
-#            self.setHidden(False)
-#        else:
-#            self.setHidden(True)
+        for cw in history:
+            
+            minimumWidth += self.get_width_in_pixels(cw)
+            if minimumWidth <= max_width:            
+                self.add_to_one_line_container(cw)
+            else:
+                self.push_new_line_container()
+                self.create_one_line_container()
+                minimumWidth = 0
+                self.add_to_one_line_container(cw)
+            
+            separator = QLabel(' > ')
+            separator.setFont(QFont( FONT_TYPE, HIERARCHY_TITLE_FONT_SIZE, weight=QFont.Normal ))
+            minimumWidth += self.get_width_in_pixels(separator)
+            if minimumWidth <= max_width:            
+                self.add_to_one_line_container(separator)
+            else:
+                self.push_new_line_container()
+                self.create_one_line_container()
+                minimumWidth = 0
+                self.add_to_one_line_container(separator)
+                                       
+        notLinkTitle = LinkLabel(actual_card_holder.title, self, 0)
+        minimumWidth += self.get_width_in_pixels(notLinkTitle)
+        if minimumWidth <= max_width:            
+            self.add_to_one_line_container(notLinkTitle)
+        else:
+            self.push_new_line_container()
+            self.create_one_line_container()
+            minimumWidth = 0
+            self.add_to_one_line_container(notLinkTitle)
+        self.push_new_line_container()
+       
+        #self.no_refresh = False
+        
+        #self.blockSignals(False)
+       
+        #print(self.panel.size().width(), minimumWidth)
+        #self.text_layout.addWidget(LinkLabel(actual_card_holder.title, self, 0))
+        #print(self.panel.size().width())
+        #print()
 
-#    def get_title(self):
-#        return self.title
+
+
+    def create_one_line_container(self):
+        self.one_line_container = QWidget(self)
+        self.one_line_container_layout = QHBoxLayout(self.one_line_container)
+        self.one_line_container_layout.setContentsMargins(0, 0, 0, 0)
+        self.one_line_container_layout.setSpacing(0)
+        self.one_line_container.setLayout(self.one_line_container_layout)
+        self.one_line_container_layout.setAlignment(Qt.AlignHCenter)
+
+    def add_to_one_line_container(self, cw):
+        self.one_line_container_layout.addWidget(cw)
+        
+    def push_new_line_container(self):
+        self.text_layout.addWidget(self.one_line_container)
+        
+    def get_width_in_pixels(self, cw):
+        initialRect = cw.fontMetrics().boundingRect(cw.text());
+        improvedRect = cw.fontMetrics().boundingRect(initialRect, 0, cw.text());   
+        return improvedRect.width()
+        
         
     def set_background_color(self, color, update=False):
         self.background_color = color
@@ -686,8 +746,9 @@ class HierarchyTitle(QWidget):
         qp.setBrush( self.background_color )
 
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
-        qp.end()  
-
+        qp.end()
+        
+        
 
 # =========================================
 #

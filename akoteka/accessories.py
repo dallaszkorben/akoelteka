@@ -67,6 +67,7 @@ filter_key = {
 
 
 class FlowLayout(QLayout):
+
     def __init__(self, parent=None, margin=0, spacing=-1):
         super(FlowLayout, self).__init__(parent)
 
@@ -87,6 +88,10 @@ class FlowLayout(QLayout):
 
     def count(self):
         return len(self.itemList)
+
+    # to keep it in style with the others..
+    def rowCount(self):
+        return self.count()
 
     def itemAt(self, index):
         if index >= 0 and index < len(self.itemList):
@@ -151,8 +156,7 @@ class FlowLayout(QLayout):
             lineHeight = max(lineHeight, item.sizeHint().height())
 
         return y + lineHeight - rect.y()
-
-
+    
 
 def get_pattern_video():
     ptrn = '|'.join( config_ini['media_player_video_ext'].split(",") )

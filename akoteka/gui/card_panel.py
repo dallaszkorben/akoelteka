@@ -404,11 +404,13 @@ class CardImage(QWidget):
     def enterEvent(self, event):
         self.update()
         QApplication.setOverrideCursor(Qt.PointingHandCursor)
+        event.ignore()
 
     # Mouse Hover out
     def leaveEvent(self, event):
         self.update()
         QApplication.restoreOverrideCursor()
+        event.ignore()
     
     def paintEvent(self, event):
         if self.underMouse():                       
