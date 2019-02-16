@@ -25,9 +25,10 @@ setup(
                 ['akoteka=akoteka.gui.main_window:main']
       },
       package_data={
-        'prala': ['gui/img/*.png'],
-        'prala': ['setup/setup.ini'],
-        'prala': ['dict/*.properties']
+        'cardholder': ['img/*.gif'],
+        'akoteka': ['gui/img/*.png'],
+        'akoteka': ['setup/setup.ini'],
+        'akoteka': ['dict/*.properties']
       },
       include_package_data = True,
       zip_safe=False)

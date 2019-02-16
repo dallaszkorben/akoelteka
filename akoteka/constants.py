@@ -53,6 +53,10 @@ RATING_KEY_BEST = 'best'
 FILE_CARD_INI = 'card.ini'
 
 IMG_CONFIG_BUTTON = "cogwheel-button.png"
+IMG_FAST_SEARCH_BUTTON_ON = "fast-search-button-on.png"
+IMG_FAST_SEARCH_BUTTON_OFF = "fast-search-button-off.png"
+IMG_ADVANCED_SEARCH_BUTTON_ON = "advanced-search-button-on.png"
+IMG_ADVANCED_SEARCH_BUTTON_OFF = "advanced-search-button-off.png"
 IMG_BACK_BUTTON = "back-button.png"
 IMG_FOLDER_BUTTON = "folder.png"
 IMG_EMPTY_BUTTON = "empty.png"

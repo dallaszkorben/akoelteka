@@ -13,6 +13,9 @@ from cardholder.cardholder import CollectCardsThread
 from akoteka.gui.pyqt_import import *
 from akoteka.gui.card_panel import CardPanel
 from akoteka.gui.configuration_dialog import ConfigurationDialog
+from akoteka.gui.control_buttons_holder import ControlButtonsHolder
+from akoteka.gui.fast_filter_holder import FastFilterHolder
+from akoteka.gui.advanced_filter_holder import AdvancedFilterHolder
 
 from akoteka.accessories import collect_cards
 from akoteka.accessories import filter_key
@@ -233,6 +236,10 @@ class GuiAkoTeka(QWidget, QObject):
             
             # select the Card which was selected to enter
             self.actual_card_holder.select_actual_card()
+            
+            # Make the CardHolder to be in Focus
+            self.actual_card_holder.setFocus()
+         
 
     # ------------------
     # Collecting Started
@@ -309,11 +316,26 @@ class GuiAkoTeka(QWidget, QObject):
             "theme": set(),
             "director": set(),
             "actor": set(),
+            "sound": set(),
+            "sub": set(),
+            "country": set(),            
             "favorite": set(),
             "new": set(),
             "best": set()
         }
-        self.generate_filtered_card_structure(cdl, filtered_card_structure, filter_hit_list)
+        filter_unconditional_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set(),
+            "sound": set(),
+            "sub": set(),
+            "country": set(),            
+            "favorite": set(),
+            "new": set(),
+            "best": set()            
+        }
+        self.generate_filtered_card_structure(cdl, filtered_card_structure, filter_hit_list, filter_unconditional_list)
         
         return filtered_card_structure
     
@@ -347,11 +369,14 @@ class GuiAkoTeka(QWidget, QObject):
         
         return card
   
-    def set_filter_listener(self, listener):
-        self.control_panel.set_filter_listener(listener)
+    def set_fast_filter_listener(self, listener):
+        self.control_panel.set_fast_filter_listener(listener)
         
-    def get_filter_holder(self):
-        return self.control_panel.get_filter_holder()
+    def get_fast_filter_holder(self):
+        return self.control_panel.get_fast_filter_holder()
+    
+    def get_advanced_filter_holder(self):
+        return self.control_panel.get_advanced_filter_holder()
       
     # --------------------------------
     #
@@ -363,6 +388,7 @@ class GuiAkoTeka(QWidget, QObject):
     def filter_the_cards(self, card_descriptor_structure=None):
         if card_descriptor_structure is None:
             card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
+        
         filtered_card_structure = self.set_up_filters(card_descriptor_structure)
         self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
 
@@ -378,7 +404,7 @@ class GuiAkoTeka(QWidget, QObject):
         # ###################################
         # Turn OFF the listener to the Filter
         # ###################################
-        self.set_filter_listener(None)
+        self.set_fast_filter_listener(None)
         
         # ####################################
         # Save the recent state of the filters
@@ -392,7 +418,7 @@ class GuiAkoTeka(QWidget, QObject):
             "new": "",
             "best": ""
         }
-        for category, value in self.get_filter_holder().get_filter_selection().items():            
+        for category, value in self.get_fast_filter_holder().get_filter_selection().items():            
             if value != None and value != "":
                 filters[category] = value
         
@@ -407,49 +433,100 @@ class GuiAkoTeka(QWidget, QObject):
             "theme": set(),
             "director": set(),
             "actor": set(),
+            "sound": set(),
+            "sub": set(),
+            "country": set(),
             "favorite": set(),
             "new": set(),
             "best": set()
         }
-        self.generate_filtered_card_structure(card_descriptor_structure, filtered_card_structure, filter_hit_list)
+        filter_unconditional_list = {
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set(),
+            "sound": set(),
+            "sub": set(),
+            "country": set(),
+            "favorite": set(),
+            "new": set(),
+            "best": set()           
+        }
+        self.generate_filtered_card_structure(card_descriptor_structure, filtered_card_structure, filter_hit_list, filter_unconditional_list)
         
-        # Fill up GENRE dropdown
-        self.get_filter_holder().clear_genre()
-        self.get_filter_holder().add_genre("", "")
-
+        # Fill up GENRE 
+        # fast filter - dropdown
+        self.get_fast_filter_holder().clear_genre()
+        self.get_fast_filter_holder().add_genre("", "")
         for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_filter_holder().add_genre(element[0], element[1])
+            self.get_fast_filter_holder().add_genre(element[0], element[1])
+        # advanced filter
+        self.get_advanced_filter_holder().clear_genre()            
+        for element in sorted([(_("genre_" + e),e) for e in filter_unconditional_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_advanced_filter_holder().add_genre(element[0], element[1])        
         
-        # Fill up THEME dropdown
-        self.get_filter_holder().clear_theme()
-        self.get_filter_holder().add_theme("", "")
+        # Fill up THEME 
+        # fast filter - dropdown
+        self.get_fast_filter_holder().clear_theme()
+        self.get_fast_filter_holder().add_theme("", "")
         for element in sorted([(_("theme_" + e), e) for e in filter_hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_filter_holder().add_theme(element[0], element[1])
+            self.get_fast_filter_holder().add_theme(element[0], element[1])
+        # advanced filter
+        for element in sorted([(_("theme_" + e), e) for e in filter_unconditional_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_advanced_filter_holder().add_theme(element[0], element[1])        
 
-        # Fill up DIRECTOR dropdown
-        self.get_filter_holder().clear_director()
-        self.get_filter_holder().add_director("")
+        # Fill up DIRECTOR 
+        # fast filter - dropdown
+        self.get_fast_filter_holder().clear_director()
+        self.get_fast_filter_holder().add_director("")
         for element in sorted( filter_hit_list['director'], key=cmp_to_key(locale.strcoll) ):
-            self.get_filter_holder().add_director(element)
+            self.get_fast_filter_holder().add_director(element)
+        # advanced filter
+        self.get_advanced_filter_holder().clear_director()            
+        for element in sorted( filter_unconditional_list['director'], key=cmp_to_key(locale.strcoll) ):
+            self.get_advanced_filter_holder().add_director(element)
 
-        # Fill up ACTOR dropdown
-        self.get_filter_holder().clear_actor()
-        self.get_filter_holder().add_actor("")
+        # Fill up ACTOR 
+        # falst filter - dropdown
+        self.get_fast_filter_holder().clear_actor()
+        self.get_fast_filter_holder().add_actor("")
         for element in sorted( filter_hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
-            self.get_filter_holder().add_actor(element)
+            self.get_fast_filter_holder().add_actor(element)
+        # advanced filter
+        self.get_advanced_filter_holder().clear_actor()            
+        for element in sorted( filter_unconditional_list['actor'], key=cmp_to_key(locale.strcoll) ):
+            self.get_advanced_filter_holder().add_actor(element)
+        
+        # Fill up SOUND
+        self.get_advanced_filter_holder().clear_sound()
+        self.get_advanced_filter_holder().add_sound("", "")
+        for element in sorted([(_("lang_long_" + e), e) for e in filter_hit_list['sound']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_advanced_filter_holder().add_sound(element[0], element[1])
+
+        # Fill up SUBTITLE
+        self.get_advanced_filter_holder().clear_sub()
+        self.get_advanced_filter_holder().add_sub("", "")
+        for element in sorted([(_("lang_long_" + e), e) for e in filter_hit_list['sub']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_advanced_filter_holder().add_sub(element[0], element[1])
+
+        # Fill up COUNTRY
+        self.get_advanced_filter_holder().clear_country()
+        self.get_advanced_filter_holder().add_country("", "")
+        for element in sorted([(_("country_long_" + e), e) for e in filter_hit_list['country']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_advanced_filter_holder().add_country(element[0], element[1])
         
         # ####################
         # Reselect the Filters
         # ####################
-        self.get_filter_holder().select_genre(filters["genre"])
-        self.get_filter_holder().select_theme(filters["theme"])
-        self.get_filter_holder().select_director(filters["director"])
-        self.get_filter_holder().select_actor(filters["actor"])
+        self.get_fast_filter_holder().select_genre(filters["genre"])
+        self.get_fast_filter_holder().select_theme(filters["theme"])
+        self.get_fast_filter_holder().select_director(filters["director"])
+        self.get_fast_filter_holder().select_actor(filters["actor"])
         
         # #######################################
         # Turn back ON the listener to the Filter
         # #######################################
-        self.set_filter_listener(self)
+        self.set_fast_filter_listener(self)
 
         return filtered_card_structure
     
@@ -459,7 +536,7 @@ class GuiAkoTeka(QWidget, QObject):
     # Generates Filtered CardStructure
     #
     # ================================   
-    def generate_filtered_card_structure(self, card_structure, filtered_card_structure, filter_hit_list):
+    def generate_filtered_card_structure(self, card_structure, filtered_card_structure, filter_hit_list, filter_unconditional_list):
         """
         This method serves a dual task:
             -Based on the Filter it generates a new, filtered list: filtered_card_structure
@@ -482,7 +559,7 @@ class GuiAkoTeka(QWidget, QObject):
             card['extra']['image-path'] = crd['extra']['image-path']
             card['extra']['media-path'] = crd['extra']['media-path']
             card['extra']['recent-folder'] = crd['extra']['recent-folder']            
-            card['extra']['sub-cards'] = [] #json.loads('[]')
+            card['extra']['sub-cards'] = []
             card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
 
             # in case of MEDIA CARD
@@ -491,7 +568,7 @@ class GuiAkoTeka(QWidget, QObject):
                 fits = True
                 
                 # go through the filters
-                for category, value in self.get_filter_holder().get_filter_selection().items():
+                for category, value in self.get_fast_filter_holder().get_filter_selection().items():
             
                     # if the specific filter is set
                     if value != None and value != "":
@@ -506,28 +583,33 @@ class GuiAkoTeka(QWidget, QObject):
                         else:
                             fits = False
 
-                # let's keep this MEDIA CARD as it fits
-                if fits:
 
-                    # Collect the filters
-                    for category, value in self.get_filter_holder().get_filter_selection().items():
-                        if filter_key[category]['store-mode'] == 'v':
-                            if card[filter_key[category]['section']][category]:
+#--
+                # Collect the filters
+                for category, value in self.get_fast_filter_holder().get_filter_selection().items():
+                    if filter_key[category]['store-mode'] == 'v':
+                        if card[filter_key[category]['section']][category]:
+                            filter_unconditional_list[category].add(card[filter_key[category]['section']][category])
+                            if fits:
                                 filter_hit_list[category].add(card[filter_key[category]['section']][category])
                                 
-                        elif filter_key[category]['store-mode'] == 'a':
-                            for cat in card[filter_key[category]['section']][category]:
-                                if cat.strip():
+                    elif filter_key[category]['store-mode'] == 'a':
+                        for cat in card[filter_key[category]['section']][category]:
+                            if cat.strip():
+                                filter_unconditional_list[category].add(cat.strip())
+                                if fits:
                                     filter_hit_list[category].add(cat.strip())
-                    
+                
+                if fits:
                     filtered_card_structure.append(card)                    
                     mediaFits = True
+#--
                     
             # in case of COLLECTOR CARD
             else:                     
                      
                 # then it depends on the next level
-                fits = self.generate_filtered_card_structure(crd['extra']['sub-cards'], card['extra']['sub-cards'], filter_hit_list)
+                fits = self.generate_filtered_card_structure(crd['extra']['sub-cards'], card['extra']['sub-cards'], filter_hit_list, filter_unconditional_list)
                 
                 if fits:
                     filtered_card_structure.append(card)
@@ -696,14 +778,6 @@ class HierarchyTitle(QWidget):
             self.add_to_one_line_container(notLinkTitle)
         self.push_new_line_container()
        
-        #self.no_refresh = False
-        
-        #self.blockSignals(False)
-       
-        #print(self.panel.size().width(), minimumWidth)
-        #self.text_layout.addWidget(LinkLabel(actual_card_holder.title, self, 0))
-        #print(self.panel.size().width())
-        #print()
 
 
 
@@ -748,6 +822,11 @@ class HierarchyTitle(QWidget):
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         qp.end()
         
+
+
+
+
+
         
 
 # =========================================
@@ -757,479 +836,73 @@ class HierarchyTitle(QWidget):
 # on the TOP of the Window
 #
 # Contains:
-#           Back Button
-#           Filter
+#           Button Control
+#           Fast Search Control
+#           Advanced Search Control
 #
 # =========================================
 class ControlPanel(QWidget):
     def __init__(self, gui):
-        super().__init__()
+        super().__init__(gui)
        
         self.gui = gui
         
-        self_layout = QHBoxLayout(self)
+        self_layout = QVBoxLayout(self)
         self.setLayout(self_layout)
         
         # controls the distance between the MainWindow and the added container: scrollContent
         self_layout.setContentsMargins(3, 3, 3, 3)
         self_layout.setSpacing(5)
 
-        # -------------
+        # ----------------------
         #
-        # Back Button
+        # Control Buttons Holder
         #
-        # -------------     
-        self.back_button_method = None
-        back_button = QPushButton()
-        back_button.setFocusPolicy(Qt.NoFocus)
-        back_button.clicked.connect(self.back_button_on_click)
+        # ----------------------
+        self.control_buttons_holder = ControlButtonsHolder(self)
+        self_layout.addWidget(self.control_buttons_holder)
         
-        back_button.setIcon( QIcon( resource_filename(__name__,os.path.join("img", IMG_BACK_BUTTON)) ))
-        back_button.setIconSize(QSize(32,32))
-        back_button.setCursor(QCursor(Qt.PointingHandCursor))
-        back_button.setStyleSheet("background:transparent; border:none") 
+        # ------------------
+        #
+        # Fast Filter Holder
+        #
+        # ------------------
+        self.fast_filter_holder = FastFilterHolder()
+        self.fast_filter_holder.changed.connect(self.fast_filter_on_change)
+        self.fast_filter_holder.setHidden(True)        
+        self_layout.addWidget(self.fast_filter_holder)
 
-        # Back button on the left
-        self_layout.addWidget( back_button )
-
-        self_layout.addStretch(1)
-        
-        # -------------------
+        # ----------------------
         #
-        # Config Button
+        # Advanced Filter Holder
         #
-        # -------------------
-        self.config_button = QPushButton()
-        self.config_button.setFocusPolicy(Qt.NoFocus)
-        self.config_button.setCheckable(False)
-        self.config_button.clicked.connect(self.config_button_on_click)
-        
-        config_icon = QIcon()
-        config_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_CONFIG_BUTTON)) ), QIcon.Normal, QIcon.On)
-        self.config_button.setIcon( config_icon )
-        self.config_button.setIconSize(QSize(25,25))
-        self.config_button.setCursor(QCursor(Qt.PointingHandCursor))
-        self.config_button.setStyleSheet("background:transparent; border:none") 
-        self_layout.addWidget( self.config_button )
-        
-        
-        
-        # -------------
-        #
-        # Filter Holder
-        #
-        # -------------
-        self.filter_holder = FilterHolder()
-        self.filter_holder.changed.connect(self.filter_on_change)
-        
-        # Filter on the right
-        self_layout.addWidget(self.filter_holder)
+        # ----------------------
+        self.advanced_filter_holder = AdvancedFilterHolder(self)
+        self.advanced_filter_holder.setHidden(True)
+        self_layout.addWidget(self.advanced_filter_holder)
 
         # Listeners
         self.back_button_listener = None
-        self.filter_listener = None
+        self.fast_filter_listener = None
 
     def refresh_label(self):
-        self.filter_holder.refresh_label()
+        self.fast_filter_holder.refresh_label()
 
     def set_back_button_method(self, method):
-        self.back_button_method = method
+        self.control_buttons_holder.back_button_method = method
         
-    def set_filter_listener(self, listener):
-        self.filter_listener = listener
-        
-    def back_button_on_click(self):
-        if self.back_button_method:
-            self.back_button_method()
-
-
-    # -----------------------
-    #
-    # Config Button Clicked
-    #
-    # -----------------------
-    def config_button_on_click(self):
-
-        dialog = ConfigurationDialog()
-
-        # if OK was clicked
-        if dialog.exec_() == QDialog.Accepted:        
-
-            # get the values from the DIALOG
-            l = dialog.get_language()
-            mp = dialog.get_media_path()
-            vp = dialog.get_media_player_video()
-            vpp = dialog.get_media_player_video_param()
-            ap = dialog.get_media_player_audio()
-            app = dialog.get_media_player_audio_param()
-
-            # Update the config.ini file
-            config_ini_function = get_config_ini()
-            config_ini_function.set_media_path(mp) 
-            config_ini_function.set_language(l)
-            config_ini_function.set_media_player_video(vp)
-            config_ini_function.set_media_player_video_param(vpp)
-            config_ini_function.set_media_player_audio(ap)
-            config_ini_function.set_media_player_audio_param(app)
-
-
-#!!!!!!!!!!!!
-            # Re-read the config.ini file
-            re_read_config_ini()
-
-            # Re-import card_holder_pane
-            mod = importlib.import_module("akoteka.gui.card_panel")
-            importlib.reload(mod)
-#!!!!!!!!!!!!
-
-            # remove history
-            for card_holder in self.gui.card_holder_history:
-                card_holder.setHidden(True)
-                self.gui.card_holder_panel_layout.removeWidget(card_holder)
-                #self.gui.scroll_layout.removeWidget(card_holder)
-            self.gui.card_holder_history.clear()
-                
-            # Remove recent CardHolder as well
-            self.gui.actual_card_holder.setHidden(True)
-            self.gui.card_holder_panel_layout.removeWidget(self.gui.actual_card_holder)
-            self.gui.actual_card_holder = None
-            
-            # reload the cards
-            self.gui.startCardHolder()
-            
-            # refresh the Control Panel
-            self.refresh_label()
-            
-        dialog.deleteLater()
+    def set_fast_filter_listener(self, listener):
+        self.fast_filter_listener = listener
  
-    def filter_on_change(self):
-        if self.filter_listener:
-            self.filter_listener.filter_the_cards()
+    def fast_filter_on_change(self):
+        if self.fast_filter_listener:
+            self.fast_filter_listener.filter_the_cards()
     
-    def get_filter_holder(self):
-        return self.filter_holder
+    def get_fast_filter_holder(self):
+        return self.fast_filter_holder
 
-
-
-
-
-
-
-
-
-# ================
-#
-# Dropdown HOLDER
-#
-# ================
-class FilterDropDownHolder(QWidget):
-    
-    def __init__(self):
-        super().__init__()
-
-        self.self_layout = QVBoxLayout(self)
-        self.setLayout( self.self_layout )
-        self.self_layout.setContentsMargins(0, 0, 0, 0)
-        self.self_layout.setSpacing(1)
-
-#        self.setStyleSheet( 'background: green')
-
-    def add_dropdown(self, filter_dropdown):
-        self.self_layout.addWidget(filter_dropdown)
-
-# =============================
-#
-# Filter Drop-Down Simple
-#
-# =============================
-#
-class FilterDropDownSimple(QWidget):
-    
-    state_changed = pyqtSignal()
-    
-    def __init__(self, label):
-        super().__init__()
-
-        self_layout = QHBoxLayout(self)
-        self_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout( self_layout )
-#        self.setStyleSheet( 'background: green')
-        
-        self.label_widget = QLabel(label)
-        self_layout.addWidget( self.label_widget )
-
-        self.dropdown = QComboBox(self)
-        self.dropdown.setFocusPolicy(Qt.NoFocus)
-        #self.dropdown.setEditable(True)
-        
-        self.dropdown.currentIndexChanged.connect(self.current_index_changed)
-
-        # TODO does not work to set the properties of the dropdown list. find out and fix
-        style =             '''
-            QComboBox { max-width: 200px; min-width: 200px; min-height: 15px; max-height: 15px;}
-            QComboBox QAbstractItemView::item { min-width:100px; max-width:100px; min-height: 150px;}
-            QListView::item:selected { color: red; background-color: lightgray; min-width: 1000px;}"
-            '''            
-
-        style_down_arrow = '''
-            QComboBox::down-arrow { 
-                image: url( ''' + resource_filename(__name__,os.path.join("img", "back-button.jpg")) + ''');
-                
-            }
-        '''
-        style_box = '''
-            QComboBox { 
-                max-width: 200px; min-width: 200px; border: 1px solid gray; border-radius: 5px;
-            }
-        '''
-#       max-width: 200px; min-width: 200px; min-height: 1em; max-height: 1em; border: 1px solid gray; border-radius: 5px;
-        
-        style_drop_down ='''
-            QComboBox QAbstractItemView::item { 
-                color: red;
-                max-height: 15px;
-            }
-        '''            
-      
-        self.dropdown.setStyleSheet(style_box + style_drop_down)
-        self.dropdown.addItem("")
-
-        self_layout.addWidget( self.dropdown )
-    
-    def clear_elements(self):
-        self.dropdown.clear()
-
-    def add_element(self, value, id):
-        self.dropdown.addItem(value, id)
-
-    # -------------------------------------
-    # get the index of the selected element
-    # -------------------------------------
-    def get_selected_index(self):
-        return self.dropdown.itemData( self.dropdown.currentIndex() )
-
-    # -------------------------------------
-    # get the value of the selected element
-    # -------------------------------------
-    def get_selected_value(self):
-        return self.dropdown.itemText( self.dropdown.currentIndex() )
-    
-    def select_element(self, id):
-        self.dropdown.setCurrentIndex( self.dropdown.findData(id) )
-
-    def current_index_changed(self):
-        self.state_changed.emit()
-        
-    def refresh_label(self, new_label):
-        self.label_widget.setText(new_label)
-
-
-# ==========
-#
-# CheckBox
-#
-# ==========
-class FilterCheckBox(QCheckBox):
-    def __init__(self, label):
-        super().__init__(label)
-
-        self.setLayoutDirection( Qt.RightToLeft )
-        style_checkbox = '''
-            QCheckBox { 
-                min-height: 15px; max-height: 15px; border: 0px solid gray;
-            }
-        '''
-        self.setStyleSheet( style_checkbox )
-#        self.setFocusPolicy(Qt.NoFocus)
-
-    def is_checked(self):
-        return 'y' if self.isChecked() else None        
- 
-    def refresh_label(self, new_label):
-        self.setText(new_label)
-
-
-# ================
-#
-# Checkbox HOLDER
-#
-# ================
-class FilterCheckBoxHolder(QWidget):
-    
-    def __init__(self):
-        super().__init__()
-
-        self.self_layout = QVBoxLayout(self)
-        self.setLayout( self.self_layout )
-        self.self_layout.setContentsMargins(0, 0, 0, 0)
-        self.self_layout.setSpacing(1)
-
-        #self.setStyleSheet( 'background: green')
-        
-    def add_checkbox(self, filter_checkbox):
-        self.self_layout.addWidget(filter_checkbox)
-        
-
-# ===============
-#
-# Filter HOLDER
-#
-# ===============
-class FilterHolder(QWidget):
-    
-    changed = pyqtSignal()
-    
-    def __init__(self):
-        super().__init__()
-
-        self_layout = QHBoxLayout(self)
-        self.setLayout( self_layout )
-        self_layout.setContentsMargins(0, 0, 0, 0)
-        self_layout.setSpacing(8)    
-        
-        # ----------
-        #
-        # Checkboxes
-        #
-        # ----------
-        self.filter_cb_favorite = FilterCheckBox(_('title_favorite'))
-        self.filter_cb_best = FilterCheckBox(_('title_best'))
-        self.filter_cb_new = FilterCheckBox(_('title_new'))
-                
-        holder_checkbox = FilterCheckBoxHolder()
-        
-        holder_checkbox.add_checkbox(self.filter_cb_favorite)
-        holder_checkbox.add_checkbox(self.filter_cb_best)
-        holder_checkbox.add_checkbox(self.filter_cb_new)        
-                
-        # Listener
-        self.filter_cb_favorite.stateChanged.connect(self.state_changed)
-        self.filter_cb_best.stateChanged.connect(self.state_changed)
-        self.filter_cb_new.stateChanged.connect(self.state_changed)
-                        
-        self_layout.addWidget(holder_checkbox)
-
-        # ----------
-        #
-        # Dropdowns 
-        #
-        # ----------
-
-        #
-        # Dropdown - genre+theme
-        #
-        self.filter_dd_genre = FilterDropDownSimple(_('title_genre'))
-        self.filter_dd_theme = FilterDropDownSimple(_('title_theme'))
-        
-        holder_dropdown_gt = FilterDropDownHolder()
-        
-        holder_dropdown_gt.add_dropdown(self.filter_dd_genre)
-        holder_dropdown_gt.add_dropdown(self.filter_dd_theme)
-        
-        self_layout.addWidget(holder_dropdown_gt)
-
-        #
-        # Dropdown - director+actor
-        #
-        self.filter_dd_director = FilterDropDownSimple(_('title_director'))
-        self.filter_dd_actor = FilterDropDownSimple(_('title_actor'))
-        
-        holder_dropdown_da = FilterDropDownHolder()
-        
-        holder_dropdown_da.add_dropdown(self.filter_dd_director)
-        holder_dropdown_da.add_dropdown(self.filter_dd_actor)
-        
-        self_layout.addWidget(holder_dropdown_da)
-
-
-        #mydd = QComboBox(self)
-        #self_layout.addWidget(mydd)
-        #mydd.setEditable(True)
-
-
-
-        # Listeners
-        self.filter_dd_genre.state_changed.connect(self.state_changed)
-        self.filter_dd_theme.state_changed.connect(self.state_changed)
-        self.filter_dd_director.state_changed.connect(self.state_changed)
-        self.filter_dd_actor.state_changed.connect(self.state_changed)
-
-    def refresh_label(self):
-        self.filter_dd_genre.refresh_label(_('title_genre'))
-        self.filter_dd_theme.refresh_label(_('title_theme'))
-        self.filter_dd_director.refresh_label(_('title_director'))
-        self.filter_dd_actor.refresh_label(_('title_actor'))
-        self.filter_cb_favorite.refresh_label(_('title_favorite'))
-        self.filter_cb_new.refresh_label(_('title_new'))
-        self.filter_cb_best.refresh_label(_('title_best'))
-        
-        
-    def clear_genre(self):
-        self.filter_dd_genre.clear_elements()
-        
-    def add_genre(self, value, id):
-        self.filter_dd_genre.add_element(value, id)
-        
-    def select_genre(self, id):
-        self.filter_dd_genre.select_element(id)
-
-    def clear_theme(self):
-        self.filter_dd_theme.clear_elements()
-
-    def add_theme(self, value, id):
-        self.filter_dd_theme.add_element(value, id)
-        
-    def select_theme(self, id):
-        self.filter_dd_theme.select_element(id)        
-
-    def clear_director(self):
-        self.filter_dd_director.clear_elements()
-    
-    def add_director(self, director):
-        self.filter_dd_director.add_element(director, director)
-    
-    def select_director(self, id):
-        self.filter_dd_director.select_element(id)
-        
-    def clear_actor(self):
-        self.filter_dd_actor.clear_elements()
-
-    def add_actor(self, actor):
-        self.filter_dd_actor.add_element(actor, actor)
-        
-    def select_actor(self, id):
-        self.filter_dd_actor.select_element(id)        
-    
-    def get_filter_selection(self):
-        filter_selection = {
-            "best": self.filter_cb_best.is_checked(),
-            "new": self.filter_cb_new.is_checked(),
-            "favorite": self.filter_cb_favorite.is_checked(),
-            "genre": self.filter_dd_genre.get_selected_index(),
-            "theme": self.filter_dd_theme.get_selected_index(),
-            "director": self.filter_dd_director.get_selected_value(),
-            "actor": self.filter_dd_actor.get_selected_value()
-        }
-        return filter_selection
-    
-    def state_changed(self):
-        self.changed.emit()
-
-    def closeEvent(self, event):
-        print('close filter holder')
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def get_advanced_filter_holder(self):
+        return self.advanced_filter_holder
 
         
 def main():   

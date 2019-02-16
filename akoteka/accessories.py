@@ -1,6 +1,5 @@
 import os
 import sys
-#import json
 import re
 import configparser
 import cgi, cgitb
@@ -61,6 +60,27 @@ filter_key = {
         "key-dict-prefix": "title_",
         "value-dict": True,
         "value-dict-prefix": "genre_",
+        "section": "general"
+    },
+    "sound":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "sound_",
+        "section": "general"
+    },
+    "sub":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "sub_",
+        "section": "general"
+    },
+    "country":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "country_",
         "section": "general"
     }
 }

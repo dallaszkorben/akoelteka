@@ -391,7 +391,7 @@ class CardImage(QWidget):
         self_layout.addWidget(self.image_panel)
 
         self.media_path = None
-        self.sub_cards = [] #json.loads('[]')
+        self.sub_cards = []
         
         self.setMinimumWidth(PICTURE_WIDTH)
         self.setMaximumWidth(PICTURE_WIDTH)
