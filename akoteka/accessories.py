@@ -18,6 +18,12 @@ from PyQt5.QtWidgets import QWidget
 from akoteka.handle_property import config_ini
 
 filter_key = {
+    "title":{
+        "store-mode": "l",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "title"
+    },
     "best":{
         "store-mode": "v",
         "key-dict-prefix": "title_",
@@ -82,7 +88,21 @@ filter_key = {
         "value-dict": True,
         "value-dict-prefix": "country_",
         "section": "general"
-    }
+    },
+    "year":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "general"
+    },    
+    "length":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "general"
+    },
+
+
 }
 
 

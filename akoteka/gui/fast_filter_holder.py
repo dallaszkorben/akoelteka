@@ -55,7 +55,6 @@ class FastFilterHolder(QWidget):
 
         self_layout.addWidget(QHLine())
         self_layout.addWidget(holder)
-
         
         # ----------
         #
@@ -86,6 +85,16 @@ class FastFilterHolder(QWidget):
         # ----------
 
         #
+        # Dropdown - title
+        #
+        self.filter_dd_title = FilterDropDownSimple(_('title_title'))
+        holder_dropdown_gt = FilterDropDownHolder()
+        
+        holder_dropdown_gt.add_dropdown(self.filter_dd_title)
+        
+        holder_layout.addWidget(holder_dropdown_gt)        
+
+        #
         # Dropdown - genre+theme
         #
         self.filter_dd_genre = FilterDropDownSimple(_('title_genre'))
@@ -112,12 +121,14 @@ class FastFilterHolder(QWidget):
         holder_layout.addWidget(holder_dropdown_da)
 
         # Listeners
+        self.filter_dd_title.state_changed.connect(self.state_changed)
         self.filter_dd_genre.state_changed.connect(self.state_changed)
         self.filter_dd_theme.state_changed.connect(self.state_changed)
         self.filter_dd_director.state_changed.connect(self.state_changed)
         self.filter_dd_actor.state_changed.connect(self.state_changed)
 
     def refresh_label(self):
+        self.filter_dd_title.refresh_label(_('title_label'))
         self.filter_dd_genre.refresh_label(_('title_genre'))
         self.filter_dd_theme.refresh_label(_('title_theme'))
         self.filter_dd_director.refresh_label(_('title_director'))
@@ -125,7 +136,16 @@ class FastFilterHolder(QWidget):
         self.filter_cb_favorite.refresh_label(_('title_favorite'))
         self.filter_cb_new.refresh_label(_('title_new'))
         self.filter_cb_best.refresh_label(_('title_best'))
+
+    def clear_title(self):
+        self.filter_dd_title.clear_elements()
         
+    def add_title(self, value):
+        self.filter_dd_title.add_element(value, value)
+
+    def select_title(self, id):
+        self.filter_dd_title.select_element(id)
+    # ---
     def clear_genre(self):
         self.filter_dd_genre.clear_elements()
         
@@ -134,7 +154,7 @@ class FastFilterHolder(QWidget):
         
     def select_genre(self, id):
         self.filter_dd_genre.select_element(id)
-
+    # ---
     def clear_theme(self):
         self.filter_dd_theme.clear_elements()
 
@@ -143,7 +163,7 @@ class FastFilterHolder(QWidget):
         
     def select_theme(self, id):
         self.filter_dd_theme.select_element(id)        
-
+    # ---
     def clear_director(self):
         self.filter_dd_director.clear_elements()
     
@@ -152,7 +172,7 @@ class FastFilterHolder(QWidget):
     
     def select_director(self, id):
         self.filter_dd_director.select_element(id)
-        
+    # ---
     def clear_actor(self):
         self.filter_dd_actor.clear_elements()
 
@@ -161,9 +181,10 @@ class FastFilterHolder(QWidget):
         
     def select_actor(self, id):
         self.filter_dd_actor.select_element(id)        
-    
+    # ---
     def get_filter_selection(self):
         filter_selection = {
+            "title": self.filter_dd_title.get_selected_value(),
             "best": self.filter_cb_best.is_checked(),
             "new": self.filter_cb_new.is_checked(),
             "favorite": self.filter_cb_favorite.is_checked(),
@@ -173,7 +194,9 @@ class FastFilterHolder(QWidget):
             "actor": self.filter_dd_actor.get_selected_value(),
             "sound": "",
             "sub": "",
-            "country": ""
+            "country": "",
+            "length": "",
+            "year": "",
         }
         return filter_selection
     
@@ -198,6 +221,7 @@ class FilterDropDownHolder(QWidget):
         self.setLayout( self.self_layout )
         self.self_layout.setContentsMargins(0, 0, 0, 0)
         self.self_layout.setSpacing(1)
+        self.self_layout.setAlignment(Qt.AlignTop)
 
 #        self.setStyleSheet( 'background: green')
 

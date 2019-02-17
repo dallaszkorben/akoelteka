@@ -198,21 +198,21 @@ class ControlButtonsHolder(QWidget):
 #!!!!!!!!!!!!
 
             # remove history
-            for card_holder in self.gui.card_holder_history:
+            for card_holder in self.control_panel.gui.card_holder_history:
                 card_holder.setHidden(True)
-                self.gui.card_holder_panel_layout.removeWidget(card_holder)
+                self.control_panel.gui.card_holder_panel_layout.removeWidget(card_holder)
                 #self.gui.scroll_layout.removeWidget(card_holder)
-            self.gui.card_holder_history.clear()
+            self.control_panel.gui.card_holder_history.clear()
                 
             # Remove recent CardHolder as well
-            self.gui.actual_card_holder.setHidden(True)
-            self.gui.card_holder_panel_layout.removeWidget(self.gui.actual_card_holder)
-            self.gui.actual_card_holder = None
+            self.control_panel.gui.actual_card_holder.setHidden(True)
+            self.control_panel.gui.card_holder_panel_layout.removeWidget(self.control_panel.gui.actual_card_holder)
+            self.control_panel.gui.actual_card_holder = None
             
             # reload the cards
-            self.gui.startCardHolder()
+            self.control_panel.gui.startCardHolder()
             
             # refresh the Control Panel
-            self.refresh_label()
+            self.control_panel.refresh_label()
             
         dialog.deleteLater()

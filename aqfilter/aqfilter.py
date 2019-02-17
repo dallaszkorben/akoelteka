@@ -206,7 +206,7 @@ class HTMLDelegate(QStyledItemDelegate):
         doc.setHtml(options.text)
 #       print(options.text)
 #       doc.setTextWidth(options.rect.width())
-        return QtCore.QSize(doc.size().width(), doc.size().height())
+        return QtCore.QSize(doc.size().width(), doc.size().height()-4)
 
         
 class CustomCompleter(QCompleter):

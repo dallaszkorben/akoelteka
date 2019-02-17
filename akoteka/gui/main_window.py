@@ -312,28 +312,34 @@ class GuiAkoTeka(QWidget, QObject):
         # Preparation for collecting the filtered_card_structure and filters
         filtered_card_structure = []
         filter_hit_list = {
+            "title": set(),
             "genre": set(),
             "theme": set(),
             "director": set(),
             "actor": set(),
             "sound": set(),
             "sub": set(),
-            "country": set(),            
+            "country": set(),
+            "year": set(),
+            "length": set(),
             "favorite": set(),
             "new": set(),
-            "best": set()
+            "best": set(),
         }
         filter_unconditional_list = {
+            "title": set(),
             "genre": set(),
             "theme": set(),
             "director": set(),
             "actor": set(),
             "sound": set(),
             "sub": set(),
-            "country": set(),            
+            "country": set(),
+            "year": set(),
+            "length": set(),
             "favorite": set(),
             "new": set(),
-            "best": set()            
+            "best": set(),
         }
         self.generate_filtered_card_structure(cdl, filtered_card_structure, filter_hit_list, filter_unconditional_list)
         
@@ -410,6 +416,7 @@ class GuiAkoTeka(QWidget, QObject):
         # Save the recent state of the filters
         # ####################################
         filters = {
+            "title": "",
             "genre": "",
             "theme": "",
             "director": "",
@@ -429,6 +436,7 @@ class GuiAkoTeka(QWidget, QObject):
         # Preparation for collecting the filtered_card_structure and filters
         filtered_card_structure = []
         filter_hit_list = {
+            "title": set(),
             "genre": set(),
             "theme": set(),
             "director": set(),
@@ -436,11 +444,14 @@ class GuiAkoTeka(QWidget, QObject):
             "sound": set(),
             "sub": set(),
             "country": set(),
+            "year": set(),
+            "length": set(),
             "favorite": set(),
             "new": set(),
-            "best": set()
+            "best": set(),
         }
         filter_unconditional_list = {
+            "title": set(),
             "genre": set(),
             "theme": set(),
             "director": set(),
@@ -448,11 +459,26 @@ class GuiAkoTeka(QWidget, QObject):
             "sound": set(),
             "sub": set(),
             "country": set(),
+            "year": set(),
+            "length": set(),
             "favorite": set(),
             "new": set(),
-            "best": set()           
+            "best": set(),
+            "year": set(),
         }
+        
         self.generate_filtered_card_structure(card_descriptor_structure, filtered_card_structure, filter_hit_list, filter_unconditional_list)
+
+        # Fill up TITLE
+        # fast filter - dropdown
+        self.get_fast_filter_holder().clear_title()
+        self.get_fast_filter_holder().add_title("")
+        for element in sorted( filter_hit_list['title'], key=cmp_to_key(locale.strcoll) ):
+            self.get_fast_filter_holder().add_title(element)
+        # advanced filter
+        self.get_advanced_filter_holder().clear_title()            
+        for element in sorted( filter_unconditional_list['title'], key=cmp_to_key(locale.strcoll) ):
+            self.get_advanced_filter_holder().add_title(element)
         
         # Fill up GENRE 
         # fast filter - dropdown
@@ -499,25 +525,39 @@ class GuiAkoTeka(QWidget, QObject):
         
         # Fill up SOUND
         self.get_advanced_filter_holder().clear_sound()
-        self.get_advanced_filter_holder().add_sound("", "")
-        for element in sorted([(_("lang_long_" + e), e) for e in filter_hit_list['sound']], key=lambda t: locale.strxfrm(t[0]) ):            
+        #self.get_advanced_filter_holder().add_sound("", "")
+        for element in sorted([(_("lang_long_" + e), e) for e in filter_unconditional_list['sound']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_advanced_filter_holder().add_sound(element[0], element[1])
 
         # Fill up SUBTITLE
         self.get_advanced_filter_holder().clear_sub()
-        self.get_advanced_filter_holder().add_sub("", "")
-        for element in sorted([(_("lang_long_" + e), e) for e in filter_hit_list['sub']], key=lambda t: locale.strxfrm(t[0]) ):            
+        #self.get_advanced_filter_holder().add_sub("", "")
+        for element in sorted([(_("lang_long_" + e), e) for e in filter_unconditional_list['sub']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_advanced_filter_holder().add_sub(element[0], element[1])
 
         # Fill up COUNTRY
         self.get_advanced_filter_holder().clear_country()
-        self.get_advanced_filter_holder().add_country("", "")
-        for element in sorted([(_("country_long_" + e), e) for e in filter_hit_list['country']], key=lambda t: locale.strxfrm(t[0]) ):            
+        #self.get_advanced_filter_holder().add_country("", "")
+        for element in sorted([(_("country_long_" + e), e) for e in filter_unconditional_list['country']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_advanced_filter_holder().add_country(element[0], element[1])
+       
+        # Fill up YEAR from/to
+        self.get_advanced_filter_holder().clear_year()
+        #self.get_advanced_filter_holder().add_year("")
+        for element in sorted( filter_unconditional_list['year'], key=cmp_to_key(locale.strcoll) ):
+            self.get_advanced_filter_holder().add_year(element)
         
+        # Fill up LENGTH from/to
+        self.get_advanced_filter_holder().clear_length()
+        #self.get_advanced_filter_holder().add_length("")
+        for element in sorted( [str(int(spl[-2])).rjust(1) + ":" + str(int(spl[-1])).zfill(2) for spl in [l.split(":") for l in filter_unconditional_list['length'] if ':' in l ] if all(c.isdigit() for c in spl[-1] ) and all(c.isdigit() for c in spl[-2] )], key=cmp_to_key(locale.strcoll) ):
+            self.get_advanced_filter_holder().add_length(element)
+
+
         # ####################
         # Reselect the Filters
         # ####################
+        self.get_fast_filter_holder().select_title(filters["title"])
         self.get_fast_filter_holder().select_genre(filters["genre"])
         self.get_fast_filter_holder().select_theme(filters["theme"])
         self.get_fast_filter_holder().select_director(filters["director"])
@@ -580,11 +620,15 @@ class GuiAkoTeka(QWidget, QObject):
                         elif filter_key[category]['store-mode'] == 'a':
                             if value not in crd[filter_key[category]['section']][category]:
                                 fits = False
+                                
+                        elif filter_key[category]['store-mode'] == 'l':
+                            if value != card[filter_key[category]['section']][config_ini['language']]:
+                                fits = False                            
                         else:
                             fits = False
 
+#--                
 
-#--
                 # Collect the filters
                 for category, value in self.get_fast_filter_holder().get_filter_selection().items():
                     if filter_key[category]['store-mode'] == 'v':
@@ -599,6 +643,11 @@ class GuiAkoTeka(QWidget, QObject):
                                 filter_unconditional_list[category].add(cat.strip())
                                 if fits:
                                     filter_hit_list[category].add(cat.strip())
+                
+                    elif filter_key[category]['store-mode'] == 'l':
+                        filter_unconditional_list['title'].add(card[filter_key[category]['section']][config_ini['language']])
+                        if fits:
+                            filter_hit_list['title'].add(card[filter_key[category]['section']][config_ini['language']])
                 
                 if fits:
                     filtered_card_structure.append(card)                    
@@ -887,6 +936,7 @@ class ControlPanel(QWidget):
 
     def refresh_label(self):
         self.fast_filter_holder.refresh_label()
+        self.advanced_filter_holder.refresh_label()
 
     def set_back_button_method(self, method):
         self.control_buttons_holder.back_button_method = method
