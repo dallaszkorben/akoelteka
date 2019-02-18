@@ -19,7 +19,7 @@ from akoteka.handle_property import config_ini
 
 filter_key = {
     "title":{
-        "store-mode": "l",
+        "store-mode": "t",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "title"

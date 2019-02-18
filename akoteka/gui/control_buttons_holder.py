@@ -137,6 +137,7 @@ class ControlButtonsHolder(QWidget):
             self.advanced_search_button.setChecked(False)
 
         self.control_panel.fast_filter_holder.setHidden(not checked)
+        self.control_panel.fast_filter_on_change()
     
     # ------------------------------
     #
@@ -148,6 +149,7 @@ class ControlButtonsHolder(QWidget):
             self.fast_search_button.setChecked(False)
 
         self.control_panel.advanced_filter_holder.setHidden(not checked)
+        self.control_panel.advanced_filter_on_change()
         
     # -------------------
     #

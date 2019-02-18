@@ -378,6 +378,9 @@ class GuiAkoTeka(QWidget, QObject):
     def set_fast_filter_listener(self, listener):
         self.control_panel.set_fast_filter_listener(listener)
         
+    def set_advanced_filter_listener(self, listener):
+        self.control_panel.set_advanced_filter_listener(listener)
+        
     def get_fast_filter_holder(self):
         return self.control_panel.get_fast_filter_holder()
     
@@ -607,29 +610,33 @@ class GuiAkoTeka(QWidget, QObject):
 
                 fits = True
                 
-                # go through the filters
+                # go through the FAST FILTERS and decide if the Card is filtered
                 for category, value in self.get_fast_filter_holder().get_filter_selection().items():
             
-                    # if the specific filter is set
-                    if value != None and value != "":
+                    # if the fast filter is visible
+                    if not self.control_panel.fast_filter_holder.isHidden():                 
+                 
+                        # if the specific filter is set
+                        if value != None and value != "":
 
-                        if filter_key[category]['store-mode'] == 'v':
-                            if value != crd[filter_key[category]['section']][category]:
-                                fits = False
+                            if filter_key[category]['store-mode'] == 'v':
+                                if value != crd[filter_key[category]['section']][category]:
+                                    fits = False
                                 
-                        elif filter_key[category]['store-mode'] == 'a':
-                            if value not in crd[filter_key[category]['section']][category]:
-                                fits = False
+                            elif filter_key[category]['store-mode'] == 'a':
+                                if value not in crd[filter_key[category]['section']][category]:
+                                    fits = False
                                 
-                        elif filter_key[category]['store-mode'] == 'l':
-                            if value != card[filter_key[category]['section']][config_ini['language']]:
-                                fits = False                            
-                        else:
-                            fits = False
+                            elif filter_key[category]['store-mode'] == 't':
+                                if value != card[filter_key[category]['section']][config_ini['language']]:
+                                    fits = False
+                                
+                            else:
+                                fits = False
 
 #--                
 
-                # Collect the filters
+                # Fill up the filter lists: unconditional/hit
                 for category, value in self.get_fast_filter_holder().get_filter_selection().items():
                     if filter_key[category]['store-mode'] == 'v':
                         if card[filter_key[category]['section']][category]:
@@ -644,7 +651,7 @@ class GuiAkoTeka(QWidget, QObject):
                                 if fits:
                                     filter_hit_list[category].add(cat.strip())
                 
-                    elif filter_key[category]['store-mode'] == 'l':
+                    elif filter_key[category]['store-mode'] == 't':
                         filter_unconditional_list['title'].add(card[filter_key[category]['section']][config_ini['language']])
                         if fits:
                             filter_hit_list['title'].add(card[filter_key[category]['section']][config_ini['language']])
@@ -933,6 +940,7 @@ class ControlPanel(QWidget):
         # Listeners
         self.back_button_listener = None
         self.fast_filter_listener = None
+        self.advanced_filter_listener = None
 
     def refresh_label(self):
         self.fast_filter_holder.refresh_label()
@@ -946,10 +954,14 @@ class ControlPanel(QWidget):
  
     def fast_filter_on_change(self):
         if self.fast_filter_listener:
-            self.fast_filter_listener.filter_the_cards()
+            self.gui.filter_the_cards()
     
     def get_fast_filter_holder(self):
         return self.fast_filter_holder
+
+    def advanced_filter_on_change(self):
+        if self.advanced_filter_listener:
+            self.gui.filter_the_cards()
 
     def get_advanced_filter_holder(self):
         return self.advanced_filter_holder
