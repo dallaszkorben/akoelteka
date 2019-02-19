@@ -395,6 +395,7 @@ class GuiAkoTeka(QWidget, QObject):
     #
     # --------------------------------
     def filter_the_cards(self, card_descriptor_structure=None):
+        #print('filter_the_cards')
         if card_descriptor_structure is None:
             card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
         
@@ -405,6 +406,10 @@ class GuiAkoTeka(QWidget, QObject):
     # Set-up Filters
     # ----------------
     def set_up_filters(self, card_descriptor_structure):
+        
+        #self.get_advanced_filter_holder().set_title('12')
+        title = self.get_advanced_filter_holder().title_filter.getValue()
+        
         """
         Based on the list that received as parameter, 
         it selects the possible filter elements
@@ -418,7 +423,7 @@ class GuiAkoTeka(QWidget, QObject):
         # ####################################
         # Save the recent state of the filters
         # ####################################
-        filters = {
+        fast_filters = {
             "title": "",
             "genre": "",
             "theme": "",
@@ -428,9 +433,27 @@ class GuiAkoTeka(QWidget, QObject):
             "new": "",
             "best": ""
         }
+        advanced_filters = {
+            "title": "",
+            "genre": "",
+            "theme": "",
+            "director": "",
+            "actor": "",
+            "sound": "",
+            "sub": "",
+            "country": "",
+            "length_from": "",
+            "length_to": "",
+            "year_from": "",
+            "year_to": "",            
+        }        
         for category, value in self.get_fast_filter_holder().get_filter_selection().items():            
             if value != None and value != "":
-                filters[category] = value
+                fast_filters[category] = value
+
+        for category, value in self.get_advanced_filter_holder().get_filter_selection().items():            
+            if value != None and value != "":
+                advanced_filters[category] = value
         
         # #############
         # Setup Filters
@@ -556,15 +579,21 @@ class GuiAkoTeka(QWidget, QObject):
         for element in sorted( [str(int(spl[-2])).rjust(1) + ":" + str(int(spl[-1])).zfill(2) for spl in [l.split(":") for l in filter_unconditional_list['length'] if ':' in l ] if all(c.isdigit() for c in spl[-1] ) and all(c.isdigit() for c in spl[-2] )], key=cmp_to_key(locale.strcoll) ):
             self.get_advanced_filter_holder().add_length(element)
 
-
         # ####################
         # Reselect the Filters
         # ####################
-        self.get_fast_filter_holder().select_title(filters["title"])
-        self.get_fast_filter_holder().select_genre(filters["genre"])
-        self.get_fast_filter_holder().select_theme(filters["theme"])
-        self.get_fast_filter_holder().select_director(filters["director"])
-        self.get_fast_filter_holder().select_actor(filters["actor"])
+        self.get_fast_filter_holder().select_title(fast_filters["title"])
+        self.get_fast_filter_holder().select_genre(fast_filters["genre"])
+        self.get_fast_filter_holder().select_theme(fast_filters["theme"])
+        self.get_fast_filter_holder().select_director(fast_filters["director"])
+        self.get_fast_filter_holder().select_actor(fast_filters["actor"])
+        
+        self.get_advanced_filter_holder().set_title(advanced_filters['title'])
+        self.get_advanced_filter_holder().set_genre(advanced_filters['genre'])
+        self.get_advanced_filter_holder().set_theme(advanced_filters['theme'])
+        self.get_advanced_filter_holder().set_director(advanced_filters['director'])
+        self.get_advanced_filter_holder().set_actor(advanced_filters['actor'])
+        
         
         # #######################################
         # Turn back ON the listener to the Filter
@@ -609,12 +638,12 @@ class GuiAkoTeka(QWidget, QObject):
             if crd['extra']['media-path']:
 
                 fits = True
+
+                # FAST FILTER is visible
+                if not self.control_panel.fast_filter_holder.isHidden():                 
                 
-                # go through the FAST FILTERS and decide if the Card is filtered
-                for category, value in self.get_fast_filter_holder().get_filter_selection().items():
-            
-                    # if the fast filter is visible
-                    if not self.control_panel.fast_filter_holder.isHidden():                 
+                    # go through the FAST FILTERS and decide if the Card is filtered
+                    for category, value in self.get_fast_filter_holder().get_filter_selection().items():
                  
                         # if the specific filter is set
                         if value != None and value != "":
@@ -622,17 +651,54 @@ class GuiAkoTeka(QWidget, QObject):
                             if filter_key[category]['store-mode'] == 'v':
                                 if value != crd[filter_key[category]['section']][category]:
                                     fits = False
+                                    break
                                 
                             elif filter_key[category]['store-mode'] == 'a':
                                 if value not in crd[filter_key[category]['section']][category]:
                                     fits = False
+                                    break
                                 
                             elif filter_key[category]['store-mode'] == 't':
                                 if value != card[filter_key[category]['section']][config_ini['language']]:
                                     fits = False
+                                    break
                                 
                             else:
                                 fits = False
+                                break
+
+                # ADVANCED FILTER is visible
+                elif not self.control_panel.advanced_filter_holder.isHidden(): 
+
+                    # go through the FAST FILTERS and decide if the Card is filtered
+                    for category, value in self.get_advanced_filter_holder().get_filter_selection().items():
+                 
+                        # if the specific filter is set
+                        if value != None and value != "":
+
+                            if filter_key[category]['store-mode'] == 'v':
+                                if value.lower() not in crd[filter_key[category]['section']][category].lower():
+                                    fits = False
+                                    break
+                                
+                            elif filter_key[category]['store-mode'] == 'a':
+                                found = False
+                                for e in crd[filter_key[category]['section']][category]:
+                                    if value.lower() in e.lower():
+                                        found = True
+                                        break
+                                fits = found
+                                break
+                                
+                            elif filter_key[category]['store-mode'] == 't':
+                                if value.lower() not in card[filter_key[category]['section']][config_ini['language']].lower():
+                                    fits = False
+                                    break
+                                
+                            else:
+                                fits = False
+                                break
+
 
 #--                
 
@@ -659,6 +725,7 @@ class GuiAkoTeka(QWidget, QObject):
                 if fits:
                     filtered_card_structure.append(card)                    
                     mediaFits = True
+                    
 #--
                     
             # in case of COLLECTOR CARD
@@ -934,6 +1001,7 @@ class ControlPanel(QWidget):
         #
         # ----------------------
         self.advanced_filter_holder = AdvancedFilterHolder(self)
+        self.advanced_filter_holder.clicked.connect(self.advanced_filter_on_click)
         self.advanced_filter_holder.setHidden(True)
         self_layout.addWidget(self.advanced_filter_holder)
 
@@ -952,6 +1020,11 @@ class ControlPanel(QWidget):
     def set_fast_filter_listener(self, listener):
         self.fast_filter_listener = listener
  
+    # ----------------------------------
+    #
+    # a value changed in the fast filter
+    # 
+    # ----------------------------------
     def fast_filter_on_change(self):
         if self.fast_filter_listener:
             self.gui.filter_the_cards()
@@ -959,9 +1032,13 @@ class ControlPanel(QWidget):
     def get_fast_filter_holder(self):
         return self.fast_filter_holder
 
-    def advanced_filter_on_change(self):
-        if self.advanced_filter_listener:
-            self.gui.filter_the_cards()
+    # ---------------------------------
+    #
+    # advanced filter clicked
+    #
+    # ---------------------------------
+    def advanced_filter_on_click(self):
+        self.gui.filter_the_cards()
 
     def get_advanced_filter_holder(self):
         return self.advanced_filter_holder

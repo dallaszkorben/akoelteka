@@ -98,7 +98,7 @@ class ControlButtonsHolder(QWidget):
         self.advanced_search_button.setFocusPolicy(Qt.NoFocus)
         self.advanced_search_button.setCheckable(True)
         self.advanced_search_button.setAutoExclusive(False)
-        self.advanced_search_button.toggled.connect(self.advamced_search_button_on_click)
+        self.advanced_search_button.toggled.connect(self.advanced_search_button_on_click)
         
         advanced_search_icon = QIcon()
         advanced_search_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_ADVANCED_SEARCH_BUTTON_ON)) ), QIcon.Normal, QIcon.On)
@@ -136,7 +136,9 @@ class ControlButtonsHolder(QWidget):
         if checked:
             self.advanced_search_button.setChecked(False)
 
+        # hide/show fast filter
         self.control_panel.fast_filter_holder.setHidden(not checked)
+        # filter the list
         self.control_panel.fast_filter_on_change()
     
     # ------------------------------
@@ -144,12 +146,14 @@ class ControlButtonsHolder(QWidget):
     # Advanced Search Button Clicked
     #
     # ------------------------------
-    def advamced_search_button_on_click(self, checked):
+    def advanced_search_button_on_click(self, checked):
         if checked:
             self.fast_search_button.setChecked(False)
 
+        # hide/show advanced filter
         self.control_panel.advanced_filter_holder.setHidden(not checked)
-        self.control_panel.advanced_filter_on_change()
+        # filter the list
+        #self.control_panel.advanced_filter_on_click()
         
     # -------------------
     #

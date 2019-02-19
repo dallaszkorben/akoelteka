@@ -98,6 +98,10 @@ class AQFilter(QWidget):
         self.list.append((value,index))
         self.custom_auto_completer.setModel(self.model)
 
+    def setValue(self, value):
+        self.value = value
+        self.input_widget.setText(value)        
+
     # #############
     # getValue
     # #############

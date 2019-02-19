@@ -30,7 +30,6 @@ from akoteka.handle_property import re_read_config_ini
 from akoteka.handle_property import config_ini
 from akoteka.handle_property import get_config_ini
 
-
 # =======================
 #
 # Advanced Filter HOLDER
@@ -38,7 +37,7 @@ from akoteka.handle_property import get_config_ini
 # =======================
 class AdvancedFilterHolder(QWidget):
     
-    changed = pyqtSignal()
+    clicked = pyqtSignal()
     
     def __init__(self, parent):
         super().__init__(parent)
@@ -233,12 +232,21 @@ class AdvancedFilterHolder(QWidget):
         holder_layout.addWidget(length_to_label, 1, 8, 1, 1)
         holder_layout.addWidget(self.length_to_combobox, 1, 9, 1, 1)
 
+        # -------------
+        #
+        # Search button
+        #
+        # -------------
+        self.filter_button = QPushButton(_('button_filter'))
+        holder_layout.addWidget(self.filter_button, 2, 7, 1, 3)
+        self.filter_button.clicked.connect(self.filter_button_clicked)
+
         # ----------
         #
         # Stretch
         #
         # ----------
-        holder_layout.setColumnStretch(10, 1)
+        holder_layout.setColumnStretch(11, 1)
 
     def refresh_label(self):
        self.title_label.setText(_('title_title') + ": ")
@@ -252,7 +260,6 @@ class AdvancedFilterHolder(QWidget):
        self.year_from_label.setText(_('title_year') + ": ")
        self.length_from_label.setText(_('title_length') + ": ")
        
-
     def clear_title(self):
         self.title_filter.clear()
 
@@ -294,6 +301,23 @@ class AdvancedFilterHolder(QWidget):
 
     # ---
     
+    def set_title(self, value):
+        self.title_filter.setValue(value)
+
+    def set_genre(self, value):
+        self.genre_filter.setValue(value)
+    
+    def set_theme(self, value):
+        self.theme_filter.setValue(value)
+        
+    def set_director(self, value):
+        self.director_filter.setValue(value)
+        
+    def set_actor(self, value):
+        self.actor_filter.setValue(value)
+    
+    # ---
+    
     def add_title(self, value):
         self.title_filter.addItemToList(value, value)
     
@@ -325,9 +349,26 @@ class AdvancedFilterHolder(QWidget):
     def add_year(self, year):
         self.year_from_combobox.addItem(year)
         self.year_to_combobox.addItem(year)
-        pass
-        
 
+    def filter_button_clicked(self):
+        self.clicked.emit()        
+
+    def get_filter_selection(self):
+        filter_selection = {
+            "title": self.title_filter.getValue(),
+            "genre": self.genre_filter.getValue(),
+            "theme": self.theme_filter.getValue(),
+            "director": self.director_filter.getValue(),
+            "actor": self.actor_filter.getValue(),
+            "sound": "",
+            "sub": "",
+            "country": "",
+            "length_from": "",
+            "length_to": "",
+            "year_from": "",
+            "year_to": "",
+        }
+        return filter_selection
 
     
     
