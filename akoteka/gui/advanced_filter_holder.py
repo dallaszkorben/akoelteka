@@ -354,19 +354,28 @@ class AdvancedFilterHolder(QWidget):
         self.clicked.emit()        
 
     def get_filter_selection(self):
+        
+        #
+        # 1st value:    the typed value
+        # 2nd value:    
+        #               if not from DICT:   None
+        #               if from DICT:
+        #                               if found: [found, dict, elements]
+        #                               if not found: []
+        #
         filter_selection = {
-            "title": self.title_filter.getValue(),
-            "genre": self.genre_filter.getValue(),
-            "theme": self.theme_filter.getValue(),
-            "director": self.director_filter.getValue(),
-            "actor": self.actor_filter.getValue(),
-            "sound": "",
-            "sub": "",
-            "country": "",
-            "length_from": "",
-            "length_to": "",
-            "year_from": "",
-            "year_to": "",
+            "title": [self.title_filter.getValue(), None],
+            "genre": [self.genre_filter.getValue(), self.genre_filter.getIndexes()],
+            "theme": [self.theme_filter.getValue(), self.theme_filter.getIndexes()],
+            "director": [self.director_filter.getValue(), None],
+            "actor": [self.actor_filter.getValue(), None],
+            "sound": [None, None],
+            "sub": [None, None],
+            "country": [None, None],
+            "length_from": [None, None],
+            "length_to": [None, None],
+            "year_from": [None, None],
+            "year_to": [None, None],
         }
         return filter_selection
 

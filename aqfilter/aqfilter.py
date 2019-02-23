@@ -109,7 +109,7 @@ class AQFilter(QWidget):
         return self.value
     
     def getIndexes(self):
-        return [l[1] for l in self.list if self.value in l[0]]
+        return [l[1] for l in self.list if (self.value.lower() and self.value in l[0].lower())]
     
     def clear(self):
         self.value = ""
