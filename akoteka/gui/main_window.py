@@ -593,7 +593,9 @@ class GuiAkoTeka(QWidget, QObject):
         self.get_advanced_filter_holder().set_theme(advanced_filters['theme'])
         self.get_advanced_filter_holder().set_director(advanced_filters['director'])
         self.get_advanced_filter_holder().set_actor(advanced_filters['actor'])
-        
+        self.get_advanced_filter_holder().select_sound(advanced_filters['sound'])
+        self.get_advanced_filter_holder().select_sub(advanced_filters['sub'])
+        self.get_advanced_filter_holder().select_country(advanced_filters['country'])
         
         # #######################################
         # Turn back ON the listener to the Filter
@@ -637,7 +639,7 @@ class GuiAkoTeka(QWidget, QObject):
             # in case of MEDIA CARD
             if crd['extra']['media-path']:
 
-                print('title: ', card['title']['hu'])
+#                print('title: ', card['title']['hu'])
 
                 fits = True
 
@@ -675,7 +677,7 @@ class GuiAkoTeka(QWidget, QObject):
                     # go through the ADVANCED FILTERS by Categories and decide if the Card is filtered
                     for category, v in self.get_advanced_filter_holder().get_filter_selection().items():
                         
-                        print('  category: ', category, 'typed: ', v[0], ', index: ', v[1], ', get: ', self.get_advanced_filter_holder().theme_filter.getValue() )
+#                        print('  category: ', category, 'typed: ', v[0], ', index: ', v[1], ', get: ', self.get_advanced_filter_holder().theme_filter.getValue() )
                         
                         # do I want to check this Category match
                         if v[0]:                            
@@ -685,19 +687,19 @@ class GuiAkoTeka(QWidget, QObject):
                             # go throug all filters in the category
                             for filter in v[1] if filter_key[category]['value-dict'] else [v[0]]:
                             
-                                print('    filter: ', filter)
+#                                print('    filter: ', filter)
                             
                                 fits = False
                                     
                                 # if multiple category values 
                                 if filter_key[category]['store-mode'] == 'a':
                                       
-                                    print('    values in the card: ', crd[filter_key[category]['section']][category]) 
+#                                    print('    values in the card: ', crd[filter_key[category]['section']][category]) 
                                     # go through the category values in the card
                                     # at least one category value should match to the filter
                                     for e in crd[filter_key[category]['section']][category]:
 
-                                        print('    value in the card: ', e,  ', equals:', filter.lower() == e.lower())
+                                        #print('    value in the card: ', e,  ', filter:', filter )
 
                                         # is the filter a DICT
                                         if filter_key[category]['value-dict']:
@@ -705,7 +707,7 @@ class GuiAkoTeka(QWidget, QObject):
                                             # then correct match needed
                                             if filter.lower() == e.lower():
                                                 fits = True
-                                                print('    break')
+#                                                print('    break')
                                                 break
                                                 
                                         # NOT dict
@@ -733,7 +735,6 @@ class GuiAkoTeka(QWidget, QObject):
                                         if filter.lower() in crd[filter_key[category]['section']][category].lower():
                                             fits = True
                                             break
-
                                     
                                 elif filter_key[category]['store-mode'] == 't':
                                         
@@ -750,14 +751,13 @@ class GuiAkoTeka(QWidget, QObject):
                                         if filter.lower() in card[filter_key[category]['section']][config_ini['language']].lower():
                                             fits = True
                                             break
-
                                 
                                 # if at least one filter matches to a category values in the card
                                 if fits:
                                     break
 
-                        print('    all filter in category fits:', fits) 
-                        print()
+#                        print('    all filter in category fits:', fits) 
+#                        print()
                         if not fits:
                             #print('not fits, break', value, crd[filter_key[category]['section']][category])
                             break
@@ -793,7 +793,7 @@ class GuiAkoTeka(QWidget, QObject):
             # in case of COLLECTOR CARD
             else:                     
 
-                print('--')
+ #               print('--')
                      
                 # then it depends on the next level
                 fits = self.generate_filtered_card_structure(crd['extra']['sub-cards'], card['extra']['sub-cards'], filter_hit_list, filter_unconditional_list)

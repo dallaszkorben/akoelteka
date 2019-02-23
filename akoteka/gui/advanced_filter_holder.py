@@ -64,12 +64,12 @@ class AdvancedFilterHolder(QWidget):
 
         combobox_short_style_box = '''
             QComboBox { 
-                max-width: 150px; max-width: 150px; border: 1px solid gray; border-radius: 5px;
+                min-width: 40px; border: 1px solid gray; border-radius: 5px;
             }
         '''
         combobox_long_style_box = '''
             QComboBox { 
-                max-width: 150px; max-width: 150px; border: 1px solid gray; border-radius: 5px;
+                min-width: 60px; border: 1px solid gray; border-radius: 5px;
             }
         '''
         
@@ -277,27 +277,27 @@ class AdvancedFilterHolder(QWidget):
 
     def clear_sound(self):
         self.sound_combobox.clear()
-        self.sound_combobox.addItem("                       ")
+        self.sound_combobox.addItem("")
         
     def clear_sub(self):
         self.sub_combobox.clear()
-        self.sub_combobox.addItem("                       ")
+        self.sub_combobox.addItem("")
         
     def clear_country(self):
         self.country_combobox.clear()
-        self.country_combobox.addItem("                       ")
+        self.country_combobox.addItem("")
 
     def clear_year(self):
         self.year_from_combobox.clear()
         self.year_to_combobox.clear()
-        self.year_from_combobox.addItem("            ")
-        self.year_to_combobox.addItem("            ")
+        self.year_from_combobox.addItem("")
+        self.year_to_combobox.addItem("")
 
     def clear_length(self):
         self.length_from_combobox.clear()
         self.length_to_combobox.clear()
-        self.length_from_combobox.addItem("            ")
-        self.length_to_combobox.addItem("            ")
+        self.length_from_combobox.addItem("")
+        self.length_to_combobox.addItem("")
 
     # ---
     
@@ -315,6 +315,15 @@ class AdvancedFilterHolder(QWidget):
         
     def set_actor(self, value):
         self.actor_filter.setValue(value)
+
+    def select_sound(self, id):
+        self.sound_combobox.setCurrentIndex( self.sound_combobox.findText(id) )
+
+    def select_sub(self, id):
+        self.sub_combobox.setCurrentIndex( self.sub_combobox.findText(id) )
+
+    def select_country(self, id):
+        self.country_combobox.setCurrentIndex( self.country_combobox.findText(id) )
     
     # ---
     
@@ -335,7 +344,7 @@ class AdvancedFilterHolder(QWidget):
     
     def add_sound(self, value, id):
         self.sound_combobox.addItem(value, id)
-
+    
     def add_sub(self, value, id):
         self.sub_combobox.addItem(value, id)
  
@@ -349,12 +358,35 @@ class AdvancedFilterHolder(QWidget):
     def add_year(self, year):
         self.year_from_combobox.addItem(year)
         self.year_to_combobox.addItem(year)
+        
+    # ---
+    
+    def get_sound_selected_index(self):
+        return self.sound_combobox.itemData( self.sound_combobox.currentIndex() )
 
+    def get_sound_selected_value(self):
+        return self.sound_combobox.itemText( self.sound_combobox.currentIndex() )
+
+    def get_sub_selected_index(self):
+        return self.sub_combobox.itemData( self.sub_combobox.currentIndex() )
+
+    def get_sub_selected_value(self):
+        return self.sub_combobox.itemText( self.sub_combobox.currentIndex() )
+
+    def get_country_selected_index(self):
+        return self.country_combobox.itemData( self.country_combobox.currentIndex() )
+
+    def get_country_selected_value(self):
+        return self.country_combobox.itemText( self.country_combobox.currentIndex() )
+
+    # ---
+    
     def filter_button_clicked(self):
         self.clicked.emit()        
 
     def get_filter_selection(self):
         
+        # -----------------------------------------------------------------
         #
         # 1st value:    the typed value
         # 2nd value:    
@@ -363,15 +395,16 @@ class AdvancedFilterHolder(QWidget):
         #                               if found: [found, dict, elements]
         #                               if not found: []
         #
+        # -----------------------------------------------------------------
         filter_selection = {
             "title": [self.title_filter.getValue(), None],
             "genre": [self.genre_filter.getValue(), self.genre_filter.getIndexes()],
             "theme": [self.theme_filter.getValue(), self.theme_filter.getIndexes()],
             "director": [self.director_filter.getValue(), None],
             "actor": [self.actor_filter.getValue(), None],
-            "sound": [None, None],
-            "sub": [None, None],
-            "country": [None, None],
+            "sound": [self.get_sound_selected_value(), [self.get_sound_selected_index()]],
+            "sub": [self.get_sub_selected_value(), [self.get_sub_selected_index()]],
+            "country": [self.get_country_selected_value(), [self.get_country_selected_index()]],
             "length_from": [None, None],
             "length_to": [None, None],
             "year_from": [None, None],

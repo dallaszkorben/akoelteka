@@ -69,7 +69,7 @@ class AQFilter(QWidget):
         self.list = []
         
         # Input field Widget
-        self.input_widget = QLineEdit(self)
+        self.input_widget = InputLine(self)
         self.input_widget.setText(self.value)
         self_layout.addWidget(self.input_widget)
         self.input_widget.textChanged.connect(self.input_changed)
@@ -116,35 +116,7 @@ class AQFilter(QWidget):
         self.index = -1
         self.input_widget.setText(self.value)
         self.list.clear()
-        
-   
-#    # ############
-#    # setMaxLine
-#    # ############
-#    def setMaxLine(self, max_line):
-#        """Set the max number of lines of the list"""
-#        self.max_line = max_line
-#
-#    # #####################
-#    # setMinCharsToShowList
-#    # #####################
-#    def setMinCharsToShowList(self, min_chars):
-#        self.min_chars_to_show_list = min_chars
-#
-#    def set_selected_value_index(self, value, index):
-#        """Set the value-index by the selected element from the list"""
-#        self.set_typed_value_index(value, index)
-#        self.input_widget.setText(value)
-#        
-#    def set_typed_value_index(self, value, index=None):
-#        """Set the value-index by the typed key"""
-#        self.value = value
-#        self.index = index
-#      
-#    def hide_list(self):
-#        """Hide the list"""
-#        self.list_widget.setHidden(True)      
-
+  
     def get_main_window(self):
         """Search for the Main Window"""
         def get(widget, ret=None):
@@ -160,7 +132,15 @@ class AQFilter(QWidget):
 
 
         
+class InputLine(QLineEdit):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
         
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Down:
+            self.parent.custom_auto_completer.complete()
+        event.ignore()
   
 class HTMLDelegate(QStyledItemDelegate):
     """ From: https://stackoverflow.com/a/5443112/1504082 """

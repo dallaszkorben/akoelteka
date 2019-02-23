@@ -306,7 +306,7 @@ class FilterDropDownSimple(QWidget):
         return self.dropdown.itemText( self.dropdown.currentIndex() )
     
     def select_element(self, id):
-        self.dropdown.setCurrentIndex( self.dropdown.findData(id) )
+        self.dropdown.setCurrentIndex( self.dropdown.findText(id) )
 
     def current_index_changed(self):
         self.state_changed.emit()
