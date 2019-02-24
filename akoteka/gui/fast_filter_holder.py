@@ -143,8 +143,8 @@ class FastFilterHolder(QWidget):
     def add_title(self, value):
         self.filter_dd_title.add_element(value, value)
 
-    def select_title(self, id):
-        self.filter_dd_title.select_element(id)
+    def select_title_by_text(self, text):
+        self.filter_dd_title.select_element_by_text(text)
     # ---
     def clear_genre(self):
         self.filter_dd_genre.clear_elements()
@@ -152,8 +152,8 @@ class FastFilterHolder(QWidget):
     def add_genre(self, value, id):
         self.filter_dd_genre.add_element(value, id)
         
-    def select_genre(self, id):
-        self.filter_dd_genre.select_element(id)
+    def select_genre_by_id(self, id):
+        self.filter_dd_genre.select_element_by_id(id)
     # ---
     def clear_theme(self):
         self.filter_dd_theme.clear_elements()
@@ -161,8 +161,8 @@ class FastFilterHolder(QWidget):
     def add_theme(self, value, id):
         self.filter_dd_theme.add_element(value, id)
         
-    def select_theme(self, id):
-        self.filter_dd_theme.select_element(id)        
+    def select_theme_by_id(self, id):
+        self.filter_dd_theme.select_element_by_id(id)        
     # ---
     def clear_director(self):
         self.filter_dd_director.clear_elements()
@@ -170,8 +170,8 @@ class FastFilterHolder(QWidget):
     def add_director(self, director):
         self.filter_dd_director.add_element(director, director)
     
-    def select_director(self, id):
-        self.filter_dd_director.select_element(id)
+    def select_director_by_text(self, text):
+        self.filter_dd_director.select_element_by_text(text)
     # ---
     def clear_actor(self):
         self.filter_dd_actor.clear_elements()
@@ -179,8 +179,8 @@ class FastFilterHolder(QWidget):
     def add_actor(self, actor):
         self.filter_dd_actor.add_element(actor, actor)
         
-    def select_actor(self, id):
-        self.filter_dd_actor.select_element(id)        
+    def select_actor_by_text(self, text):
+        self.filter_dd_actor.select_element_by_text(text)        
     # ---
     def get_filter_selection(self):
         filter_selection = {
@@ -188,8 +188,8 @@ class FastFilterHolder(QWidget):
             "best": self.filter_cb_best.is_checked(),
             "new": self.filter_cb_new.is_checked(),
             "favorite": self.filter_cb_favorite.is_checked(),
-            "genre": self.filter_dd_genre.get_selected_index(),
-            "theme": self.filter_dd_theme.get_selected_index(),
+            "genre": self.filter_dd_genre.get_selected_id(),
+            "theme": self.filter_dd_theme.get_selected_id(),
             "director": self.filter_dd_director.get_selected_value(),
             "actor": self.filter_dd_actor.get_selected_value(),
             "sound": "",
@@ -296,7 +296,7 @@ class FilterDropDownSimple(QWidget):
     # -------------------------------------
     # get the index of the selected element
     # -------------------------------------
-    def get_selected_index(self):
+    def get_selected_id(self):
         return self.dropdown.itemData( self.dropdown.currentIndex() )
 
     # -------------------------------------
@@ -305,8 +305,11 @@ class FilterDropDownSimple(QWidget):
     def get_selected_value(self):
         return self.dropdown.itemText( self.dropdown.currentIndex() )
     
-    def select_element(self, id):
-        self.dropdown.setCurrentIndex( self.dropdown.findText(id) )
+    def select_element_by_id(self, id):
+        self.dropdown.setCurrentIndex( self.dropdown.findData(id) )
+
+    def select_element_by_text(self, text):
+        self.dropdown.setCurrentIndex( self.dropdown.findText(text) )
 
     def current_index_changed(self):
         self.state_changed.emit()

@@ -397,18 +397,18 @@ class AdvancedFilterHolder(QWidget):
         #
         # -----------------------------------------------------------------
         filter_selection = {
-            "title": [self.title_filter.getValue(), None],
-            "genre": [self.genre_filter.getValue(), self.genre_filter.getIndexes()],
-            "theme": [self.theme_filter.getValue(), self.theme_filter.getIndexes()],
-            "director": [self.director_filter.getValue(), None],
-            "actor": [self.actor_filter.getValue(), None],
-            "sound": [self.get_sound_selected_value(), [self.get_sound_selected_index()]],
-            "sub": [self.get_sub_selected_value(), [self.get_sub_selected_index()]],
-            "country": [self.get_country_selected_value(), [self.get_country_selected_index()]],
-            "length_from": [None, None],
-            "length_to": [None, None],
-            "year_from": [None, None],
-            "year_to": [None, None],
+            "title": [self.title_filter.getValue(), None, ""],
+            "genre": [self.genre_filter.getValue(), self.genre_filter.getIndexes(), ""],
+            "theme": [self.theme_filter.getValue(), self.theme_filter.getIndexes(), ""],
+            "director": [self.director_filter.getValue(), None, ""],
+            "actor": [self.actor_filter.getValue(), None, ""],
+            "sound": [self.get_sound_selected_value(), [self.get_sound_selected_index()], ""],
+            "sub": [self.get_sub_selected_value(), [self.get_sub_selected_index()], ""],
+            "country": [self.get_country_selected_value(), [self.get_country_selected_index()], ""],
+            "length-from": [None, None, ""],
+            "length-to": [None, None, ""],
+            "year-from": [None, None, ""], #[self.get_country_selected_value(), None, 'gte'],
+            "year-to": [None, None, ""], #[self.get_country_selected_value(), None, 'lte'],
         }
         return filter_selection
 

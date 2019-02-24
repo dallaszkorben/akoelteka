@@ -109,7 +109,7 @@ class AQFilter(QWidget):
         return self.value
     
     def getIndexes(self):
-        return [l[1] for l in self.list if (self.value.lower() and self.value in l[0].lower())]
+        return [l[1] for l in self.list if (self.value.lower() and self.value.lower() in l[0].lower())]
     
     def clear(self):
         self.value = ""
@@ -140,7 +140,8 @@ class InputLine(QLineEdit):
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Down:
             self.parent.custom_auto_completer.complete()
-        event.ignore()
+        #event.ignore()
+        super().keyPressEvent(event)
   
 class HTMLDelegate(QStyledItemDelegate):
     """ From: https://stackoverflow.com/a/5443112/1504082 """

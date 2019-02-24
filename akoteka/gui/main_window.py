@@ -233,6 +233,7 @@ class GuiAkoTeka(QWidget, QObject):
             
             # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
             self.filter_the_cards(self.actual_card_holder.orig_card_descriptor_structure)
+            self.filter_the_cards(self.actual_card_holder.orig_card_descriptor_structure)
             
             # select the Card which was selected to enter
             self.actual_card_holder.select_actual_card()
@@ -514,7 +515,7 @@ class GuiAkoTeka(QWidget, QObject):
         # advanced filter
         self.get_advanced_filter_holder().clear_genre()            
         for element in sorted([(_("genre_" + e),e) for e in filter_unconditional_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_advanced_filter_holder().add_genre(element[0], element[1])        
+            self.get_advanced_filter_holder().add_genre(element[0], element[1])
         
         # Fill up THEME 
         # fast filter - dropdown
@@ -582,11 +583,11 @@ class GuiAkoTeka(QWidget, QObject):
         # ####################
         # Reselect the Filters
         # ####################
-        self.get_fast_filter_holder().select_title(fast_filters["title"])
-        self.get_fast_filter_holder().select_genre(fast_filters["genre"])
-        self.get_fast_filter_holder().select_theme(fast_filters["theme"])
-        self.get_fast_filter_holder().select_director(fast_filters["director"])
-        self.get_fast_filter_holder().select_actor(fast_filters["actor"])
+        self.get_fast_filter_holder().select_title_by_text(fast_filters["title"])
+        self.get_fast_filter_holder().select_genre_by_id(fast_filters["genre"])
+        self.get_fast_filter_holder().select_theme_by_id(fast_filters["theme"])
+        self.get_fast_filter_holder().select_director_by_text(fast_filters["director"])
+        self.get_fast_filter_holder().select_actor_by_text(fast_filters["actor"])
         
         self.get_advanced_filter_holder().set_title(advanced_filters['title'])
         self.get_advanced_filter_holder().set_genre(advanced_filters['genre'])
@@ -596,6 +597,7 @@ class GuiAkoTeka(QWidget, QObject):
         self.get_advanced_filter_holder().select_sound(advanced_filters['sound'])
         self.get_advanced_filter_holder().select_sub(advanced_filters['sub'])
         self.get_advanced_filter_holder().select_country(advanced_filters['country'])
+        #self.get_advanced_filter_holder().select_year(advanced_filters['year-from'])
         
         # #######################################
         # Turn back ON the listener to the Filter
@@ -613,7 +615,7 @@ class GuiAkoTeka(QWidget, QObject):
     def generate_filtered_card_structure(self, card_structure, filtered_card_structure, filter_hit_list, filter_unconditional_list):
         """
         This method serves a dual task:
-            -Based on the Filter it generates a new, filtered list: filtered_card_structure
+            -Based on the Fast Filter it generates a new, filtered list: filtered_card_structure
             -Collects the new Filter, based on the filtered list:   filter_hit_list
         """
         mediaFits = False
@@ -639,7 +641,7 @@ class GuiAkoTeka(QWidget, QObject):
             # in case of MEDIA CARD
             if crd['extra']['media-path']:
 
-#                print('title: ', card['title']['hu'])
+                print('title: ', card['title']['hu'])
 
                 fits = True
 
@@ -685,9 +687,9 @@ class GuiAkoTeka(QWidget, QObject):
                             fits = False
                             
                             # go throug all filters in the category
-                            for filter in v[1] if filter_key[category]['value-dict'] else [v[0]]:
+                            for filter, op in zip(v[1], [v[2]]*len(v[1])) if filter_key[category]['value-dict'] else [v[0], v[2]]:
                             
-#                                print('    filter: ', filter)
+#                                print('    filter: ', filter, ', op: ', op)
                             
                                 fits = False
                                     
@@ -709,9 +711,17 @@ class GuiAkoTeka(QWidget, QObject):
                                                 fits = True
 #                                                print('    break')
                                                 break
-                                                
+                                        
                                         # NOT dict
                                         else:
+
+                                            # dict >= (greater than or equal
+#                                            if op == 'gte':
+                                            
+                                            
+                                            # dict <= (less than or equal
+#                                            elif op == 'gte':
+
                                                 
                                             #NOT correct mach needed
                                             if filter.lower() in e.lower():
@@ -759,7 +769,6 @@ class GuiAkoTeka(QWidget, QObject):
 #                        print('    all filter in category fits:', fits) 
 #                        print()
                         if not fits:
-                            #print('not fits, break', value, crd[filter_key[category]['section']][category])
                             break
 
 #--                
