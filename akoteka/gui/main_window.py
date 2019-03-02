@@ -286,7 +286,8 @@ class GuiAkoTeka(QWidget, QObject):
         # if there is only ONE Card and the status of the presentation is "initialize"
         if len(card_holder.card_descriptor_list) == 1 and self.initialize:
             # then I go down ONE level
-            self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["orig-sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
+#            self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["orig-sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
+            self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
 
     # ----------------------------------------------------------
     #
@@ -870,6 +871,7 @@ class GuiAkoTeka(QWidget, QObject):
         
         
         return (mediaFits or collectorFits)
+
   
   
   
@@ -1055,9 +1057,12 @@ class GuiAkoTeka(QWidget, QObject):
         
     def get_cards_by_advanced_filter(self, card_structure):
         """
+        parameters:
+            card_structure:        the full structure on the recent level (not filtered)
         """  
   
-        def generate_filtered_list(card_structure, filtered_card_structure):
+        #def generate_filtered_list(card_structure, filtered_card_structure):
+        def generate_filtered_list(card_structure):
 
             mediaFits = False
             collectorFits = False
@@ -1065,19 +1070,20 @@ class GuiAkoTeka(QWidget, QObject):
             # through the SORTED list
             for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
             
-                card = {}
-                card['title'] = crd['title']
-                card['storyline'] = crd['storyline']
-                card['general'] = crd['general']
-                card['rating'] = crd['rating']
-                card['links'] = crd['links']
-
-                card['extra'] = {}            
-                card['extra']['image-path'] = crd['extra']['image-path']
-                card['extra']['media-path'] = crd['extra']['media-path']
-                card['extra']['recent-folder'] = crd['extra']['recent-folder']            
-                card['extra']['sub-cards'] = []
-                card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
+#                card = {}
+#                card['title'] = crd['title']
+#                card['storyline'] = crd['storyline']
+#                card['general'] = crd['general']
+#                card['rating'] = crd['rating']
+#                card['links'] = crd['links']
+#
+#                card['extra'] = {}            
+#                card['extra']['image-path'] = crd['extra']['image-path']
+#                card['extra']['media-path'] = crd['extra']['media-path']
+#                card['extra']['recent-folder'] = crd['extra']['recent-folder']            
+#                card['extra']['sub-cards'] = []
+#                card['extra']['visible'] = False
+#                #card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
 
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:
@@ -1107,8 +1113,6 @@ class GuiAkoTeka(QWidget, QObject):
                                 # go throug all filters in the category
                                 #for filter, op in zip(v[1], [v[2]]*len(v[1])) if filter_key[category]['value-dict'] else [v[0], v[2]]:
                             
-#                                    print('    filter: ', filter, ', op: ', op)
-                            
                                     fits = False
                                     
                                     # if multiple category values 
@@ -1132,14 +1136,6 @@ class GuiAkoTeka(QWidget, QObject):
                                         
                                             # NOT dict
                                             else:
-
-                                                # dict >= (greater than or equal
-#                                                if op == 'gte':
-                                            
-                                            
-                                                # dict <= (less than or equal
-#                                                elif op == 'gte':
-
                                                 
                                                 #NOT correct mach needed
                                                 if filter.lower() in e.lower():
@@ -1168,7 +1164,7 @@ class GuiAkoTeka(QWidget, QObject):
 
                                             elif operation == 'lte': 
                                                 
-                                                # then >= needed
+                                                # then <= needed
                                                 if self.to_integer(filter) >= self.to_integer(crd[filter_key[category]['section']][category]):
                                                     fits = True
                                                     break                                                     
@@ -1191,10 +1187,10 @@ class GuiAkoTeka(QWidget, QObject):
                                         # NOT dict
                                         else:
                                             
-                                            if filter.lower() in card[filter_key[category]['section']][config_ini['language']].lower():
+#                                            if filter.lower() in card[filter_key[category]['section']][config_ini['language']].lower():
+                                            if filter.lower() in crd[filter_key[category]['section']][config_ini['language']].lower():
                                                 fits = True
-                                                break
-                                
+                                                break                                
                                 
                                     # if at least one filter matches to a category values in the card
                                     if fits:
@@ -1203,33 +1199,37 @@ class GuiAkoTeka(QWidget, QObject):
 #                           print('    all filter in category fits:', fits) 
 #                           print()
                             if not fits:
-                                break
-
-#--                
+                                break#--                
                  
                     if fits:
-                        filtered_card_structure.append(card)                    
+#                        filtered_card_structure.append(card)                    
                         mediaFits = True
-#--                    
+#--                 
+                    crd['extra']['visible'] = fits
+   
                 # in case of COLLECTOR CARD
                 else:                     
 
- #                  print('--')
-                     
                     # then it depends on the next level
-                    fits = generate_filtered_list(crd['extra']['sub-cards'], card['extra']['sub-cards'])
+#                    fits = generate_filtered_list(crd['extra']['sub-cards'], card['extra']['sub-cards'])
+#                    fits = generate_filtered_list(crd['extra']['sub-cards'], card['extra']['sub-cards'])
+                    fits = generate_filtered_list(crd['extra']['sub-cards'])
                 
                     if fits:
-                        filtered_card_structure.append(card)
+#                        filtered_card_structure.append(card)
                         collectorFits = True        
             
+                    crd['extra']['visible'] = fits
+                
             return (mediaFits or collectorFits)
     
-        filtered_card_structure = []
+#        filtered_card_structure = []
             
-        generate_filtered_list(card_structure, filtered_card_structure)
+#        generate_filtered_list(card_structure, filtered_card_structure)
+        generate_filtered_list(card_structure)
         
-        return filtered_card_structure      
+#        return filtered_card_structure      
+        return card_structure
 
     def to_integer(self, value):         
         hours, minutes = map(int, (['0']+value.split(':'))[-2:])

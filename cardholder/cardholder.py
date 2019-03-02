@@ -255,7 +255,8 @@ class CardHolder( QWidget ):
         # Fill up the card_descriptor_structure
         self.card_descriptor_list = []
         for c in card_descriptor_list:
-            self.card_descriptor_list.append(c)
+            if c['extra']['visible']:
+                self.card_descriptor_list.append(c)
         
         # Build up the CardHolder and select the actual card
         self.select_actual_card()

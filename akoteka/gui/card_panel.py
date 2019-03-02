@@ -70,8 +70,8 @@ class CardPanel(QWidget):
  
         self.set_image_path( card_data["extra"]["image-path"] )
         
-        self.set_sub_cards( card_data["extra"]["orig-sub-cards"] )
-        #self.set_sub_cards( card_data['extra']['sub-cards'])
+        #self.set_sub_cards( card_data["extra"]["orig-sub-cards"] )
+        self.set_sub_cards( card_data['extra']['sub-cards'])
         
         self.set_media_path( card_data["extra"]["media-path"] )
         
