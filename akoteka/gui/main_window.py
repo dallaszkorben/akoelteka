@@ -253,6 +253,9 @@ class GuiAkoTeka(QWidget, QObject):
             -Hide the title
         """
         self.hierarchy_title.setHidden(True)
+        
+        # close the Search panels and disable buttons to search
+        self.control_panel.control_buttons_holder.enableSearchIcons(False)
 
     # -------------------
     # Collecting Finished
@@ -289,6 +292,9 @@ class GuiAkoTeka(QWidget, QObject):
 #            self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["orig-sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
             self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
 
+        # Enable the buttons to search
+        self.control_panel.control_buttons_holder.enableSearchIcons(True)
+        
     # ----------------------------------------------------------
     #
     # Calculates the Y coordinate of a Card using reverse index
@@ -1070,21 +1076,6 @@ class GuiAkoTeka(QWidget, QObject):
             # through the SORTED list
             for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
             
-#                card = {}
-#                card['title'] = crd['title']
-#                card['storyline'] = crd['storyline']
-#                card['general'] = crd['general']
-#                card['rating'] = crd['rating']
-#                card['links'] = crd['links']
-#
-#                card['extra'] = {}            
-#                card['extra']['image-path'] = crd['extra']['image-path']
-#                card['extra']['media-path'] = crd['extra']['media-path']
-#                card['extra']['recent-folder'] = crd['extra']['recent-folder']            
-#                card['extra']['sub-cards'] = []
-#                card['extra']['visible'] = False
-#                #card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
-
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:
 
@@ -1095,7 +1086,6 @@ class GuiAkoTeka(QWidget, QObject):
                         # go through the ADVANCED FILTERS by Categories and decide if the Card is filtered
                         for c, v in self.get_advanced_filter_holder().get_filter_selection().items():
                             category = v[0]
-#                            print('  category: ', category, 'typed: ', v[0], ', index: ', v[1], ', get: ', self.get_advanced_filter_holder().theme_filter.getValue() )
                         
                             # do I want to check this Category match
                             if v[1]:                            
@@ -1110,20 +1100,15 @@ class GuiAkoTeka(QWidget, QObject):
                                     mylist = [v[1]]
                                  
                                 for filter in mylist:   
-                                # go throug all filters in the category
-                                #for filter, op in zip(v[1], [v[2]]*len(v[1])) if filter_key[category]['value-dict'] else [v[0], v[2]]:
                             
                                     fits = False
                                     
                                     # if multiple category values 
                                     if filter_key[category]['store-mode'] == 'a':
                                       
-#                                       print('    values in the card: ', crd[filter_key[category]['section']][category]) 
                                         # go through the category values in the card
                                         # at least one category value should match to the filter
                                         for e in crd[filter_key[category]['section']][category]:
-
-                                            #print('    value in the card: ', e,  ', filter:', filter )
 
                                             # is the filter a DICT
                                             if filter_key[category]['value-dict']:
@@ -1131,7 +1116,6 @@ class GuiAkoTeka(QWidget, QObject):
                                                 # then correct match needed
                                                 if filter.lower() == e.lower():
                                                     fits = True
-#                                                    print('    break')
                                                     break
                                         
                                             # NOT dict
@@ -1196,8 +1180,6 @@ class GuiAkoTeka(QWidget, QObject):
                                     if fits:
                                         break
 
-#                           print('    all filter in category fits:', fits) 
-#                           print()
                             if not fits:
                                 break#--                
                  
@@ -1211,24 +1193,16 @@ class GuiAkoTeka(QWidget, QObject):
                 else:                     
 
                     # then it depends on the next level
-#                    fits = generate_filtered_list(crd['extra']['sub-cards'], card['extra']['sub-cards'])
-#                    fits = generate_filtered_list(crd['extra']['sub-cards'], card['extra']['sub-cards'])
                     fits = generate_filtered_list(crd['extra']['sub-cards'])
                 
                     if fits:
-#                        filtered_card_structure.append(card)
                         collectorFits = True        
             
                     crd['extra']['visible'] = fits
                 
             return (mediaFits or collectorFits)
     
-#        filtered_card_structure = []
-            
-#        generate_filtered_list(card_structure, filtered_card_structure)
         generate_filtered_list(card_structure)
-        
-#        return filtered_card_structure      
         return card_structure
 
     def to_integer(self, value):         

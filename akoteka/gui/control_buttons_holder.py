@@ -125,7 +125,20 @@ class ControlButtonsHolder(QWidget):
         self.config_button.setIconSize(QSize(25,25))
         self.config_button.setCursor(QCursor(Qt.PointingHandCursor))
         self.config_button.setStyleSheet("background:transparent; border:none") 
-        self_layout.addWidget( self.config_button )    
+        self_layout.addWidget( self.config_button )   
+        
+        self.enableSearchIcons(False)
+        
+         
+    def enableSearchIcons(self, enabled):
+        if self.advanced_search_button.isChecked():
+            self.advanced_search_button.setChecked(False)
+
+        if self.fast_search_button.isChecked():
+            self.fast_search_button.setChecked(False)
+        
+        self.advanced_search_button.setEnabled(enabled)
+        self.fast_search_button.setEnabled(enabled)
 
     # --------------------------
     #

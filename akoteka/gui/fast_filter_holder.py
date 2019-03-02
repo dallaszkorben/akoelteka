@@ -128,7 +128,7 @@ class FastFilterHolder(QWidget):
         self.filter_dd_actor.state_changed.connect(self.state_changed)
 
     def refresh_label(self):
-        self.filter_dd_title.refresh_label(_('title_label'))
+        self.filter_dd_title.refresh_label(_('title_title'))
         self.filter_dd_genre.refresh_label(_('title_genre'))
         self.filter_dd_theme.refresh_label(_('title_theme'))
         self.filter_dd_director.refresh_label(_('title_director'))
