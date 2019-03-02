@@ -148,7 +148,6 @@ class ControlButtonsHolder(QWidget):
     def fast_search_button_on_click(self, checked):
         if checked:
             self.advanced_search_button.setChecked(False)
-
         # hide/show fast filter
         self.control_panel.fast_filter_holder.setHidden(not checked)
         # filter the list
@@ -162,11 +161,10 @@ class ControlButtonsHolder(QWidget):
     def advanced_search_button_on_click(self, checked):
         if checked:
             self.fast_search_button.setChecked(False)
-
         # hide/show advanced filter
         self.control_panel.advanced_filter_holder.setHidden(not checked)
         # filter the list
-        #self.control_panel.advanced_filter_on_click()
+        self.control_panel.advanced_filter_on_click()
         
     # -------------------
     #

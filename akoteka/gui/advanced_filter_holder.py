@@ -299,6 +299,18 @@ class AdvancedFilterHolder(QWidget):
         self.length_from_combobox.addItem("")
         self.length_to_combobox.addItem("")
 
+    def clear_fields(self):
+        self.clear_title()
+        self.clear_director()
+        self.clear_actor()
+        self.clear_genre()
+        self.clear_theme()
+        self.clear_sound()
+        self.clear_sub()
+        self.clear_country()
+        self.clear_year()
+        self.clear_length()
+
     # ---
     
     def set_title(self, value):

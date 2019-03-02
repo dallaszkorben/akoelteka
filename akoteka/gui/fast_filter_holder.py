@@ -208,6 +208,14 @@ class FastFilterHolder(QWidget):
 
     def closeEvent(self, event):
         print('close filter holder')
+        
+    def clear_fields(self):
+        self.clear_actor()
+        self.clear_director()
+        self.clear_fields()
+        self.clear_genre()
+        self.clear_theme()
+        self.clear_title()
 
 
 # ================

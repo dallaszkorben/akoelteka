@@ -429,13 +429,10 @@ class GuiAkoTeka(QWidget, QObject):
         # --- ADVANCED FILTER ---
         advanced_filter_list = self.get_advanced_filter_list(card_descriptor_structure)        
         self.fill_up_advanced_filter_lists(advanced_filter_list)
-#        return filtered_cards
         
-        # --- FAST FILTER ---
-        self.set_fast_filter_listener(None)
+        # --- FAST FILTER ---        
         fast_filter_list = self.get_fast_filter_list(card_descriptor_structure)
         self.fill_up_fast_filter_lists(fast_filter_list)
-        self.set_fast_filter_listener(self)
 
         if not self.control_panel.fast_filter_holder.isHidden():
             filtered_cards = self.get_cards_by_fast_filter(card_descriptor_structure)
@@ -531,6 +528,8 @@ class GuiAkoTeka(QWidget, QObject):
         Fill up the Fast Filter list by the fast_filter_list
         
         -----------------------------------------------------------------"""
+        self.set_fast_filter_listener(None)
+        
         fast_state_fields = {
                 "title": "",
                 "genre": "",
@@ -588,6 +587,8 @@ class GuiAkoTeka(QWidget, QObject):
         self.get_fast_filter_holder().select_director_by_text(fast_state_fields["director"])
         self.get_fast_filter_holder().select_actor_by_text(fast_state_fields["actor"])        
 
+        self.set_fast_filter_listener(self)
+        
     def get_cards_by_fast_filter(self, card_structure):
         """
         parameters:
