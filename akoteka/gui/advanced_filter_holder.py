@@ -324,6 +324,18 @@ class AdvancedFilterHolder(QWidget):
 
     def select_country(self, id):
         self.country_combobox.setCurrentIndex( self.country_combobox.findText(id) )
+
+    def select_year_from(self, value):
+        self.year_from_combobox.setCurrentIndex( self.year_from_combobox.findText(value) )
+
+    def select_year_to(self, value):
+        self.year_to_combobox.setCurrentIndex( self.year_to_combobox.findText(value) )
+
+    def select_length_from(self, value):
+        self.length_from_combobox.setCurrentIndex( self.length_from_combobox.findText(value) )
+
+    def select_length_to(self, value):
+        self.length_to_combobox.setCurrentIndex( self.length_to_combobox.findText(value) )
     
     # ---
     
@@ -351,13 +363,13 @@ class AdvancedFilterHolder(QWidget):
     def add_country(self, value, id):
         self.country_combobox.addItem(value, id)
         
-    def add_length(self, length):
-        self.length_from_combobox.addItem(length)
-        self.length_to_combobox.addItem(length)
+    def add_length(self, value):
+        self.length_from_combobox.addItem(value, value)
+        self.length_to_combobox.addItem(value, value)
 
-    def add_year(self, year):
-        self.year_from_combobox.addItem(year)
-        self.year_to_combobox.addItem(year)
+    def add_year(self, value):
+        self.year_from_combobox.addItem(value, value)
+        self.year_to_combobox.addItem(value, value)
         
     # ---
     
@@ -379,6 +391,18 @@ class AdvancedFilterHolder(QWidget):
     def get_country_selected_value(self):
         return self.country_combobox.itemText( self.country_combobox.currentIndex() )
 
+    def get_length_from_selected_value(self):
+        return self.length_from_combobox.currentText()
+
+    def get_length_to_selected_value(self):
+        return self.length_to_combobox.currentText()
+
+    def get_year_from_selected_value(self):
+        return self.year_from_combobox.currentText()
+
+    def get_year_to_selected_value(self):
+        return self.year_to_combobox.currentText()
+
     # ---
     
     def filter_button_clicked(self):
@@ -397,18 +421,18 @@ class AdvancedFilterHolder(QWidget):
         #
         # -----------------------------------------------------------------
         filter_selection = {
-            "title": [self.title_filter.getValue(), None, ""],
-            "genre": [self.genre_filter.getValue(), self.genre_filter.getIndexes(), ""],
-            "theme": [self.theme_filter.getValue(), self.theme_filter.getIndexes(), ""],
-            "director": [self.director_filter.getValue(), None, ""],
-            "actor": [self.actor_filter.getValue(), None, ""],
-            "sound": [self.get_sound_selected_value(), [self.get_sound_selected_index()], ""],
-            "sub": [self.get_sub_selected_value(), [self.get_sub_selected_index()], ""],
-            "country": [self.get_country_selected_value(), [self.get_country_selected_index()], ""],
-            "length-from": [None, None, ""],
-            "length-to": [None, None, ""],
-            "year-from": [None, None, ""], #[self.get_country_selected_value(), None, 'gte'],
-            "year-to": [None, None, ""], #[self.get_country_selected_value(), None, 'lte'],
+            "title": ["title", self.title_filter.getValue(), None, "a"],
+            "genre": ["genre", self.genre_filter.getValue(), self.genre_filter.getIndexes(), "a"],
+            "theme": ["theme", self.theme_filter.getValue(), self.theme_filter.getIndexes(), "a"],
+            "director": ["director", self.director_filter.getValue(), None, "a"],
+            "actor": ["actor", self.actor_filter.getValue(), None, "a"],
+            "sound": ["sound", self.get_sound_selected_value(), [self.get_sound_selected_index()], "a"],
+            "sub": ["sub", self.get_sub_selected_value(), [self.get_sub_selected_index()], "a"],
+            "country": ["country", self.get_country_selected_value(), [self.get_country_selected_index()], "a"],
+            "length-from": ["length", self.get_length_from_selected_value(), None, "gte"],
+            "length-to": ["length", self.get_length_to_selected_value(), None, "lte"],
+            "year-from": ["year", self.get_year_from_selected_value(), None, "gte"],
+            "year-to": ["year", self.get_year_to_selected_value(), None, "lte"],
         }
         return filter_selection
 

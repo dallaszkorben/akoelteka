@@ -19,50 +19,42 @@ from akoteka.handle_property import config_ini
 
 filter_key = {
     "title":{
-        "key": "title",
         "store-mode": "t",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "title"
     },
     "best":{
-        "key": "best",
         "store-mode": "v",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "rating"
     },
     "new":{
-        "key": "new",
         "store-mode": "v",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "rating"
     },
     "favorite":{
-        "key": "favorite",
         "store-mode": "v",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "rating"
     },
     "director":{
-        "key": "director",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "general"
     },
     "actor": {
-        "key": "actor",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "general"
     },
     "theme":{
-        
-        "key": "theme",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
@@ -70,7 +62,6 @@ filter_key = {
         "section": "general"
     },
     "genre":{        
-        "key": "genre",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
@@ -78,7 +69,6 @@ filter_key = {
         "section": "general"
     },
     "sound":{
-        "key": "sound",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
@@ -86,7 +76,6 @@ filter_key = {
         "section": "general"
     },
     "sub":{
-        "key": "sub",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
@@ -94,7 +83,6 @@ filter_key = {
         "section": "general"
     },
     "country":{
-        "key": "country",
         "store-mode": "a",
         "key-dict-prefix": "title_",
         "value-dict": True,
@@ -102,14 +90,12 @@ filter_key = {
         "section": "general"
     },
     "year":{
-        "key": "year",
         "store-mode": "v",
         "key-dict-prefix": "title_",
         "value-dict": False,
         "section": "general"
     },    
     "length":{        
-        "key": "length",
         "store-mode": "v",
         "key-dict-prefix": "title_",
         "value-dict": False,
