@@ -421,18 +421,18 @@ class AdvancedFilterHolder(QWidget):
         #
         # -----------------------------------------------------------------
         filter_selection = {
-            "title": ["title", self.title_filter.getValue(), None, "a"],
-            "genre": ["genre", self.genre_filter.getValue(), self.genre_filter.getIndexes(), "a"],
-            "theme": ["theme", self.theme_filter.getValue(), self.theme_filter.getIndexes(), "a"],
+            "title":    ["title", self.title_filter.getValue(), None, "a"],
+            "genre":    ["genre", self.genre_filter.getValue(), self.genre_filter.getIndexes(), "a"],
+            "theme":    ["theme", self.theme_filter.getValue(), self.theme_filter.getIndexes(), "a"],
             "director": ["director", self.director_filter.getValue(), None, "a"],
-            "actor": ["actor", self.actor_filter.getValue(), None, "a"],
-            "sound": ["sound", self.get_sound_selected_value(), [self.get_sound_selected_index()], "a"],
-            "sub": ["sub", self.get_sub_selected_value(), [self.get_sub_selected_index()], "a"],
-            "country": ["country", self.get_country_selected_value(), [self.get_country_selected_index()], "a"],
-            "length-from": ["length", self.get_length_from_selected_value(), None, "gte"],
-            "length-to": ["length", self.get_length_to_selected_value(), None, "lte"],
-            "year-from": ["year", self.get_year_from_selected_value(), None, "gte"],
-            "year-to": ["year", self.get_year_to_selected_value(), None, "lte"],
+            "actor":    ["actor", self.actor_filter.getValue(), None, "a"],
+            "sound":    ["sound", self.get_sound_selected_value(), [self.get_sound_selected_index()], "a"],
+            "sub":      ["sub", self.get_sub_selected_value(), [self.get_sub_selected_index()], "a"],
+            "country":  ["country", self.get_country_selected_value(), [self.get_country_selected_index()], "a"],
+            "length-from":  ["length", self.get_length_from_selected_value(), None, "gte"],
+            "length-to":    ["length", self.get_length_to_selected_value(), None, "lte"],
+            "year-from":    ["year", self.get_year_from_selected_value(), None, "gte"],
+            "year-to":  ["year", self.get_year_to_selected_value(), None, "lte"],
         }
         return filter_selection
 

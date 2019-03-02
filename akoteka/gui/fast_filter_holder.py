@@ -95,6 +95,19 @@ class FastFilterHolder(QWidget):
         holder_layout.addWidget(holder_dropdown_gt)        
 
         #
+        # Dropdown - director+actor
+        #
+        self.filter_dd_director = FilterDropDownSimple(_('title_director'))
+        self.filter_dd_actor = FilterDropDownSimple(_('title_actor'))
+        
+        holder_dropdown_da = FilterDropDownHolder()
+        
+        holder_dropdown_da.add_dropdown(self.filter_dd_director)
+        holder_dropdown_da.add_dropdown(self.filter_dd_actor)
+        
+        holder_layout.addWidget(holder_dropdown_da)
+
+        #
         # Dropdown - genre+theme
         #
         self.filter_dd_genre = FilterDropDownSimple(_('title_genre'))
@@ -107,18 +120,6 @@ class FastFilterHolder(QWidget):
         
         holder_layout.addWidget(holder_dropdown_gt)
 
-        #
-        # Dropdown - director+actor
-        #
-        self.filter_dd_director = FilterDropDownSimple(_('title_director'))
-        self.filter_dd_actor = FilterDropDownSimple(_('title_actor'))
-        
-        holder_dropdown_da = FilterDropDownHolder()
-        
-        holder_dropdown_da.add_dropdown(self.filter_dd_director)
-        holder_dropdown_da.add_dropdown(self.filter_dd_actor)
-        
-        holder_layout.addWidget(holder_dropdown_da)
 
         # Listeners
         self.filter_dd_title.state_changed.connect(self.state_changed)
@@ -154,6 +155,9 @@ class FastFilterHolder(QWidget):
         
     def select_genre_by_id(self, id):
         self.filter_dd_genre.select_element_by_id(id)
+        
+    def select_genre_by_text(self, text):
+        self.filter_dd_genre.select_element_by_text(text)        
     # ---
     def clear_theme(self):
         self.filter_dd_theme.clear_elements()
@@ -163,6 +167,10 @@ class FastFilterHolder(QWidget):
         
     def select_theme_by_id(self, id):
         self.filter_dd_theme.select_element_by_id(id)        
+
+    def select_theme_by_text(self, text):
+        self.filter_dd_theme.select_element_by_text(text)        
+
     # ---
     def clear_director(self):
         self.filter_dd_director.clear_elements()
@@ -184,19 +192,14 @@ class FastFilterHolder(QWidget):
     # ---
     def get_filter_selection(self):
         filter_selection = {
-            "title": self.filter_dd_title.get_selected_value(),
-            "best": self.filter_cb_best.is_checked(),
-            "new": self.filter_cb_new.is_checked(),
-            "favorite": self.filter_cb_favorite.is_checked(),
-            "genre": self.filter_dd_genre.get_selected_id(),
-            "theme": self.filter_dd_theme.get_selected_id(),
-            "director": self.filter_dd_director.get_selected_value(),
-            "actor": self.filter_dd_actor.get_selected_value(),
-            "sound": "",
-            "sub": "",
-            "country": "",
-            "length": "",
-            "year": "",
+            "title":    ["title", self.filter_dd_title.get_selected_value(), None, "a"],
+            "genre":    ["genre", self.filter_dd_genre.get_selected_value(), [self.filter_dd_genre.get_selected_id()], "a"],
+            "theme":    ["theme", self.filter_dd_theme.get_selected_value(), [self.filter_dd_theme.get_selected_id()], "a"],
+            "director": ["director", self.filter_dd_director.get_selected_value(), None, "a"],
+            "actor":    ["actor", self.filter_dd_actor.get_selected_value(), None, "a"],
+            "best":     ["best", self.filter_cb_best.is_checked(), None, "c"],
+            "new":      ["new", self.filter_cb_new.is_checked(), None, "c"],
+            "favorite": ["favorite", self.filter_cb_favorite.is_checked(),None, "c"],
         }
         return filter_selection
     

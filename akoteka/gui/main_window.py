@@ -357,8 +357,6 @@ class GuiAkoTeka(QWidget, QObject):
             "best": set(),
         }
         
-
-        
 #        self.agenerate_filtered_card_structure(cdl, filtered_card_structure, filter_hit_list, filter_unconditional_list)
         
         #advanced_filter_list = self.get_advanced_filter_list(cdl)        
@@ -428,463 +426,221 @@ class GuiAkoTeka(QWidget, QObject):
     # Set-up Filters
     # ----------------
     def set_up_filters(self, card_descriptor_structure):
+        # --- ADVANCED FILTER ---
         advanced_filter_list = self.get_advanced_filter_list(card_descriptor_structure)        
         self.fill_up_advanced_filter_lists(advanced_filter_list)
-        filtered_cards = self.get_cards_by_advanced_filter(card_descriptor_structure)    
-        return filtered_cards
-    
-    
-    def ssssset_up_filters(self, card_descriptor_structure):
+#        return filtered_cards
         
-        #self.get_advanced_filter_holder().set_title('12')
-        title = self.get_advanced_filter_holder().title_filter.getValue()
-        
-        """
-        Based on the list that received as parameter, 
-        it selects the possible filter elements
-        """
-        
-        # ###################################
-        # Turn OFF the listener to the Filter
-        # ###################################
+        # --- FAST FILTER ---
         self.set_fast_filter_listener(None)
-        
-        # ####################################
-        # Save the recent state of the filters
-        # ####################################
-        fast_state_fields = {
-            "title": "",
-            "genre": "",
-            "theme": "",
-            "director": "",
-            "actor": "",
-            "favorite": "",
-            "new": "",
-            "best": ""
-        }
-        advanced_state_fields = {
-            "title": "",
-            "genre": "",
-            "theme": "",
-            "director": "",
-            "actor": "",
-            "sound": "",
-            "sub": "",
-            "country": "",
-            "length_from": "",
-            "length_to": "",
-            "year_from": "",
-            "year_to": "",            
-        }        
-        for category, value in self.get_fast_filter_holder().get_filter_selection().items():            
-            if value != None and value != "":
-                fast_state_fields[category] = value
-
-        for category, value in self.get_advanced_filter_holder().get_filter_selection().items():            
-            if value[0] != None and value[0] != "":
-                advanced_state_fields[category] = value[0]
-        
-        # #############
-        # Setup Filters
-        # #############
-
-        # Preparation for collecting the filtered_card_structure and filters
-        filtered_card_structure = []
-        filter_hit_list = {
-            "title": set(),
-            "genre": set(),
-            "theme": set(),
-            "director": set(),
-            "actor": set(),
-            "sound": set(),
-            "sub": set(),
-            "country": set(),
-            "year": set(),
-            "length": set(),
-            "favorite": set(),
-            "new": set(),
-            "best": set(),
-        }
-        filter_unconditional_list = {
-            "title": set(),
-            "genre": set(),
-            "theme": set(),
-            "director": set(),
-            "actor": set(),
-            "sound": set(),
-            "sub": set(),
-            "country": set(),
-            "year": set(),
-            "length": set(),
-            "favorite": set(),
-            "new": set(),
-            "best": set(),
-            "year": set(),
-        }
-        
-        
-
-        self.agenerate_filtered_card_structure(card_descriptor_structure, filtered_card_structure, filter_hit_list, filter_unconditional_list)
-
-
-#        import pprint
-#        #advanced_filter_list = self.get_advanced_filter_list(card_descriptor_structure)        
-#        #self.fill_up_advanced_filter_lists(advanced_filter_list)
-#        filtered_cards = self.get_cards_by_advanced_filter(card_descriptor_structure)    
-#        pprint.pprint(filtered_cards)
-#        print()
-#        print()
-        
-
-
-#        import pprint
-#        #pprint.pprint(card_descriptor_structure)
-#        print("callded now")
-#        
-#        a_f_l = self.get_advanced_filter_list(self, card_descriptor_structure)        
-#        fill_up_advanced_filter_lists(self, a_f_l)
-#        s_c = self.get_cards_by_advanced_filter(card_descriptor_structure)
-#        
-#        pprint.pprint(s_c)
-#        print()
-
-
-
-
-
-        # Fill up TITLE
-        # fast filter - dropdown
-        self.get_fast_filter_holder().clear_title()
-        self.get_fast_filter_holder().add_title("")
-        for element in sorted( filter_hit_list['title'], key=cmp_to_key(locale.strcoll) ):
-            self.get_fast_filter_holder().add_title(element)
-        # advanced filter
-        self.get_advanced_filter_holder().clear_title()            
-        for element in sorted( filter_unconditional_list['title'], key=cmp_to_key(locale.strcoll) ):
-            self.get_advanced_filter_holder().add_title(element)
-        
-        # Fill up GENRE 
-        # fast filter - dropdown
-        self.get_fast_filter_holder().clear_genre()
-        self.get_fast_filter_holder().add_genre("", "")
-        for element in sorted([(_("genre_" + e),e) for e in filter_hit_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_fast_filter_holder().add_genre(element[0], element[1])
-        # advanced filter
-        self.get_advanced_filter_holder().clear_genre()            
-        for element in sorted([(_("genre_" + e),e) for e in filter_unconditional_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_advanced_filter_holder().add_genre(element[0], element[1])
-        
-        # Fill up THEME 
-        # fast filter - dropdown
-        self.get_fast_filter_holder().clear_theme()
-        self.get_fast_filter_holder().add_theme("", "")
-        for element in sorted([(_("theme_" + e), e) for e in filter_hit_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_fast_filter_holder().add_theme(element[0], element[1])
-        # advanced filter
-        self.get_advanced_filter_holder().clear_theme()
-        for element in sorted([(_("theme_" + e), e) for e in filter_unconditional_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_advanced_filter_holder().add_theme(element[0], element[1])
-
-        # Fill up DIRECTOR 
-        # fast filter - dropdown
-        self.get_fast_filter_holder().clear_director()
-        self.get_fast_filter_holder().add_director("")
-        for element in sorted( filter_hit_list['director'], key=cmp_to_key(locale.strcoll) ):
-            self.get_fast_filter_holder().add_director(element)
-        # advanced filter
-        self.get_advanced_filter_holder().clear_director()            
-        for element in sorted( filter_unconditional_list['director'], key=cmp_to_key(locale.strcoll) ):
-            self.get_advanced_filter_holder().add_director(element)
-
-        # Fill up ACTOR 
-        # falst filter - dropdown
-        self.get_fast_filter_holder().clear_actor()
-        self.get_fast_filter_holder().add_actor("")
-        for element in sorted( filter_hit_list['actor'], key=cmp_to_key(locale.strcoll) ):
-            self.get_fast_filter_holder().add_actor(element)
-        # advanced filter
-        self.get_advanced_filter_holder().clear_actor()            
-        for element in sorted( filter_unconditional_list['actor'], key=cmp_to_key(locale.strcoll) ):
-            self.get_advanced_filter_holder().add_actor(element)
-        
-        # Fill up SOUND
-        self.get_advanced_filter_holder().clear_sound()
-        #self.get_advanced_filter_holder().add_sound("", "")
-        for element in sorted([(_("lang_long_" + e), e) for e in filter_unconditional_list['sound']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_advanced_filter_holder().add_sound(element[0], element[1])
-
-        # Fill up SUBTITLE
-        self.get_advanced_filter_holder().clear_sub()
-        #self.get_advanced_filter_holder().add_sub("", "")
-        for element in sorted([(_("lang_long_" + e), e) for e in filter_unconditional_list['sub']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_advanced_filter_holder().add_sub(element[0], element[1])
-
-        # Fill up COUNTRY
-        self.get_advanced_filter_holder().clear_country()
-        #self.get_advanced_filter_holder().add_country("", "")
-        for element in sorted([(_("country_long_" + e), e) for e in filter_unconditional_list['country']], key=lambda t: locale.strxfrm(t[0]) ):            
-            self.get_advanced_filter_holder().add_country(element[0], element[1])
-       
-        # Fill up YEAR from/to
-        self.get_advanced_filter_holder().clear_year()
-        #self.get_advanced_filter_holder().add_year("")
-        for element in sorted( filter_unconditional_list['year'], key=cmp_to_key(locale.strcoll) ):
-            self.get_advanced_filter_holder().add_year(element)
-        
-        # Fill up LENGTH from/to
-        self.get_advanced_filter_holder().clear_length()
-        #self.get_advanced_filter_holder().add_length("")
-        for element in sorted( [str(int(spl[-2])).rjust(1) + ":" + str(int(spl[-1])).zfill(2) for spl in [l.split(":") for l in filter_unconditional_list['length'] if ':' in l ] if all(c.isdigit() for c in spl[-1] ) and all(c.isdigit() for c in spl[-2] )], key=cmp_to_key(locale.strcoll) ):
-            self.get_advanced_filter_holder().add_length(element)
-
-        # ####################
-        # Reselect the Filters
-        # ####################
-        self.get_fast_filter_holder().select_title_by_text(fast_state_fields["title"])
-        self.get_fast_filter_holder().select_genre_by_id(fast_state_fields["genre"])
-        self.get_fast_filter_holder().select_theme_by_id(fast_state_fields["theme"])
-        self.get_fast_filter_holder().select_director_by_text(fast_state_fields["director"])
-        self.get_fast_filter_holder().select_actor_by_text(fast_state_fields["actor"])
-        
-        self.get_advanced_filter_holder().set_title(advanced_state_fields['title'])
-        self.get_advanced_filter_holder().set_genre(advanced_state_fields['genre'])
-        self.get_advanced_filter_holder().set_theme(advanced_state_fields['theme'])
-        self.get_advanced_filter_holder().set_director(advanced_state_fields['director'])
-        self.get_advanced_filter_holder().set_actor(advanced_state_fields['actor'])
-        self.get_advanced_filter_holder().select_sound(advanced_state_fields['sound'])
-        self.get_advanced_filter_holder().select_sub(advanced_state_fields['sub'])
-        self.get_advanced_filter_holder().select_country(advanced_state_fields['country'])
-        #self.get_advanced_filter_holder().select_year(advanced_state_fields['year-from'])
-        
-        # #######################################
-        # Turn back ON the listener to the Filter
-        # #######################################
+        fast_filter_list = self.get_fast_filter_list(card_descriptor_structure)
+        self.fill_up_fast_filter_lists(fast_filter_list)
         self.set_fast_filter_listener(self)
 
-        return filtered_card_structure
+        if not self.control_panel.fast_filter_holder.isHidden():
+            filtered_cards = self.get_cards_by_fast_filter(card_descriptor_structure)
+        else:    
+            filtered_cards = self.get_cards_by_advanced_filter(card_descriptor_structure)
+        
+        return filtered_cards
     
+        
     
-    # ================================
-    # 
-    # Generates Filtered CardStructure
-    #
-    # ================================   
-    def agenerate_filtered_card_structure(self, card_structure, filtered_card_structure, filter_hit_list, filter_unconditional_list):
-        """
-        This method serves a dual task:
-            -Based on the Fast Filter it generates a new, filtered list: filtered_card_structure
-            -Collects the new Filter, based on the filtered list:   filter_hit_list
-        """
-        mediaFits = False
-        collectorFits = False
-            
-        # through the SORTED list
-        for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
-            
-            card = {}
-            card['title'] = crd['title']
-            card['storyline'] = crd['storyline']
-            card['general'] = crd['general']
-            card['rating'] = crd['rating']
-            card['links'] = crd['links']
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    def get_fast_filter_list(self, card_structure):
+        """ --------------------------------------------------------------------------------
+        
+        --- Get Fast Filter List ---
+        
+        Gives back the filter lists in the certain point of the card hierarchy                
+        ------------------------------------------------------------------------------------""" 
+        
+        def generate_fast_filter_list(card_structure):
+        
+            # through the SORTED list
+            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
 
-            card['extra'] = {}            
-            card['extra']['image-path'] = crd['extra']['image-path']
-            card['extra']['media-path'] = crd['extra']['media-path']
-            card['extra']['recent-folder'] = crd['extra']['recent-folder']            
-            card['extra']['sub-cards'] = []
-            card['extra']['orig-sub-cards'] = crd['extra']['sub-cards']
+                # in case of MEDIA CARD
+                if crd['extra']['media-path']:              
 
-            # in case of MEDIA CARD
-            if crd['extra']['media-path']:
+                    if self.isFitByFilterSelection(crd, self.get_fast_filter_holder().get_filter_selection().items()):
 
-#                print('title: ', card['title']['hu'])
-
-                fits = True
-
-                # FAST FILTER is visible
-                if not self.control_panel.fast_filter_holder.isHidden():                 
-                
-                    # go through the FAST FILTERS and decide if the Card is filtered
-                    for category, value in self.get_fast_filter_holder().get_filter_selection().items():
-                 
-                        # if the specific filter is set
-                        if value != None and value != "":
-
+                        for c, v in self.get_fast_filter_holder().get_filter_selection().items():
+                            category = v[0]
+                        
                             if filter_key[category]['store-mode'] == 'v':
-                                if value != crd[filter_key[category]['section']][category]:
-                                    fits = False
-                                    break
+                                if crd[filter_key[category]['section']][category]:
+                                    fast_filter_list[category].add(crd[filter_key[category]['section']][category])
                                 
                             elif filter_key[category]['store-mode'] == 'a':
-                                if value not in crd[filter_key[category]['section']][category]:
-                                    fits = False
-                                    break
-                                
+                                for cat in crd[filter_key[category]['section']][category]:
+                                    if cat.strip():
+                                        fast_filter_list[category].add(cat.strip())
+                
                             elif filter_key[category]['store-mode'] == 't':
-                                if value != card[filter_key[category]['section']][config_ini['language']]:
-                                    fits = False
-                                    break
-                                
-                            else:
-                                fits = False
-                                break
-
-                # ADVANCED FILTER is visible
-                elif not self.control_panel.advanced_filter_holder.isHidden(): 
-
-                    # go through the ADVANCED FILTERS by Categories and decide if the Card is filtered
-                    for category, v in self.get_advanced_filter_holder().get_filter_selection().items():
-                        
-#                        print('  category: ', category, 'typed: ', v[0], ', index: ', v[1], ', get: ', self.get_advanced_filter_holder().theme_filter.getValue() )
-                        
-                        # do I want to check this Category match
-                        if v[0]:                            
-                            
-                            fits = False
-                            
-                            if filter_key[category]['value-dict']:
-                                mylist = v[1]
-                            else:
-                                mylist = [v[0]]
-                                 
-                            for filter in mylist:
-                            # go throug all filters in the category
-                            #for filter, op in zip(v[1], [v[2]]*len(v[1])) if filter_key[category]['value-dict'] else [v[0], v[2]]:
-                            
-#                                print('    filter: ', filter, ', op: ', op)
-                            
-                                fits = False
-                                    
-                                # if multiple category values 
-                                if filter_key[category]['store-mode'] == 'a':
-                                      
-#                                    print('    values in the card: ', crd[filter_key[category]['section']][category]) 
-                                    # go through the category values in the card
-                                    # at least one category value should match to the filter
-                                    for e in crd[filter_key[category]['section']][category]:
-
-                                        #print('    value in the card: ', e,  ', filter:', filter )
-
-                                        # is the filter a DICT
-                                        if filter_key[category]['value-dict']:
-
-                                            # then correct match needed
-                                            if filter.lower() == e.lower():
-                                                fits = True
-#                                                print('    break')
-                                                break
-                                        
-                                        # NOT dict
-                                        else:
-
-                                            # dict >= (greater than or equal
-#                                            if op == 'gte':
-                                            
-                                            
-                                            # dict <= (less than or equal
-#                                            elif op == 'gte':
-
-                                                
-                                            #NOT correct mach needed
-                                            if filter.lower() in e.lower():
-                                                fits = True
-                                                break
-
-                                elif filter_key[category]['store-mode'] == 'v':
-                                    
-                                    # is the filter a DICT
-                                    if filter_key[category]['value-dict']:
-
-                                        # then correct match needed
-                                        if filter.lower() == crd[filter_key[category]['section']][category].lower():
-                                            fits = True
-                                            break
-
-                                    # NOT dict
-                                    else:
-                                                
-                                        #NOT correct mach needed
-                                        if filter.lower() in crd[filter_key[category]['section']][category].lower():
-                                            fits = True
-                                            break
-                                    
-                                elif filter_key[category]['store-mode'] == 't':
-                                        
-                                    # is the filter a DICT
-                                    if filter_key[category]['value-dict']:
-
-                                        # then correct match needed
-                                        if filter.lower() == card[filter_key[category]['section']][config_ini['language']].lower():
-                                            fits = True
-                                            break
-                                        
-                                    # NOT dict
-                                    else:
-                                        if filter.lower() in card[filter_key[category]['section']][config_ini['language']].lower():
-                                            fits = True
-                                            break
-                                
-                                # if at least one filter matches to a category values in the card
-                                if fits:
-                                    break
-
-#                        print('    all filter in category fits:', fits) 
-#                        print()
-                        if not fits:
-                            break
-
-#--                
-                #
-                # Fill up the filter lists: unconditional/hit
-                #
-                for category, value in self.get_fast_filter_holder().get_filter_selection().items():
-                    if filter_key[category]['store-mode'] == 'v':
-                        if card[filter_key[category]['section']][category]:
-                            filter_unconditional_list[category].add(card[filter_key[category]['section']][category])
-                            if fits:
-                                filter_hit_list[category].add(card[filter_key[category]['section']][category])
-                                
-                    elif filter_key[category]['store-mode'] == 'a':
-                        for cat in card[filter_key[category]['section']][category]:
-                            if cat.strip():
-                                filter_unconditional_list[category].add(cat.strip())
-                                if fits:
-                                    filter_hit_list[category].add(cat.strip())
-                
-                    elif filter_key[category]['store-mode'] == 't':
-                        filter_unconditional_list['title'].add(card[filter_key[category]['section']][config_ini['language']])
-                        if fits:
-                            filter_hit_list['title'].add(card[filter_key[category]['section']][config_ini['language']])
-                
-                if fits:
-                    filtered_card_structure.append(card)                    
-                    mediaFits = True
-   
-#--
+                                fast_filter_list['title'].add(crd[filter_key[category]['section']][config_ini['language']])
                     
-            # in case of COLLECTOR CARD
-            else:                     
+                # in case of COLLECTOR CARD
+                else:                     
 
- #               print('--')
-                     
-                # then it depends on the next level
-                fits = self.agenerate_filtered_card_structure(crd['extra']['sub-cards'], card['extra']['sub-cards'], filter_hit_list, filter_unconditional_list)
+                    # then it depends on the next level
+                    generate_fast_filter_list(crd['extra']['sub-cards'])
+        
+            return fast_filter_list  
+  
+        fast_filter_list={
+            "title": set(),
+            "genre": set(),
+            "theme": set(),
+            "director": set(),
+            "actor": set(),
+#            "sound": set(),
+#            "sub": set(),
+#            "country": set(),
+#            "year": set(),
+#            "length": set(),
+            "favorite": set(),
+            "new": set(),
+            "best": set() 
+        }
+
+        generate_fast_filter_list(card_structure)
+        
+        return fast_filter_list
+    
+    def fill_up_fast_filter_lists(self, fast_filter_list):
+        """--------------------------------------------------------------
+        
+        Fill up the Fast Filter list by the fast_filter_list
+        
+        -----------------------------------------------------------------"""
+        fast_state_fields = {
+                "title": "",
+                "genre": "",
+                "theme": "",
+                "director": "",
+                "actor": "",
+#                "sound": "",
+#                "sub": "",
+#                "country": "",
+#                "length-from": "",
+#                "length-to": "",
+#                "year-from": "",
+#                "year-to": "",            
+            }        
+
+        # save the fields of the filters because the will be clear when the list is updated
+        for category, value in self.get_fast_filter_holder().get_filter_selection().items():            
+            if value[1] != None and value[1] != "":
+                fast_state_fields[category] = value[1]
+
+        # Fill up TITLE 
+        self.get_fast_filter_holder().clear_title()
+        self.get_fast_filter_holder().add_title("")
+        for element in sorted( fast_filter_list['title'], key=cmp_to_key(locale.strcoll) ):
+            self.get_fast_filter_holder().add_title(element)
+
+        # Fill up GENRE 
+        self.get_fast_filter_holder().clear_genre()
+        self.get_fast_filter_holder().add_genre("", "")
+        for element in sorted([(_("genre_" + e),e) for e in fast_filter_list['genre']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_fast_filter_holder().add_genre(element[0], element[1])
+        
+        # Fill up THEME 
+        self.get_fast_filter_holder().clear_theme()
+        self.get_fast_filter_holder().add_theme("", "")
+        for element in sorted([(_("theme_" + e), e) for e in fast_filter_list['theme']], key=lambda t: locale.strxfrm(t[0]) ):
+            self.get_fast_filter_holder().add_theme(element[0], element[1])
+
+        # Fill up DIRECTOR 
+        self.get_fast_filter_holder().clear_director()
+        self.get_fast_filter_holder().add_director("")
+        for element in sorted( fast_filter_list['director'], key=cmp_to_key(locale.strcoll) ):
+            self.get_fast_filter_holder().add_director(element)
+
+        # Fill up ACTOR 
+        self.get_fast_filter_holder().clear_actor()
+        self.get_fast_filter_holder().add_actor("")
+        for element in sorted( fast_filter_list['actor'], key=cmp_to_key(locale.strcoll) ):
+            self.get_fast_filter_holder().add_actor(element)
+
+        # Recover the contents of the fields
+        self.get_fast_filter_holder().select_title_by_text(fast_state_fields["title"])
+        self.get_fast_filter_holder().select_genre_by_text(fast_state_fields["genre"])
+        self.get_fast_filter_holder().select_theme_by_text(fast_state_fields["theme"])
+        self.get_fast_filter_holder().select_director_by_text(fast_state_fields["director"])
+        self.get_fast_filter_holder().select_actor_by_text(fast_state_fields["actor"])        
+
+    def get_cards_by_fast_filter(self, card_structure):
+        """
+        parameters:
+            card_structure:        the full structure on the recent level (not filtered)
+        """  
+        def generate_filtered_list(card_structure):
+
+            mediaFits = False
+            collectorFits = False
+            
+            # through the SORTED list
+            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            
+                # in case of MEDIA CARD
+                if crd['extra']['media-path']:
+
+                    fits = True
+
+                    if not self.control_panel.fast_filter_holder.isHidden():
+    
+                        fits = self.isFitByFilterSelection(crd, self.get_fast_filter_holder().get_filter_selection().items())
+                 
+                    if fits:
+
+                        mediaFits = True
+                 
+                    crd['extra']['visible'] = fits
+   
+                # in case of COLLECTOR CARD
+                else:                     
+
+                    # then it depends on the next level
+                    fits = generate_filtered_list(crd['extra']['sub-cards'])
                 
-                if fits:
-                    filtered_card_structure.append(card)
-                    collectorFits = True
-        
-        
-        return (mediaFits or collectorFits)
-
-  
-  
-  
-  
-  
-  
-  
+                    if fits:
+                        collectorFits = True        
+            
+                    crd['extra']['visible'] = fits
+                
+            return (mediaFits or collectorFits)
+    
+        generate_filtered_list(card_structure)
+        return card_structure    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
   
   
   
@@ -903,8 +659,9 @@ class GuiAkoTeka(QWidget, QObject):
     def get_advanced_filter_list(self, card_structure):
         """ --------------------------------------------------------------------------------
         
-        Gives back the unconditional filter lists in the certain point of the card hierarchy
-                
+        --- Get Advanced Filter List ---
+        
+        Gives back the unconditional filter lists in the certain point of the card hierarchy                
         ------------------------------------------------------------------------------------""" 
         
         def generate_unconditional_filter_list(card_structure):
@@ -968,9 +725,6 @@ class GuiAkoTeka(QWidget, QObject):
         Fill up the Advanced Filter list by the unconditional_filter_list
         
         -----------------------------------------------------------------"""
-
-        # ADVANCED FILTER is visible
-        #if not self.control_panel.advanced_filter_holder.isHidden():
 
         advanced_state_fields = {
                 "title": "",
@@ -1066,8 +820,6 @@ class GuiAkoTeka(QWidget, QObject):
         parameters:
             card_structure:        the full structure on the recent level (not filtered)
         """  
-  
-        #def generate_filtered_list(card_structure, filtered_card_structure):
         def generate_filtered_list(card_structure):
 
             mediaFits = False
@@ -1083,110 +835,12 @@ class GuiAkoTeka(QWidget, QObject):
 
                     if not self.control_panel.advanced_filter_holder.isHidden():
     
-                        # go through the ADVANCED FILTERS by Categories and decide if the Card is filtered
-                        for c, v in self.get_advanced_filter_holder().get_filter_selection().items():
-                            category = v[0]
-                        
-                            # do I want to check this Category match
-                            if v[1]:                            
-                            
-                                fits = False                           
-                            
-                                operation = v[3]
-                                
-                                if filter_key[category]['value-dict']:
-                                    mylist = v[2]
-                                else:
-                                    mylist = [v[1]]
-                                 
-                                for filter in mylist:   
-                            
-                                    fits = False
-                                    
-                                    # if multiple category values 
-                                    if filter_key[category]['store-mode'] == 'a':
-                                      
-                                        # go through the category values in the card
-                                        # at least one category value should match to the filter
-                                        for e in crd[filter_key[category]['section']][category]:
-
-                                            # is the filter a DICT
-                                            if filter_key[category]['value-dict']:
-
-                                                # then correct match needed
-                                                if filter.lower() == e.lower():
-                                                    fits = True
-                                                    break
-                                        
-                                            # NOT dict
-                                            else:
-                                                
-                                                #NOT correct mach needed
-                                                if filter.lower() in e.lower():
-                                                    fits = True
-                                                    break
-
-                                    elif filter_key[category]['store-mode'] == 'v':
-                                    
-                                        # is the filter a DICT
-                                        if filter_key[category]['value-dict']:
-
-                                            # then correct match needed
-                                            if filter.lower() == crd[filter_key[category]['section']][category].lower():
-                                                fits = True
-                                                break
-
-                                        # NOT dict
-                                        else:
-                                                
-                                            if operation == 'gte':
- 
-                                                # then >= needed
-                                                if self.to_integer(filter) <= self.to_integer(crd[filter_key[category]['section']][category]):
-                                                    fits = True
-                                                    break                                                
-
-                                            elif operation == 'lte': 
-                                                
-                                                # then <= needed
-                                                if self.to_integer(filter) >= self.to_integer(crd[filter_key[category]['section']][category]):
-                                                    fits = True
-                                                    break                                                     
-                                                
-                                            #NOT correct mach needed
-                                            elif filter.lower() in crd[filter_key[category]['section']][category].lower():
-                                                fits = True
-                                                break
-                                    
-                                    elif filter_key[category]['store-mode'] == 't':
-                                        
-                                        # is the filter a DICT
-                                        if filter_key[category]['value-dict']:
-
-                                            # then correct match needed
-                                            if filter.lower() == card[filter_key[category]['section']][config_ini['language']].lower():
-                                                fits = True
-                                                break
-                                        
-                                        # NOT dict
-                                        else:
-                                            
-#                                            if filter.lower() in card[filter_key[category]['section']][config_ini['language']].lower():
-                                            if filter.lower() in crd[filter_key[category]['section']][config_ini['language']].lower():
-                                                fits = True
-                                                break                                
-                                
-                                    # if at least one filter matches to a category values in the card
-                                    if fits:
-                                        break
-
-                            if not fits:
-                                break#--                
+                        fits = self.isFitByFilterSelection(crd, self.get_advanced_filter_holder().get_filter_selection().items())
                  
                     if fits:
-#                        filtered_card_structure.append(card)                    
+
                         mediaFits = True
-#--                 
+
                     crd['extra']['visible'] = fits
    
                 # in case of COLLECTOR CARD
@@ -1209,8 +863,112 @@ class GuiAkoTeka(QWidget, QObject):
         hours, minutes = map(int, (['0']+value.split(':'))[-2:])
         return hours * 60 + minutes
   
-  
-  
+    def isFitByFilterSelection(self, card, filter_selection):
+        """
+        
+        --- Is Fit By Filter Selection ---
+        
+        Say if the card fits to the Filter Selection        
+        """
+        fits = True            
+        # go through the ADVANCED FILTERS by Categories and decide if the Card is filtered
+        for c, v in filter_selection:
+            category = v[0]
+                        
+            # do I want to check this Category match
+            if v[1]:                            
+                            
+                fits = False
+                operation = v[3]
+                                
+                if filter_key[category]['value-dict']:
+                    mylist = v[2]
+                else:
+                    mylist = [v[1]]                                 
+                
+                for filter in mylist:
+                    fits = False
+                                    
+                    # if multiple category values 
+                    if filter_key[category]['store-mode'] == 'a':
+                                      
+                        # go through the category values in the card
+                        # at least one category value should match to the filter
+                        for e in card[filter_key[category]['section']][category]:
+
+                            # is the filter a DICT
+                            if filter_key[category]['value-dict']:
+
+                                # then correct match needed
+                                if filter.lower() == e.lower():
+                                    fits = True
+                                    break
+                                        
+                            # NOT dict
+                            else:
+                                                
+                                #NOT correct mach needed
+                                if filter.lower() in e.lower():
+                                    fits = True
+                                    break
+
+                    elif filter_key[category]['store-mode'] == 'v':
+                                    
+                        # is the filter a DICT
+                        if filter_key[category]['value-dict']:
+
+                            # then correct match needed
+                            if filter.lower() == card[filter_key[category]['section']][category].lower():
+                                fits = True
+                                break
+
+                        # NOT dict
+                        else:
+                                                
+                            if operation == 'gte':
+ 
+                                # then >= needed
+                                if self.to_integer(filter) <= self.to_integer(card[filter_key[category]['section']][category]):
+                                    fits = True
+                                    break                                                
+
+                            elif operation == 'lte': 
+                                                
+                                # then <= needed
+                                if self.to_integer(filter) >= self.to_integer(card[filter_key[category]['section']][category]):
+                                    fits = True
+                                    break                                                     
+                                                
+                            #NOT correct mach needed
+                            elif filter.lower() in card[filter_key[category]['section']][category].lower():
+                                fits = True
+                                break
+                                    
+                    elif filter_key[category]['store-mode'] == 't':
+                                        
+                        # is the filter a DICT
+                        if filter_key[category]['value-dict']:
+
+                            # then correct match needed
+                            if filter.lower() == card[filter_key[category]['section']][config_ini['language']].lower():
+                                fits = True
+                                break
+                                        
+                        # NOT dict
+                        else:
+                                            
+                            if filter.lower() in card[filter_key[category]['section']][config_ini['language']].lower():
+                                fits = True
+                                break                                
+                                
+                    # if at least one filter matches to a category values in the card
+                    if fits:
+                        break
+
+            if not fits:
+                break                
+        
+        return fits
   
   
   

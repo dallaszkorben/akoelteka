@@ -553,7 +553,7 @@ class CardRating(QLabel):
         self.rating_new_button.setCheckable(True)        
         rating_new_icon = QIcon()
         rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_NEW_ON)) ), QIcon.Normal, QIcon.On)
-        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_OFF)) ), QIcon.Normal, QIcon.Off)
+        rating_new_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_NEW_OFF)) ), QIcon.Normal, QIcon.Off)
         self.rating_new_button.clicked.connect(self.rating_new_button_on_click)        
         self.rating_new_button.setIcon( rating_new_icon )
         self.rating_new_button.setIconSize(QSize(25,25))
