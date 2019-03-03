@@ -30,6 +30,7 @@ from akoteka.handle_property import _
 from akoteka.handle_property import re_read_config_ini
 from akoteka.handle_property import config_ini
 from akoteka.handle_property import get_config_ini
+#from builtins import None
 
 class GuiAkoTeka(QWidget, QObject):
     
@@ -113,13 +114,11 @@ class GuiAkoTeka(QWidget, QObject):
         fg.moveCenter(cp)
         self.move(fg.topLeft())
 
-    # --------------------------
-    #
-    # Start CardHolder
-    #
-    # --------------------------
     def startCardHolder(self):
-
+        """
+        --- Start Card Holder ---
+        
+        """
         # Create the first Card Holder - 
         #self.go_down_in_hierarchy( [], "" )
         self.go_down_in_hierarchy() 
@@ -130,20 +129,20 @@ class GuiAkoTeka(QWidget, QObject):
         # Start to collect the Cards from the media path
         self.actual_card_holder.startCardCollection(paths)        
 
-    # --------------------------------------------------------------
-    #
-    # Go deeper in the hierarchy
-    #
-    # card_descriptor_structure The NOT Filtered card hierarchy list
-    #                           on the recent level
-    # title                     The title what whould be shown above
-    #                           the CardHolder
-    # save                      It controls to save the CardHolder
-    #                           into the history list
-    #                           collecting_finish uses it with False
-    # --------------------------------------------------------------
     def go_down_in_hierarchy( self, card_descriptor_structure=None, title=None, save=True ):
+        """
+        --- Go Down in Hierarchy
+        
+        Go deeper in the hierarchy
 
+         card_descriptor_structure The NOT Filtered card hierarchy list
+                                   on the recent level
+         title                     The title what whould be shown above
+                               the CardHolder
+         save                      It controls to save the CardHolder
+                                   into the history list
+                                   collecting_finish uses it with False
+        """
         # if it is called very first time
         if card_descriptor_structure is None:
             self.initialize = True
@@ -197,13 +196,12 @@ class GuiAkoTeka(QWidget, QObject):
         # filter the list by the filters + Fill-up the CardHolder with Cards using the parameter as list of descriptor
         self.filter_the_cards(card_descriptor_structure)
 
-    # -------------------------
-    #
-    # Come up in the hierarchy
-    #
-    # -------------------------
     def restore_previous_holder(self, steps=1):
+        """
+        --- Restore Previous Holder ---
         
+        Come up in the hierarchy
+        """        
         size = len(self.card_holder_history)
         if  size >= steps:
 
@@ -242,11 +240,9 @@ class GuiAkoTeka(QWidget, QObject):
             self.actual_card_holder.setFocus()
          
 
-    # ------------------
-    # Collecting Started
-    # ------------------
     def collecting_start(self):
         """
+        --- Collecting Started ---
         Indicates that the CardCollection process started.
         The CardHolder calls this method
         Jobs to do:
@@ -257,11 +253,10 @@ class GuiAkoTeka(QWidget, QObject):
         # close the Search panels and disable buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(False)
 
-    # -------------------
-    # Collecting Finished
-    # -------------------
     def collecting_finish(self, card_holder, card_descriptor_structure):
         """
+        --- Collecting Finished ---
+        
         Indicates that the CardCollection process finished.
         The CardHolder calls this method
         Jobs to do:
@@ -295,83 +290,43 @@ class GuiAkoTeka(QWidget, QObject):
         # Enable the buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(True)
         
-    # ----------------------------------------------------------
-    #
-    # Calculates the Y coordinate of a Card using reverse index
-    #
-    # ----------------------------------------------------------
     def get_y_coordinate_by_reverse_index(self, reverse_index, diff_to_max):
+        """
+        --- Get Y coordinate by reverse index
+      
+        Calculates the Y coordinate of a Card using reverse index        
+        """
         raw_pos = (reverse_index + diff_to_max) * (reverse_index + diff_to_max)
         offset = diff_to_max * diff_to_max
         return (raw_pos - offset) * 8
         #return reverse_index * 220
     
-    # -----------------------------------------------
-    #
-    # Calculates the X coordinate of a Card by index
-    #
-    # -----------------------------------------------
     def get_x_offset_by_index(self, index):
+        """
+        --- Get X offset by index ---
+        
+        Calculates the X coordinate of a Card by index        
+        """
         return index * 4       
 
-    # ---------------------------------------------------------------------
-    #
-    # It will be executed only once
-    # in the CardHolder.CollectCardThread.run() what the 
-    # CardHOlder.startCardCollection() triggers in the startHolder() method
-    #
-    # ---------------------------------------------------------------------
     def collect_cards(self, paths):
+        """
+        --- Collect Cards ---
+        
+        It will be executed only once
+        in the CardHolder.CollectCardThread.run() what the 
+        CardHOlder.startCardCollection() triggers in the startHolder() method
+        """
         cdl = collect_cards(paths)
-        
-        # Preparation for collecting the filtered_card_structure and filters
-        filtered_card_structure = []
-        filter_hit_list = {
-            "title": set(),
-            "genre": set(),
-            "theme": set(),
-            "director": set(),
-            "actor": set(),
-            "sound": set(),
-            "sub": set(),
-            "country": set(),
-            "year": set(),
-            "length": set(),
-            "favorite": set(),
-            "new": set(),
-            "best": set(),
-        }
-        filter_unconditional_list = {
-            "title": set(),
-            "genre": set(),
-            "theme": set(),
-            "director": set(),
-            "actor": set(),
-            "sound": set(),
-            "sub": set(),
-            "country": set(),
-            "year": set(),
-            "length": set(),
-            "favorite": set(),
-            "new": set(),
-            "best": set(),
-        }
-        
-#        self.agenerate_filtered_card_structure(cdl, filtered_card_structure, filter_hit_list, filter_unconditional_list)
-        
-        #advanced_filter_list = self.get_advanced_filter_list(cdl)        
-        #self.fill_up_advanced_filter_lists(advanced_filter_list)
         filtered_card_structure = self.get_cards_by_advanced_filter(cdl)
-        #self.set_up_filters(cdl)
-        
         return filtered_card_structure
     
-    # --------------------
-    #
-    # Generates a new Card
-    #
-    # --------------------
     def get_new_card(self, card_data, local_index, index):
+        """
+        --- Get New Card ---
+        
+        Generates a new Card
+        """
 
         card = Card(self.actual_card_holder, card_data, local_index, index)
         
@@ -477,6 +432,7 @@ class GuiAkoTeka(QWidget, QObject):
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:              
 
+                    # if the card fits to the filter
                     if self.isFitByFilterSelection(crd, self.get_fast_filter_holder().get_filter_selection().items()):
 
                         for c, v in self.get_fast_filter_holder().get_filter_selection().items():
@@ -672,10 +628,7 @@ class GuiAkoTeka(QWidget, QObject):
 
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:              
-#--                
-                    #
-                    # Fill up the filter lists: unconditional/hit
-                    #
+
                     for c, v in self.get_advanced_filter_holder().get_filter_selection().items():
                         category = v[0]
                         
@@ -1243,6 +1196,7 @@ class ControlPanel(QWidget):
         # ------------------
         self.fast_filter_holder = FastFilterHolder()
         self.fast_filter_holder.changed.connect(self.fast_filter_on_change)
+        self.fast_filter_holder.clear_clicked.connect(self.fast_filter_clear_on_change)
         self.fast_filter_holder.setHidden(True)        
         self_layout.addWidget(self.fast_filter_holder)
 
@@ -1252,7 +1206,8 @@ class ControlPanel(QWidget):
         #
         # ----------------------
         self.advanced_filter_holder = AdvancedFilterHolder(self)
-        self.advanced_filter_holder.clicked.connect(self.advanced_filter_on_click)
+        self.advanced_filter_holder.filter_clicked.connect(self.advanced_filter_filter_on_click)
+        self.advanced_filter_holder.clear_clicked.connect(self.advanced_filter_clear_on_click)
         self.advanced_filter_holder.setHidden(True)
         self_layout.addWidget(self.advanced_filter_holder)
 
@@ -1277,8 +1232,25 @@ class ControlPanel(QWidget):
     # 
     # ----------------------------------
     def fast_filter_on_change(self):
+        """
+        --- Fast Filter on Change ---
+        
+        If there is no listener then Filters the Cards
+        """
         if self.fast_filter_listener:
             self.gui.filter_the_cards()
+            
+    def fast_filter_clear_on_change(self):
+        """
+        --- Fast Filter Clear on Change ---
+        
+        -Clear all the fields
+        -Filter the cards
+        """
+        self.fast_filter_listener = None
+        self.fast_filter_holder.clear_fields()
+        self.fast_filter_listener = self.gui
+        self.fast_filter_on_change()
     
     def get_fast_filter_holder(self):
         return self.fast_filter_holder
@@ -1288,15 +1260,31 @@ class ControlPanel(QWidget):
     # advanced filter clicked
     #
     # ---------------------------------
-    def advanced_filter_on_click(self):
+    def advanced_filter_filter_on_click(self):
+        """
+        --- Advanced Filter FILTER on Click
+        
+        The Filter button was clicked on the Advanced Filter panel
+        -filter the cards
+        """
+        self.gui.filter_the_cards()
+        
+    def advanced_filter_clear_on_click(self):
+        """
+        --- Advanced Filter CLEAR on Click ---
+        
+        The CLEAR button was clicked on the Advanced Filter panel
+        -clear the fields
+        -filter the cards by cleared filter
+        """
+        self.advanced_filter_holder.clear_fields()
         self.gui.filter_the_cards()
 
     def get_advanced_filter_holder(self):
         return self.advanced_filter_holder
 
         
-def main():   
-    
+def main():    
     app = QApplication(sys.argv)
     ex = GuiAkoTeka()
     ex.startCardHolder()

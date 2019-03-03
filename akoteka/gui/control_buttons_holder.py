@@ -164,7 +164,7 @@ class ControlButtonsHolder(QWidget):
         # hide/show advanced filter
         self.control_panel.advanced_filter_holder.setHidden(not checked)
         # filter the list
-        self.control_panel.advanced_filter_on_click()
+        self.control_panel.advanced_filter_filter_on_click()
         
     # -------------------
     #

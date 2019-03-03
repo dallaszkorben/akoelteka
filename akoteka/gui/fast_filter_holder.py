@@ -38,6 +38,7 @@ from akoteka.handle_property import get_config_ini
 class FastFilterHolder(QWidget):
     
     changed = pyqtSignal()
+    clear_clicked = pyqtSignal()
     
     def __init__(self):
         super().__init__()
@@ -54,16 +55,64 @@ class FastFilterHolder(QWidget):
         holder_layout.setSpacing(8)    
 
         self_layout.addWidget(QHLine())
-        self_layout.addWidget(holder)
+        self_layout.addWidget(holder)        
+
+        # ----------
+        #
+        # Dropdowns 
+        #
+        # ----------
+
+        #
+        # Dropdown - title
+        #
+#        self.filter_dd_title = FilterDropDownSimple(_('title_title'))
+#        holder_dropdown_gt = FilterDropDownHolder()
+#      
+#        holder_dropdown_gt.add_dropdown(self.filter_dd_title)
+#        
+#        holder_layout.addWidget(holder_dropdown_gt)        
+
+        # -------------------------------
+        #
+        # Dropdown - title+director+actor
+        #
+        # -------------------------------
+        self.filter_dd_title = FilterDropDownSimple(_('title_title') + ": ")
+        self.filter_dd_director = FilterDropDownSimple(_('title_director') + ": ")
+        self.filter_dd_actor = FilterDropDownSimple(_('title_actor') + ": ")
         
+        holder_dropdown_da = FilterDropDownHolder()
+        
+        holder_dropdown_da.add_dropdown(self.filter_dd_title)
+        holder_dropdown_da.add_dropdown(self.filter_dd_director)
+        holder_dropdown_da.add_dropdown(self.filter_dd_actor)
+        
+        holder_layout.addWidget(holder_dropdown_da)
+
+        # ----------------------
+        #
+        # Dropdown - genre+theme
+        #
+        # ----------------------
+        self.filter_dd_genre = FilterDropDownSimple(_('title_genre') + ": ")
+        self.filter_dd_theme = FilterDropDownSimple(_('title_theme') + ": ")
+        
+        holder_dropdown_gt = FilterDropDownHolder()
+        
+        holder_dropdown_gt.add_dropdown(self.filter_dd_genre)
+        holder_dropdown_gt.add_dropdown(self.filter_dd_theme)
+        
+        holder_layout.addWidget(holder_dropdown_gt) 
+ 
         # ----------
         #
         # Checkboxes
         #
         # ----------
-        self.filter_cb_favorite = FilterCheckBox(_('title_favorite'))
-        self.filter_cb_best = FilterCheckBox(_('title_best'))
-        self.filter_cb_new = FilterCheckBox(_('title_new'))
+        self.filter_cb_favorite = FilterCheckBox(_('title_favorite') + ": ")
+        self.filter_cb_best = FilterCheckBox(_('title_best') + ": ")
+        self.filter_cb_new = FilterCheckBox(_('title_new') + ": ")
                 
         holder_checkbox = FilterCheckBoxHolder()
         
@@ -77,49 +126,24 @@ class FastFilterHolder(QWidget):
         self.filter_cb_new.stateChanged.connect(self.state_changed)
                         
         holder_layout.addWidget(holder_checkbox)
-
+ 
         # ----------
         #
-        # Dropdowns 
+        # Stretch
         #
         # ----------
-
+        holder_layout.addStretch(1)
+        holder_layout.addWidget(QVLine()) 
+        holder_layout.addStretch(1)
+        
+        # ------------
         #
-        # Dropdown - title
+        # Clear button
         #
-        self.filter_dd_title = FilterDropDownSimple(_('title_title'))
-        holder_dropdown_gt = FilterDropDownHolder()
-        
-        holder_dropdown_gt.add_dropdown(self.filter_dd_title)
-        
-        holder_layout.addWidget(holder_dropdown_gt)        
-
-        #
-        # Dropdown - director+actor
-        #
-        self.filter_dd_director = FilterDropDownSimple(_('title_director'))
-        self.filter_dd_actor = FilterDropDownSimple(_('title_actor'))
-        
-        holder_dropdown_da = FilterDropDownHolder()
-        
-        holder_dropdown_da.add_dropdown(self.filter_dd_director)
-        holder_dropdown_da.add_dropdown(self.filter_dd_actor)
-        
-        holder_layout.addWidget(holder_dropdown_da)
-
-        #
-        # Dropdown - genre+theme
-        #
-        self.filter_dd_genre = FilterDropDownSimple(_('title_genre'))
-        self.filter_dd_theme = FilterDropDownSimple(_('title_theme'))
-        
-        holder_dropdown_gt = FilterDropDownHolder()
-        
-        holder_dropdown_gt.add_dropdown(self.filter_dd_genre)
-        holder_dropdown_gt.add_dropdown(self.filter_dd_theme)
-        
-        holder_layout.addWidget(holder_dropdown_gt)
-
+        # ------------
+        self.clear_button = QPushButton(_('button_clear'))
+        holder_layout.addWidget(self.clear_button)
+        self.clear_button.clicked.connect(self.clear_button_clicked)
 
         # Listeners
         self.filter_dd_title.state_changed.connect(self.state_changed)
@@ -203,6 +227,9 @@ class FastFilterHolder(QWidget):
         }
         return filter_selection
     
+    def clear_button_clicked(self):
+        self.clear_clicked.emit()
+    
     def state_changed(self):
         self.changed.emit()
 
@@ -212,10 +239,12 @@ class FastFilterHolder(QWidget):
     def clear_fields(self):
         self.clear_actor()
         self.clear_director()
-        self.clear_fields()
         self.clear_genre()
         self.clear_theme()
         self.clear_title()
+        self.filter_cb_favorite.setChecked(False)
+        self.filter_cb_new.setChecked(False)
+        self.filter_cb_best.setChecked(False)
 
 
 # ================

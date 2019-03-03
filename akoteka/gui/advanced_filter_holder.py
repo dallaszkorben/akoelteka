@@ -37,7 +37,8 @@ from akoteka.handle_property import get_config_ini
 # =======================
 class AdvancedFilterHolder(QWidget):
     
-    clicked = pyqtSignal()
+    filter_clicked = pyqtSignal()
+    clear_clicked = pyqtSignal()
     
     def __init__(self, parent):
         super().__init__(parent)
@@ -232,13 +233,31 @@ class AdvancedFilterHolder(QWidget):
         holder_layout.addWidget(length_to_label, 1, 8, 1, 1)
         holder_layout.addWidget(self.length_to_combobox, 1, 9, 1, 1)
 
+        # ------------------
+        #
+        # Vertical Separator
+        #
+        # ------------------
+        holder_layout.setColumnStretch(10, 1)
+        holder_layout.addWidget(QVLine(), 0, 11, 3, 2)
+        holder_layout.setColumnStretch(12, 1)
+
+        # -------------
+        #
+        # Clear button
+        #
+        # -------------
+        self.clear_button = QPushButton(_('button_clear'))
+        holder_layout.addWidget(self.clear_button, 0, 13, 1, 1)
+        self.clear_button.clicked.connect(self.clear_button_clicked)
+        
         # -------------
         #
         # Search button
         #
         # -------------
         self.filter_button = QPushButton(_('button_filter'))
-        holder_layout.addWidget(self.filter_button, 2, 7, 1, 3)
+        holder_layout.addWidget(self.filter_button, 2, 13, 1, 1)
         self.filter_button.clicked.connect(self.filter_button_clicked)
 
         # ----------
@@ -418,7 +437,10 @@ class AdvancedFilterHolder(QWidget):
     # ---
     
     def filter_button_clicked(self):
-        self.clicked.emit()        
+        self.filter_clicked.emit()        
+
+    def clear_button_clicked(self):
+        self.clear_clicked.emit()        
 
     def get_filter_selection(self):
         
