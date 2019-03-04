@@ -22,7 +22,6 @@ from akoteka.accessories import filter_key
 from akoteka.accessories import clearLayout
 from akoteka.accessories import FlowLayout
 
-
 from akoteka.constants import *
 from akoteka.setup.setup import getSetupIni
 

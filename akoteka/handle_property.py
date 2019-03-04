@@ -1,6 +1,7 @@
 import os
 import configparser
 from pathlib import Path
+#from akoteka.logger import logger
 
 class Property(object):
        
@@ -25,7 +26,7 @@ class Property(object):
 
         # if not existing file
         if not os.path.exists(self.file):
-            print("GET", "No file: ", self.file)
+            #self.log_msg("MESSAGE: No file found FILE NAME: " + self.file + " OPERATION: get")
             
             self.parser[section]={key: default_value}
             self.__write_file()
@@ -34,7 +35,7 @@ class Property(object):
         try:
             result=self.parser.get(section,key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
-            print("GET", e, 'in ', self.file)
+            #self.log_msg("MESSAGE: " + str(e) + " FILE NAME: " + self.file + " OPERATION: get")
             if self.writable:
                 self.update(section, key, default_value)
                 result=self.parser.get(section,key)
@@ -63,7 +64,7 @@ class Property(object):
 
     def update(self, section, key, value, source=None):
         if not os.path.exists(self.file):
-            print("UPDATE", "No file: ", self.file, " Source: " + source if source else "")
+            #self.log_msg("MESSAGE: No file found FILE NAME: " + self.file + " OPERATION: update SOURCE: " + source if source else "")
             self.parser[section]={key: value}        
         else:
             self.parser.read(self.file)
@@ -71,12 +72,13 @@ class Property(object):
                 # if no section -> NoSectionError | if no key -> Create it
                 self.parser.set(section, key, value)
             except configparser.NoSectionError as e:
-                print("UPDATE", e, "in ", self.file, " Source: ", source )
-
+                #self.log_msg("MESSAGE: " + str(e) + " FILE NAME: " + self.file + " OPERATION: update SOURCE: " + source)
                 self.parser[section]={key: value}
 
         self.__write_file()
-
+        
+#    def log_msg(self, message):
+#        logger.warning( message)
 
 # ====================
 #
@@ -110,6 +112,13 @@ class Dict( Property ):
     def _(self, key):
         return self.get(self.__class__.DICT_SECTION, key,  "[" + key + "]")
 
+class Config:
+    HOME = str(Path.home())
+    CONFIG_FOLDER = '.akoteka'
+    
+    @staticmethod 
+    def get_path_to_config_folder():
+        return os.path.join(Config.HOME, Config.CONFIG_FOLDER)
 
 # =====================
 #
@@ -117,8 +126,6 @@ class Dict( Property ):
 #
 # =====================
 class ConfigIni( Property ):
-    HOME = str(Path.home())
-    CONFIG_FOLDER = '.akoteka'
     INI_FILE_NAME="config.ini"
 
     # (section, key, default)
@@ -130,7 +137,6 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PLAYER_AUDIO = ("media", "player-audio", "rhythmbox")
     DEFAULT_MEDIA_PLAYER_AUDIO_PARAM = ("media", "player-audio-param", "")
     DEFAULT_MEDIA_PLAYER_AUDIO_EXT = ("media", "player-audio-ext", "mp3,ogg")
-    
     
     __instance = None    
 
@@ -146,7 +152,7 @@ class ConfigIni( Property ):
         return inst
         
     def __init__(self):
-        folder = os.path.join(ConfigIni.HOME, ConfigIni.CONFIG_FOLDER)
+        folder = os.path.join(Config.HOME, Config.CONFIG_FOLDER)
         file = os.path.join(folder, ConfigIni.INI_FILE_NAME)
         super().__init__( file, True, folder )
 
@@ -198,7 +204,6 @@ class ConfigIni( Property ):
 
     def set_media_player_audio_ext(self, param):
         self.update(self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[1], param)
-
 
 config_ini = {}
 
