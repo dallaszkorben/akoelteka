@@ -7,7 +7,7 @@ setup(
       name=sp['name'],
       version=sp['version'],
       description='Videoteka',
-      long_description="Records your media contents in searchable form",	#=open('README.md', encoding="utf-8").read(),
+      long_description="Helps to manage your media contents",	#=open('README.md', encoding="utf-8").read(),
       url='http://github.com/dallaszkorben/akoteka',
       author='dallaszkorben',
       author_email='dallaszkorben@gmail.com',
@@ -21,8 +21,10 @@ setup(
       setup_requires=[ "pyqt5", "pyqt5-sip", "numpy", "pyttsx3", 'configparser'],
       install_requires=["pyqt5", 'pyqt5-sip', 'numpy','pyttsx3', 'configparser' ],
       entry_points = {
-        'console_scripts':
-                ['akoteka=akoteka.gui.main_window:main']
+        'console_scripts': [
+		'akoteka=akoteka.gui.main_window:main',
+		'inihealthcheck=akoteka.health_check:main'
+		]
       },
       package_data={
         'cardholder': ['img/*.gif'],
