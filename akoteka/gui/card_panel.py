@@ -2,6 +2,7 @@ import sys
 import os
 #import json
 from subprocess import call
+from subprocess import run
 from threading import Thread
 from pkg_resources import resource_string, resource_filename
 from functools import cmp_to_key
@@ -63,6 +64,7 @@ class CardPanel(QWidget):
         #
         self.card_image = CardImage( self )
         panel_layout.addWidget( self.card_image )
+        
         self.card_information = CardInformation()
         panel_layout.addWidget( self.card_information )
         self.card_rating = CardRating()
@@ -378,16 +380,14 @@ class CardImage(QWidget):
         self_layout = QHBoxLayout(self)
         self_layout.setContentsMargins(2,2,2,2)
         self.setLayout( self_layout )
-        #p = self.palette()
-        #p.setColor(self.backgroundRole(), Qt.red)
-        #self.setPalette(p)
-        self.setStyleSheet('background: black')
 
         self.image_panel = QLabel(self)
         self.image_panel.setAlignment(Qt.AlignCenter)
         panel_layout = QHBoxLayout(self.image_panel)
         panel_layout.setContentsMargins(0,0,0,0)
         self_layout.addWidget(self.image_panel)
+
+        self.setStyleSheet('background: black')
 
         self.media_path = None
         self.sub_cards = []
@@ -403,21 +403,38 @@ class CardImage(QWidget):
     def enterEvent(self, event):
         self.update()
         QApplication.setOverrideCursor(Qt.PointingHandCursor)
+
+        self.setStyleSheet('background: gray')
+
         event.ignore()
 
     # Mouse Hover out
     def leaveEvent(self, event):
         self.update()
         QApplication.restoreOverrideCursor()
-        event.ignore()
-    
-    def paintEvent(self, event):
-        if self.underMouse():                       
-            self.setStyleSheet('background: gray')
-        else:
-            self.setStyleSheet('background: black')
+
+        self.setStyleSheet('background: black')
         
-        super().paintEvent(event)
+        event.ignore()
+
+# !!!! Do not use paintEvent to change color !!!!!
+# !!!! If you use it, it will be an infinite loop and almost 100% CPU usage !!!!    
+#    def paintEvent(self, event):
+#        s = self.size()
+#        qp = QPainter()
+#        qp.begin(self)
+#        qp.setRenderHint(QPainter.Antialiasing, True)
+#        qp.setBrush( QColor(Qt.red) )
+#
+#        qp.drawRect(0, 0, s.width(), s.height())
+#        qp.end()
+        
+        #if self.underMouse():                       
+        #    self.setStyleSheet('background: gray')
+        #else:
+        #    self.setStyleSheet('background: black')
+        
+        #super().paintEvent(event)
         
     def set_image_path( self, image_path ):
         pixmap = QPixmap( image_path )
@@ -488,7 +505,7 @@ class CardImage(QWidget):
                 #param_list += switch_list
                 param_list.append(self.media_path)
 
-            thread = Thread(target = call, args = (param_list, ))
+            thread = Thread(target = run, args = (param_list, ))
             thread.start()
             
         else:

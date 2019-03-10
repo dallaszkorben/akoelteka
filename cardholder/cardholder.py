@@ -676,7 +676,8 @@ class CardHolder( QWidget ):
         qp.setBrush( self.background_color )
 
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
-        qp.end()  
+        qp.end()
+        event.accept()
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
@@ -791,7 +792,8 @@ class Panel(QWidget):
         #if self.background_color:        
         qp.setBrush( self.background_color )
         qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
-        qp.end()    
+        qp.end()
+        event.accept()  
     
 
 
@@ -947,6 +949,7 @@ class Card(QWidget):
             qp.drawRoundedRect(0, 0, s.width(), s.height(), self.border_radius, self.border_radius)
         
         qp.end()
+        event.accept()
  
  
     # --------------
@@ -1089,8 +1092,9 @@ class CollectCardsThread(QtCore.QThread):
         self.paths = paths
         
     def run(self):
-        CollectCardsThread.__run = True
 
+        CollectCardsThread.__run = True
+        
         # Emits the collectionStarted Event
         self.collectionStarted.emit()
 

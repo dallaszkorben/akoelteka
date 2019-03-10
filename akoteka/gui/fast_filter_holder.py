@@ -1,7 +1,7 @@
 import sys
 import os
 import importlib
-from threading import Thread
+#from threading import Thread
 from pkg_resources import resource_string, resource_filename
 from functools import cmp_to_key
 import locale

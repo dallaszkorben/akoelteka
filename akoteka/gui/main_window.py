@@ -1285,6 +1285,7 @@ class ControlPanel(QWidget):
         
 def main():    
     app = QApplication(sys.argv)
+    
     ex = GuiAkoTeka()
     ex.startCardHolder()
     sys.exit(app.exec_())

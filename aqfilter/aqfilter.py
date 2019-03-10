@@ -24,7 +24,7 @@ from PyQt5.QtCore import QEvent
 from PyQt5.QtCore import QModelIndex
 from PyQt5.QtCore import QRect
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QThread
+#from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QSortFilterProxyModel  
 from PyQt5.QtCore import QStringListModel

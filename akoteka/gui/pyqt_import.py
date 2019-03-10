@@ -39,7 +39,7 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QAbstractTableModel
 from PyQt5.QtCore import QModelIndex
 from PyQt5.QtCore import QVariant
-from PyQt5.QtCore import QThread
+#from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QMimeData
 from PyQt5.QtCore import QPoint
