@@ -5,6 +5,8 @@ import configparser
 import cgi, cgitb
 import logging
 from pathlib import Path
+from threading import Thread
+from subprocess import run
 
 from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import QRect
@@ -325,7 +327,7 @@ def folder_investigation( actual_dir, json_list):
     if card_path_os and not media_path_os and dir_list:
                 
         parser = configparser.RawConfigParser()
-        parser.read(card_path_os)
+        parser.read(card_path_os, encoding='utf-8')
         
         # I collect the data from the card and the image if there is and the folders if there are
         try:
@@ -356,7 +358,7 @@ def folder_investigation( actual_dir, json_list):
 
         # first collect every data from the card
         parser = configparser.RawConfigParser()
-        parser.read(card_path_os)
+        parser.read(card_path_os, encoding='utf-8')
 
         # save the os path of the image
         card['extra']['image-path'] = image_path_os            
@@ -518,3 +520,23 @@ def collect_cards( rootdirs ):
         folder_investigation(rootdir, media_list)
 
     return media_list
+
+def play_media(media_path):
+    param_list = []
+
+    # video
+    if get_pattern_video().match(media_path):
+        switch_list = config_ini['media_player_video_param'].split(" ")
+        param_list.append(config_ini['media_player_video'])
+        param_list += switch_list
+        param_list.append(media_path)
+
+    # audio
+    elif get_pattern_audio().match(media_path):
+        switch_list = config_ini['media_player_audio_param'].split(" ")
+        param_list.append(config_ini['media_player_audio'])
+        #param_list += switch_list
+        param_list.append(media_path)
+
+    thread = Thread(target = run, args = (param_list, ))
+    thread.start()

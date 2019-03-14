@@ -251,6 +251,7 @@ class GuiAkoTeka(QWidget, QObject):
         
         # close the Search panels and disable buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(False)
+        self.control_panel.control_buttons_holder.disablePlayStopContinouslyIcons()
 
     def collecting_finish(self, card_holder, card_descriptor_structure):
         """
@@ -288,6 +289,7 @@ class GuiAkoTeka(QWidget, QObject):
 
         # Enable the buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(True)
+        self.control_panel.control_buttons_holder.enablePlayContinouslyIcon(True)
         
     def get_y_coordinate_by_reverse_index(self, reverse_index, diff_to_max):
         """
@@ -374,8 +376,11 @@ class GuiAkoTeka(QWidget, QObject):
             card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
         
         filtered_card_structure = self.set_up_filters(card_descriptor_structure)
-        self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
-
+        
+        # Fill up the CardHolder with Cards, alpabetically orderd by title 
+        self.actual_card_holder.fillUpCardHolderByDescriptor(sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False))
+            
+            
     # ----------------
     # Set-up Filters
     # ----------------
@@ -426,7 +431,8 @@ class GuiAkoTeka(QWidget, QObject):
         def generate_fast_filter_list(card_structure):
         
             # through the SORTED list
-            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            for crd in card_structure:
 
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:              
@@ -555,7 +561,8 @@ class GuiAkoTeka(QWidget, QObject):
             collectorFits = False
             
             # through the SORTED list
-            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            for crd in card_structure:
             
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:
@@ -623,7 +630,8 @@ class GuiAkoTeka(QWidget, QObject):
         def generate_unconditional_filter_list(card_structure):
         
             # through the SORTED list
-            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            for crd in card_structure:
+            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
 
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:              
@@ -779,7 +787,8 @@ class GuiAkoTeka(QWidget, QObject):
             collectorFits = False
             
             # through the SORTED list
-            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            for crd in card_structure:
             
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:

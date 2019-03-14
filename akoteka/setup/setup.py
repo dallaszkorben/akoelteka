@@ -5,7 +5,7 @@ def getSetupIni():
 
     file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'setup.ini')
     parser = configparser.RawConfigParser()
-    parser.read( file )
+    parser.read( file, encoding='utf-8' )
 
     version = "0.0.0"
     name = "akoteka"

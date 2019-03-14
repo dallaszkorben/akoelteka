@@ -1,18 +1,14 @@
 import sys
 import os
-#import json
 from subprocess import call
-from subprocess import run
-from threading import Thread
 from pkg_resources import resource_string, resource_filename
 from functools import cmp_to_key
 import locale
 
-#from PyQt5.QtCore import pyqtSignal  
-
 from akoteka.accessories import filter_key
 from akoteka.accessories import get_pattern_video
 from akoteka.accessories import get_pattern_audio
+from akoteka.accessories import play_media
 
 from akoteka.handle_property import _
 from akoteka.handle_property import config_ini
@@ -488,25 +484,8 @@ class CardImage(QWidget):
             
         # Play media
         if media_path:
-
-            param_list = []
-
-            # video
-            if get_pattern_video().match(self.media_path):
-                switch_list = config_ini['media_player_video_param'].split(" ")
-                param_list.append(config_ini['media_player_video'])
-                param_list += switch_list
-                param_list.append(self.media_path)
-
-            # audio
-            elif get_pattern_audio().match(self.media_path):
-                switch_list = config_ini['media_player_audio_param'].split(" ")
-                param_list.append(config_ini['media_player_audio'])
-                #param_list += switch_list
-                param_list.append(self.media_path)
-
-            thread = Thread(target = run, args = (param_list, ))
-            thread.start()
+            
+            play_media(self.media_path)
             
         else:
             # go deeper

@@ -83,7 +83,7 @@ def folder_investigation( actual_dir):
     if card_path_os and not media_path_os and dir_list:
                 
         parser = configparser.RawConfigParser()
-        parser.read(card_path_os)
+        parser.read(card_path_os, encoding='utf-8')
         
         try:            
             # save the http path of the image
@@ -112,7 +112,7 @@ def folder_investigation( actual_dir):
 
         # first collect every data from the card
         parser = configparser.RawConfigParser()
-        parser.read(card_path_os)
+        parser.read(card_path_os, encoding='utf-8')
 
         # save the os path of the image
         card['extra']['image-path'] = image_path_os            
