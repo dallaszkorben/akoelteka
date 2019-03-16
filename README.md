@@ -3,12 +3,15 @@
 The aim of this project is to produce a software which helps to organize and play media
 
 <table border="0">
-<tr>
-<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/simple-cardlist-advancedfilteropen.png
-.png' width='400'>
+<tr>  
+<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/cardlist-simple.png' width='400'>
+<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/cardlist-filter.png' width='400'> 
+<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/cardlist-setting.png' width='400'> 
 <tr/>
 <tr>
-<td>GUI<br>
+<td>Normal view<br>
+<td>Filter<br>
+<td>Setting<br> 
 <tr/>
 <table>
 
@@ -41,7 +44,8 @@ The main features are:
 <code>pip install akoteka --upgrade</code>
 
 ### Run
-
+1. Run a console
+2. On the console type the following 
 <code>**akoteka**</code>
 
 
