@@ -250,7 +250,7 @@ class GuiAkoTeka(QWidget, QObject):
         
         # close the Search panels and disable buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(False)
-        self.control_panel.control_buttons_holder.disablePlayStopContinouslyIcons()
+        self.control_panel.control_buttons_holder.disablePlayStopContinously()
 
     def collecting_finish(self, card_holder, card_descriptor_structure):
         """
@@ -287,7 +287,7 @@ class GuiAkoTeka(QWidget, QObject):
 
         # Enable the buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(True)
-        self.control_panel.control_buttons_holder.enablePlayContinouslyIcon(True)
+        self.control_panel.control_buttons_holder.enablePlayContinously(True)
         
     def get_y_coordinate_by_reverse_index(self, reverse_index, diff_to_max):
         """
@@ -383,18 +383,22 @@ class GuiAkoTeka(QWidget, QObject):
     # Set-up Filters
     # ----------------
     def set_up_filters(self, card_descriptor_structure):
-        # --- ADVANCED FILTER ---
-        advanced_filter_list = self.get_advanced_filter_list(card_descriptor_structure)        
-        self.fill_up_advanced_filter_lists(advanced_filter_list)
+        # --- FILL UP ADVANCED FILTERS ---
+        unconditional_list = self.get_unconditional_filter_list(card_descriptor_structure)        
+        self.fill_up_advanced_filter_lists(unconditional_list)
         
-        # --- FAST FILTER ---        
+        # --- FILL UP FAST FILTERS ---        
         fast_filter_list = self.get_fast_filter_list(card_descriptor_structure)
         self.fill_up_fast_filter_lists(fast_filter_list)
 
+        # --- Filter the cards setting its ['extra']['visible'] attribute ---
         if not self.control_panel.fast_filter_holder.isHidden():
             filtered_cards = self.get_cards_by_fast_filter(card_descriptor_structure)
         else:    
             filtered_cards = self.get_cards_by_advanced_filter(card_descriptor_structure)
+        
+        # --- FILL UP PLAY CONTINOUSLY DROP-DOWN ---
+        self.fill_up_play_continously_list(filtered_cards)
         
         return filtered_cards
     
@@ -558,8 +562,7 @@ class GuiAkoTeka(QWidget, QObject):
             mediaFits = False
             collectorFits = False
             
-            # through the SORTED list
-            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            # through the card structure
             for crd in card_structure:
             
                 # in case of MEDIA CARD
@@ -593,7 +596,59 @@ class GuiAkoTeka(QWidget, QObject):
         generate_filtered_list(card_structure)
         return card_structure    
     
+
+
+
+
+
+
+
     
+    def fill_up_play_continously_list(self, filtered_card_structure):
+        """
+        Gives back a list of media-cards which should be played
+        
+        Parameters:
+            filtered_card_structure   ['extra']['sub-cards'] False - should not be played (filtered out) 
+        
+        Return:
+            <list>[0] True/False - media/separator
+            <list>[1] path to media
+            <list>[2] title of the media
+        """
+
+        def generate_list(filtered_card_structure, playing_list):
+
+            # through the SORTED list
+            #for crd in sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False):
+            for crd in sorted(filtered_card_structure, key=lambda arg:  locale.strxfrm(arg['title'][config_ini['language']])    if arg['extra']['media-path'] and arg['extra']['visible'] else "_" + locale.strxfrm(arg['title'][config_ini['language']])            , reverse=False):
+            
+                # in case of MEDIA CARD
+                if crd['extra']['media-path'] and crd['extra']['visible']:
+
+                    playing_list.append((True, crd['extra']['media-path'], crd['title'][config_ini['language']]))
+   
+                # in case of COLLECTOR CARD
+                elif crd['extra']['visible']:                     
+
+                    playing_list.append((False, crd['extra']['media-path'], crd['title'][config_ini['language']]))
+                    
+                    # then it depends on the next level
+                    generate_list(crd['extra']['sub-cards'], playing_list)
+                
+            return
+    
+        playing_list = []        
+        generate_list(filtered_card_structure, playing_list)
+        
+        self.control_panel.control_buttons_holder.clear_play_continously_elements()
+        self.control_panel.control_buttons_holder.add_play_continously_element("", "")
+        for l in playing_list:
+            if l[0]:
+                self.control_panel.control_buttons_holder.add_play_continously_element(l[2], l[1])
+            else:
+                self.control_panel.control_buttons_holder.add_play_continously_separator()
+
     
     
     
@@ -617,7 +672,7 @@ class GuiAkoTeka(QWidget, QObject):
   
   
   
-    def get_advanced_filter_list(self, card_structure):
+    def get_unconditional_filter_list(self, card_structure):
         """ --------------------------------------------------------------------------------
         
         --- Get Advanced Filter List ---
@@ -784,8 +839,7 @@ class GuiAkoTeka(QWidget, QObject):
             mediaFits = False
             collectorFits = False
             
-            # through the SORTED list
-            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            # through the card structure
             for crd in card_structure:
             
                 # in case of MEDIA CARD

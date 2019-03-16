@@ -74,7 +74,10 @@ class ControlButtonsHolder(QWidget):
         self_layout.addWidget( back_button )
 
         self_layout.addStretch(1) 
-        # ------------------------------
+        
+        
+        # ================================================
+        # ================================================        
         
         # -------------------
         #
@@ -113,10 +116,40 @@ class ControlButtonsHolder(QWidget):
         self.stop_continously_button.setStyleSheet("background:transparent; border:none") 
         self_layout.addWidget( self.stop_continously_button )
         
+        # ----------------------------------
+        #
+        # Playing Continously list drop-down
+        #
+        # ----------------------------------
+
+        self.dropdown_play_continously = QComboBox(self)
+        self.dropdown_play_continously.setFocusPolicy(Qt.NoFocus)
+        self.dropdown_play_continously.setEditable(True)
+        
+#        self.dropdown.currentIndexChanged.connect(self.current_index_changed)
+
+        style_box = '''
+            QComboBox { 
+                max-width: 200px; min-width: 300px; border: 1px solid gray; border-radius: 5px;
+            }
+        '''
+        style_drop_down ='''
+            QComboBox QAbstractItemView::item { 
+                color: red;
+                max-height: 15px;
+            }
+        '''            
+      
+        self.dropdown_play_continously.setStyleSheet(style_box + style_drop_down)
+        #self.dropdown_play_continously.addItem("")
+        self_layout.addWidget( self.dropdown_play_continously )
+
                
         self_layout.addStretch(1) 
-        # ------------------------------
         
+        # ================================================
+        # ================================================        
+                
         # -------------------
         #
         # Fast Search Button
@@ -157,6 +190,9 @@ class ControlButtonsHolder(QWidget):
         self.advanced_search_button.setStyleSheet("background:transparent; border:none") 
         self_layout.addWidget( self.advanced_search_button )
         
+        # ================================================
+        # ================================================
+                        
         # -------------------
         #
         # Config Button
@@ -176,15 +212,53 @@ class ControlButtonsHolder(QWidget):
         self_layout.addWidget( self.config_button )   
         
         self.enableSearchIcons(False)
-        self.disablePlayStopContinouslyIcons()
+        self.disablePlayStopContinously()
         
-    def disablePlayStopContinouslyIcons(self):
+    # ======================================================
+    
+    def clear_play_continously_elements(self):
+        self.dropdown_play_continously.clear()
+        
+    def add_play_continously_separator(self):
+        self.dropdown_play_continously.insertSeparator(self.dropdown_play_continously.__len__())        
+        
+    def add_play_continously_element(self, title, path):
+        self.dropdown_play_continously.addItem(title, path)        
+        
+    def get_play_continously_selected_path(self):
+        return self.dropdown_play_continously.itemData( self.dropdown_play_continously.currentIndex() )
+
+    def get_play_continously_path_by_index(self, index):
+        return self.dropdown_play_continously.itemData( index )
+
+    def get_play_continously_selected_title(self):
+        return self.dropdown_play_continously.itemText( self.dropdown_play_continously.currentIndex() )    
+    
+    def get_play_continously_title_by_index(self, index):
+        return self.dropdown_play_continously.itemText( index )
+    
+    def get_play_continously_selected_index(self):
+        return self.dropdown_play_continously.currentIndex()
+
+    def get_play_continously_last_index(self):
+        return self.dropdown_play_continously.count() - 1
+    
+    def select_play_continously_element_by_index(self, index):
+        self.dropdown_play_continously.setCurrentIndex(index)
+        
+    # ======================================================
+            
+    def disablePlayStopContinously(self):
         self.play_continously_button.setEnabled(False)
         self.stop_continously_button.setEnabled(False)
+        self.dropdown_play_continously.setEnabled(False)
         
-    def enablePlayContinouslyIcon(self, enabled):
+    def enablePlayContinously(self, enabled):
         self.play_continously_button.setEnabled(enabled)
         self.stop_continously_button.setEnabled(not enabled)
+        self.dropdown_play_continously.setEnabled(enabled)
+    
+    # =====================================================
          
     def enableSearchIcons(self, enabled):
         if self.advanced_search_button.isChecked():
@@ -196,10 +270,13 @@ class ControlButtonsHolder(QWidget):
         self.advanced_search_button.setEnabled(enabled)
         self.fast_search_button.setEnabled(enabled)
 
-
     def play_continously_button_on_click(self):
-        print('clicked')
-        PlayContinouslyThread.play(self, self.control_panel.gui.actual_card_holder.orig_card_descriptor_structure)
+
+        # Start to play the media collection
+        inst = PlayContinouslyThread.play(self)
+       
+        # connect the "selected" event to a method which will select the media in the drop-down list
+        inst.selected.connect(self.select_play_continously_element_by_index)
 
     def stop_continously_button_on_click(self):
         PlayContinouslyThread.stop()
@@ -298,32 +375,32 @@ class ControlButtonsHolder(QWidget):
             
         dialog.deleteLater()
         
-        
-        
-        
+
+
+
 class PlayContinouslyThread(QThread):
     
-#    collectionStarted = pyqtSignal()
-#    collectionFinished = pyqtSignal(list)    
+    selected = pyqtSignal(int)
     
     __instance = None
     __run = False
     __wait_for_stop = False
     
     @classmethod
-    def play(cls, parent, card_descriptor_list):
+    def play(cls, parent):
         
         if cls.__instance is None:
             cls.__new__(cls)
         
-        cls.__init__(cls.__instance, parent, card_descriptor_list)
+        cls.__init__(cls.__instance, parent)
             
         if not cls.__run:
             cls.__instance.start()
+            
+        return cls.__instance
 
     @classmethod
     def stop(cls):
-        print("stop called")
         PlayContinouslyThread.__wait_for_stop = True
         
     def __new__(cls):
@@ -331,36 +408,31 @@ class PlayContinouslyThread(QThread):
             cls.__instance = super().__new__(cls)
         return cls.__instance    
 
-    def __init__(self, parent, card_descriptor_list):
-        QThread.__init__(self)
-        
+    def __init__(self, parent):
+        QThread.__init__(self)        
         self.parent = parent
-        self.card_descriptor_list = card_descriptor_list
          
     def run(self):
 
         PlayContinouslyThread.__run = True
         PlayContinouslyThread.__wait_for_stop = False
-        self.parent.enablePlayContinouslyIcon(False)
+        self.parent.enablePlayContinously(False)
 
-        playing_list = self.get_playing_list(self.card_descriptor_list)
-        # Emits the collectionStarted Event
-        #self.collectionStarted.emit()
+        start_index = self.parent.get_play_continously_selected_index()
+        end_index = self.parent.get_play_continously_last_index()
 
-        #### for TEST reason
-        #time.sleep(5)
-        ####
-        
-        print("loop started")
-        print("==============")
-        
         stop_all = False
-        for media in playing_list:
-            print('!!!!!!!!Playing: ', media[1])
+        for index in range(start_index, end_index + 1):
             
-            # play the next media
-            pid = play_media(media[0])
-            print('PID: ', pid)
+            pid = None
+            media = self.parent.get_play_continously_path_by_index(index)
+            if media is not None:
+            
+                # play the next media
+                pid = play_media(media)               
+            
+                # emit an media selection event
+                self.selected.emit(index)                
 
             # checking if it stopped
             while pid is not None:
@@ -370,8 +442,6 @@ class PlayContinouslyThread(QThread):
                     
                     # then kill the process
                     stop_all = True
-                    print("kill: ", pid)
-                    print("--------")
                     os.kill(pid, signal.SIGKILL)
                     break
                     
@@ -391,55 +461,19 @@ class PlayContinouslyThread(QThread):
                 if not still_exist_pid:
                     break
                 
-                # the pid is still exists so the media is playing
-                # so I wait a second
-                print('    -----still playing', media[1], pid)
+                # at this point the pid is still exists so the media is playing
+                # I wait a second
                 QThread.sleep(1)
-
-            print(" new loop")
 
             # If the Play Continously is stopped
             if stop_all:
                 
                 # Break the loop on the files
                 break
-            
-        print("==============")
-        print("loop stopped")
-        # Here Collects the Cards Info
-        #card_list = self.collect_cards_method(self.paths)
-        
-        # Emits the collectionFinished Event
-        #self.collectionFinished.emit(card_list)
 
         # Indicates that the Thread is ready to start again
-        self.parent.enablePlayContinouslyIcon(True)
+        self.parent.enablePlayContinously(True)
         PlayContinouslyThread.__run = False
-
-    def get_playing_list(self, card_structure):
-
-        def generate_list(card_structure, playing_list):
-
-            # through the SORTED list
-            for crd in sorted(card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False):
-            
-                # in case of MEDIA CARD
-                if crd['extra']['media-path'] and crd['extra']['visible']:
-
-                    playing_list.append((crd['extra']['media-path'], crd['title'][config_ini['language']]))
-   
-                # in case of COLLECTOR CARD
-                elif crd['extra']['visible']:                     
-
-                    # then it depends on the next level
-                    generate_list(crd['extra']['sub-cards'], playing_list)
-                
-            return
-    
-        playing_list = []        
-        generate_list(card_structure, playing_list)
-        return playing_list
-
 
     def __del__(self):
         self.exiting = True
