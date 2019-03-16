@@ -4,9 +4,14 @@ import re
 import configparser
 import cgi, cgitb
 import logging
+import psutil
+import datetime
+import time
+   
 from pathlib import Path
 from threading import Thread
 from subprocess import run
+from subprocess import call
 
 from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import QRect
@@ -523,20 +528,36 @@ def collect_cards( rootdirs ):
 
 def play_media(media_path):
     param_list = []
+    player = None
 
     # video
     if get_pattern_video().match(media_path):
         switch_list = config_ini['media_player_video_param'].split(" ")
-        param_list.append(config_ini['media_player_video'])
+        player = config_ini['media_player_video']
+        param_list.append(player)
         param_list += switch_list
         param_list.append(media_path)
 
     # audio
     elif get_pattern_audio().match(media_path):
         switch_list = config_ini['media_player_audio_param'].split(" ")
-        param_list.append(config_ini['media_player_audio'])
+        player = config_ini['media_player_audio']
+        param_list.append(player)
         #param_list += switch_list
         param_list.append(media_path)
 
+    start_time = datetime.datetime.now().timestamp()
+
+    # start playing media    
     thread = Thread(target = run, args = (param_list, ))
     thread.start()
+    time.sleep(0.1)
+    
+    # get the pid of the player
+    pid = None
+    for p in psutil.process_iter():
+        if p.name() == player and (start_time-p.create_time()) <= 1.0:
+            pid = p.pid
+            break
+    return pid
+

@@ -1,6 +1,9 @@
 import sys
 import os
+import signal
 import importlib
+import psutil
+
 from threading import Thread
 from pkg_resources import resource_string, resource_filename
 from functools import cmp_to_key
@@ -19,6 +22,8 @@ from akoteka.accessories import collect_cards
 from akoteka.accessories import filter_key
 from akoteka.accessories import clearLayout
 from akoteka.accessories import FlowLayout
+from akoteka.accessories import play_media
+
 
 
 from akoteka.constants import *
@@ -194,7 +199,7 @@ class ControlButtonsHolder(QWidget):
 
     def play_continously_button_on_click(self):
         print('clicked')
-        PlayContinouslyThread.play(self, None)
+        PlayContinouslyThread.play(self, self.control_panel.gui.actual_card_holder.orig_card_descriptor_structure)
 
     def stop_continously_button_on_click(self):
         PlayContinouslyThread.stop()
@@ -310,7 +315,8 @@ class PlayContinouslyThread(QThread):
         
         if cls.__instance is None:
             cls.__new__(cls)
-            cls.__init__(cls.__instance, parent, card_descriptor_list)
+        
+        cls.__init__(cls.__instance, parent, card_descriptor_list)
             
         if not cls.__run:
             cls.__instance.start()
@@ -337,7 +343,7 @@ class PlayContinouslyThread(QThread):
         PlayContinouslyThread.__wait_for_stop = False
         self.parent.enablePlayContinouslyIcon(False)
 
-        
+        playing_list = self.get_playing_list(self.card_descriptor_list)
         # Emits the collectionStarted Event
         #self.collectionStarted.emit()
 
@@ -345,13 +351,61 @@ class PlayContinouslyThread(QThread):
         #time.sleep(5)
         ####
         
+        print("loop started")
+        print("==============")
         
-        for i in range(1000):
-            print("waiting")
-            QThread.sleep(2)
-            if PlayContinouslyThread.__wait_for_stop:
+        stop_all = False
+        for media in playing_list:
+            print('!!!!!!!!Playing: ', media[1])
+            
+            # play the next media
+            pid = play_media(media[0])
+            print('PID: ', pid)
+
+            # checking if it stopped
+            while pid is not None:
+
+                # if the Play Continously is stopped
+                if PlayContinouslyThread.__wait_for_stop:
+                    
+                    # then kill the process
+                    stop_all = True
+                    print("kill: ", pid)
+                    print("--------")
+                    os.kill(pid, signal.SIGKILL)
+                    break
+                    
+                    # --- Id does not work. root needed ---
+                    #p = psutil.Process(pid)
+                    #p.terminate()
+
+                # I suppose the pid does not exist anymore
+                still_exist_pid = False
+                
+                # I check the running processes
+                for p in psutil.process_iter():
+                    if p.pid == pid:
+                        still_exist_pid = True
+                        break
+                    
+                if not still_exist_pid:
+                    break
+                
+                # the pid is still exists so the media is playing
+                # so I wait a second
+                print('    -----still playing', media[1], pid)
+                QThread.sleep(1)
+
+            print(" new loop")
+
+            # If the Play Continously is stopped
+            if stop_all:
+                
+                # Break the loop on the files
                 break
-        print("stopping")
+            
+        print("==============")
+        print("loop stopped")
         # Here Collects the Cards Info
         #card_list = self.collect_cards_method(self.paths)
         
@@ -363,48 +417,28 @@ class PlayContinouslyThread(QThread):
         PlayContinouslyThread.__run = False
 
     def get_playing_list(self, card_structure):
-        """
-        parameters:
-            card_structure:        the full structure on the recent level (not filtered)
-        """  
-        def generate_filtered_list(card_structure):
 
-            mediaFits = False
-            collectorFits = False
-            
+        def generate_list(card_structure, playing_list):
+
             # through the SORTED list
-            for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
+            for crd in sorted(card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False):
             
                 # in case of MEDIA CARD
-                if crd['extra']['media-path']:
+                if crd['extra']['media-path'] and crd['extra']['visible']:
 
-                    fits = True
-
-                    if not self.control_panel.advanced_filter_holder.isHidden():
-    
-                        fits = self.isFitByFilterSelection(crd, self.get_advanced_filter_holder().get_filter_selection().items())
-                 
-                    if fits:
-
-                        mediaFits = True
-
-                    crd['extra']['visible'] = fits
+                    playing_list.append((crd['extra']['media-path'], crd['title'][config_ini['language']]))
    
                 # in case of COLLECTOR CARD
-                else:                     
+                elif crd['extra']['visible']:                     
 
                     # then it depends on the next level
-                    fits = generate_filtered_list(crd['extra']['sub-cards'])
+                    generate_list(crd['extra']['sub-cards'], playing_list)
                 
-                    if fits:
-                        collectorFits = True        
-            
-                    crd['extra']['visible'] = fits
-                
-            return (mediaFits or collectorFits)
+            return
     
-        generate_filtered_list(card_structure)
-        return card_structure
+        playing_list = []        
+        generate_list(card_structure, playing_list)
+        return playing_list
 
 
     def __del__(self):

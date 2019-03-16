@@ -18,8 +18,8 @@ setup(
         "Operating System :: OS Independent",
       ],
       packages = find_packages(),
-      setup_requires=[ "pyqt5", "pyqt5-sip", "numpy", "pyttsx3", 'configparser'],
-      install_requires=["pyqt5", 'pyqt5-sip', 'numpy','pyttsx3', 'configparser' ],
+      setup_requires=[ "pyqt5", "pyqt5-sip", "numpy", "pyttsx3", 'configparser', 'psutil'],
+      install_requires=["pyqt5", 'pyqt5-sip', 'numpy','pyttsx3', 'configparser', 'psutil'],
       entry_points = {
         'console_scripts': [
 		'akoteka=akoteka.gui.main_window:main',

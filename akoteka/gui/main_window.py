@@ -236,8 +236,7 @@ class GuiAkoTeka(QWidget, QObject):
             self.actual_card_holder.select_actual_card()
             
             # Make the CardHolder to be in Focus
-            self.actual_card_holder.setFocus()
-         
+            self.actual_card_holder.setFocus()         
 
     def collecting_start(self):
         """
@@ -267,8 +266,7 @@ class GuiAkoTeka(QWidget, QObject):
         if card_descriptor_structure:
           
             # Show the title of the CardHolder (the certain level)        
-            self.hierarchy_title.setHidden(False)
-       
+            self.hierarchy_title.setHidden(False)       
         
         # Save the NOT Filtered list
         card_holder.orig_card_descriptor_structure = card_descriptor_structure
@@ -703,7 +701,7 @@ class GuiAkoTeka(QWidget, QObject):
             }        
 
         # save the fields of the filters because the will be clear when the list is updated
-        for category, value in self.get_advanced_filter_holder().get_filter_selection().items():            
+        for category, value in self.get_advanced_filter_holder().get_filter_selection().items():
             if value[1] != None and value[1] != "":
                 advanced_state_fields[category] = value[1]
 
