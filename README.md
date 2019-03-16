@@ -19,21 +19,9 @@ The aim of this project is to produce a software which helps to organize and pla
 
 The main features are:
  - Cards show the characteristics of the media
-    - Title
-    - Year
-    - Length
-   - Country
-   - Sound
-   - Subtitle
-   - Director
-   - Actor
-   - Genre
-   - Theme,
-   - Story
+    - Title, Year, Length, Country, Sound, Subtitle, Director, Actor, Genre, Theme, Story
  - Indicate personal opinion about the media
-   - Favorite
-   - Best
-   - New
+    - Favorite, Best, New
  - Paging Cards in card-holder
  - Filtering Cards by title, genre, theme, language, director, actor ...
  - Playing media one-by-one
