@@ -1,4 +1,4 @@
-# Akoteka
+# akoteka
 
 The aim of this project is to produce a software which helps to organize and play media
 
@@ -18,14 +18,18 @@ The aim of this project is to produce a software which helps to organize and pla
 
 
 The main features are:
- - Cards show the characteristics of the media
-    - Title, Year, Length, Country, Sound, Subtitle, Director, Actor, Genre, Theme, Story
- - Indicate personal opinion about the media
-    - Favorite, Best, New
- - Paging Cards in card-holder
- - Filtering Cards by title, genre, theme, language, director, actor ...
- - Playing media one-by-one
- - Continously playing media
+- Cards show the characteristics of the media
+  - Title, Year, Length, Country, Sound, Subtitle, Director, Actor, Genre, Theme, Story
+  - <img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/card-single.png' width='600'>    
+- Indicate personal opinion about the media 
+  - Favorite, Best, New
+  - <img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/personalopinion.png' width='20'>   
+- Paging Cards in card-holder
+  - <img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/paging.gif' width='500'>
+    
+- Filtering Cards by title, genre, theme, language, director, actor ...
+- Playing media one-by-one
+- Continously playing media
 
 ## Usage
 
