@@ -18,6 +18,9 @@ The aim of this project is to produce a software which helps to organize and pla
 
 
 ## The main features are:
+- Navigation in the Card hierarchy
+  - <img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/card-navigation.png' width='600'>    
+
 - Cards show the characteristics of the media
   - Title, Year, Length, Country, Sound, Subtitle, Director, Actor, Genre, Theme, Story
   - <img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/card-single.png' width='600'>    
