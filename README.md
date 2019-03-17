@@ -48,12 +48,16 @@ The main features are:
 
 1. Run a console
 2. On the console type the following  
+
 		pip install akoteka --upgrade
+		
 
 ### Run
 1. Run a console
 2. On the console type the following 
-<code>**akoteka**</code>
+
+	**akoteka**
+	
 
 
 
