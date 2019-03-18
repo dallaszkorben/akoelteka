@@ -67,7 +67,28 @@ The aim of this project is to produce a software which helps to organize and pla
 
 		akoteka
 	
+## Media
 
+### Card folder
+
+The application needs a special hierarchy of files to recognize media. A folder, which represents a Card, contains the 
+- specific media file (**avi, mkv, mp4, mp3 ...**) 
+- a descriptor file (**card.ini**) 
+- optionaly an image (**image.jpg**).
+
+### Container folder
+
+Card Folders can contain many subfolders, which can themselves be a Card folder. 
+
+
+
+### card.ini file
+
+The **card.ini** file is a simple text file containing key-value pairs which describe the media. Here is an example:
+
+### Card hierarchy
+
+ 
 
 
 
