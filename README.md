@@ -88,8 +88,65 @@ The **card.ini** file is a simple text file containing key-value pairs which des
 
 ### Card hierarchy
 ```console
-foo@bar:~$ whoami
-foo
+.
+├── -Aaron.Russo
+│   ├── America.Freedom.To.Facism-2006
+│   │   ├── America.Freedom.To.Fascism.avi
+│   │   ├── America.Freedom.To.Fascism.sub
+│   │   ├── card.ini
+│   │   └── image.jpeg
+│   ├── card.ini
+│   ├── image.jpeg
+│   ├── Interview.With.Aaron.Russo-2009
+│   │   ├── card.ini
+│   │   ├── image.jpeg
+│   │   └── Interview.With.Aaron.Russo.avi
+│   └── Mad.As.Hell-1996
+│       ├── card.ini
+│       ├── image.jpeg
+│       └── Mad.As.Hell.divx
+├── card.ini
+├── Home-2009
+│   ├── card.ini
+│   ├── Home.mkv
+│   └── image.jpeg
+├── image.jpeg
+├── Inside.Job-2010
+│   ├── card.ini
+│   ├── image.jpeg
+│   └── Inside.Job.mkv
+├── -Michael.Moore
+│   ├── Bowling.For.Columbine
+│   │   ├── Bowling.For.Columbine-2002.mkv
+│   │   ├── card.ini
+│   │   └── image.jpeg
+│   ├── card.ini
+│   ├── Fahrenheit911-2004
+│   │   ├── card.ini
+│   │   ├── Fahrenheit.911.mkv
+│   │   └── image.jpeg
+│   └── image.jpeg
+├── The.Age.Of.Stupid-2009
+│   ├── card.ini
+│   ├── image.jpeg
+│   └── The.Age.Of.Stupid.mkv
+├── The.Corporation-2003
+│   ├── card.ini
+│   ├── image.jpeg
+│   └── The.Corporation.mkv
+├── The.Great.Global.Warming.Swindle-2007
+│   ├── card.ini
+│   ├── image.jpeg
+│   ├── TheGreatGlobalWarmingSwindle.avi
+│   └── TheGreatGlobalWarmingSwindle.srt
+├── The.Light.Bulb.Cosnpiracy
+│   ├── card.ini
+│   ├── image.jpeg
+│   └── The.Light.Bulb.Conspiracy.mp4
+└── Who.Killed.The.Electric.Car-2006
+    ├── card.ini
+    ├── image.jpeg
+    └── Who.Killed.The.Electric.Car.mkv
 ```
  
 
