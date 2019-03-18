@@ -85,6 +85,34 @@ Card Folders can contain many subfolders, which can themselves be a Card folder.
 ### card.ini file
 
 The **card.ini** file is a simple text file containing key-value pairs which describe the media. Here is an example:
+```console
+[titles]
+title_en=The Great Global Warming Swindle
+title_hu=A nagy globális felmelegedés átverés
+
+[storyline]
+storyline_en=Everything you've ever been told about Global Warming is probably untrue. This film blows the whistle on the biggest swindle in modern history. We are told that 'Man Made Global Warming' is the biggest ever threat to mankind. There is no room for scientific doubt. Well, watch this film and make up your own mind.
+storyline_hu=
+
+[general]
+year=2007
+director=Martin Durkin
+actor=Tim Ball,Nir Shaviv,Ian Clark,Piers Corbyn,
+length=1:14
+sound=en
+sub=hu
+genre=documentary
+theme=lie,money,greed,conspiracy,stupidity
+country=gb
+
+[rating]
+best=y
+new=y
+favorite=y
+
+[links]
+imdb=https://www.imdb.com/title/tt1020027/?ref_=nv_sr_1
+```
 
 ### Card hierarchy
 ```console
