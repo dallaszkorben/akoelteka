@@ -92,7 +92,7 @@ title_hu=A nagy globális felmelegedés átverés
 
 [storyline]
 storyline_en=Everything you've ever been told about Global Warming is probably untrue. This film blows the whistle on the biggest swindle in modern history. We are told that 'Man Made Global Warming' is the biggest ever threat to mankind. There is no room for scientific doubt. Well, watch this film and make up your own mind.
-storyline_hu=
+storyline_hu=Az általánosan elfogadott nézet szerint az emberiség széndioxid kibocsátása okozza a globális felmelegedést. Ezt halljuk egész nap a hírekből. De vannak akiknek más a véleményük a témáról. Ez a Channel 4 sokat vitatott dokumentumfilmje, amit mindenféleképpen érdemes megnézni. Azt sem szabad elhallgatni, hogy a film készítője Michal Moore-os technikákat is alkalmazott a filmhez, azaz az egyik szakértő, Carl Wunsch egyáltalán nem ért egyet a film végkövetkeztetésével.
 
 [general]
 year=2007
