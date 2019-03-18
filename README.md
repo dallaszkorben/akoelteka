@@ -78,7 +78,7 @@ The application needs a special hierarchy of files to recognize media. A folder,
 
 ### Container folder
 
-Card Folders can contain many subfolders, which can themselves be a Card folder. 
+Card Folders can contain many subfolders, which can themselves be a Card folder. In that case the folder should not contain any media file.
 
 
 
