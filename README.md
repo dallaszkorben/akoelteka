@@ -87,7 +87,10 @@ Card Folders can contain many subfolders, which can themselves be a Card folder.
 The **card.ini** file is a simple text file containing key-value pairs which describe the media. Here is an example:
 
 ### Card hierarchy
-
+```console
+foo@bar:~$ whoami
+foo
+```
  
 
 
