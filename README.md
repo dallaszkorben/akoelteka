@@ -2,21 +2,6 @@
 
 The aim of this project is to produce a software which helps to organize and play media
 
-<table border="0">
-<tr>  
-<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/cardlist-simple.png' width='400'>
-<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/cardlist-filter.png' width='400'> 
-<td><img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/cardlist-setting.png' width='400'> 
-<tr/>
-<tr>
-<td>Normal view<br>
-<td>Filter<br>
-<td>Setting<br> 
-<tr/>
-<table>
-
-
-
 ## The main features are:
 - Navigation in the Card hierarchy
   - <img src='https://github.com/dallaszkorben/akoteka/blob/master/wiki/card-navigation.png' width='600'>    
