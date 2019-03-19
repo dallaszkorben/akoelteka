@@ -537,13 +537,9 @@ def play_media(media_path):
         param_list.append(player)
         param_list.append(media_path)
         param_list += switch_list
-#        param_list.append(player + " " + config_ini['media_player_video_param']  + " " + media_path)
 
-#        param_list.append(config_ini['media_player_video_param'])
-#        print("---------", param_list)
-
-        #param_list.append("1>/dev/null")
-        #param_list.append("2>/dev/null")
+        param_list.append("1>/dev/null")
+        param_list.append("2>/dev/null")
 
     # audio
     elif get_pattern_audio().match(media_path):
@@ -562,7 +558,7 @@ def play_media(media_path):
         # start playing media    
         thread = Thread(target=run, args=(param_list, ))
         thread.start()
-        time.sleep(0.1)
+        time.sleep(0.2)
     
         # get the pid of the player
         for p in psutil.process_iter():

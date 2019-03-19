@@ -52,6 +52,7 @@ RATING_KEY_BEST = 'best'
 
 FILE_CARD_INI = 'card.ini'
 
+IMG_WINDOW = "akoteka.png"
 IMG_CONFIG_BUTTON = "cogwheel-button.png"
 IMG_FAST_SEARCH_BUTTON_ON = "fast-search-button-on.png"
 IMG_FAST_SEARCH_BUTTON_OFF = "fast-search-button-off.png"

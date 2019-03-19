@@ -100,7 +100,8 @@ class GuiAkoTeka(QWidget, QObject):
 
         # --- Window ---
         sp=getSetupIni()
-        self.setWindowTitle(sp['name'] + '-' + sp['version'])    
+        self.setWindowTitle(sp['name'] + '-' + sp['version'])
+        self.setWindowIcon(QIcon(resource_filename(__name__,os.path.join("img", IMG_WINDOW)))) 
         #self.setGeometry(300, 300, 300, 200)
         self.resize(900,600)
         self.center()
