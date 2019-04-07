@@ -295,26 +295,11 @@ class FilterDropDownSimple(QWidget):
         
         self.dropdown.currentIndexChanged.connect(self.current_index_changed)
 
-        # TODO does not work to set the properties of the dropdown list. find out and fix
-        style =             '''
-            QComboBox { max-width: 200px; min-width: 200px; min-height: 15px; max-height: 15px;}
-            QComboBox QAbstractItemView::item { min-width:100px; max-width:100px; min-height: 150px;}
-            QListView::item:selected { color: red; background-color: lightgray; min-width: 1000px;}"
-            '''            
-
-        style_down_arrow = '''
-            QComboBox::down-arrow { 
-                image: url( ''' + resource_filename(__name__,os.path.join("img", "back-button.jpg")) + ''');
-                
-            }
-        '''
         style_box = '''
             QComboBox { 
                 max-width: 200px; min-width: 200px; border: 1px solid gray; border-radius: 5px;
             }
         '''
-#       max-width: 200px; min-width: 200px; min-height: 1em; max-height: 1em; border: 1px solid gray; border-radius: 5px;
-        
         style_drop_down ='''
             QComboBox QAbstractItemView::item { 
                 color: red;
@@ -322,7 +307,7 @@ class FilterDropDownSimple(QWidget):
             }
         '''            
       
-        self.dropdown.setStyleSheet(style_box + style_drop_down)
+        self.dropdown.setStyleSheet(style_box)
         self.dropdown.addItem("")
 
         self_layout.addWidget( self.dropdown )

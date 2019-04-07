@@ -684,8 +684,8 @@ class GuiAkoTeka(QWidget, QObject):
         def generate_unconditional_filter_list(card_structure):
         
             # through the SORTED list
+            #for crd in sorted(card_structure, key=lambda arg:  locale.strxfrm(arg['title'][config_ini['language']])    if arg['extra']['media-path'] and arg['extra']['visible'] else "_" + locale.strxfrm(arg['title'][config_ini['language']]), reverse=False):
             for crd in card_structure:
-            #for crd in sorted(card_structure, key=lambda arg: arg['title'][config_ini['language']], reverse=False):
 
                 # in case of MEDIA CARD
                 if crd['extra']['media-path']:              

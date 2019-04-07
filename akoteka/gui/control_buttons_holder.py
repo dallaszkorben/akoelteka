@@ -124,13 +124,11 @@ class ControlButtonsHolder(QWidget):
 
         self.dropdown_play_continously = QComboBox(self)
         self.dropdown_play_continously.setFocusPolicy(Qt.NoFocus)
-        self.dropdown_play_continously.setEditable(True)
+        self.dropdown_play_continously.setEditable(False)
         
-#        self.dropdown.currentIndexChanged.connect(self.current_index_changed)
-
         style_box = '''
             QComboBox { 
-                max-width: 200px; min-width: 300px; border: 1px solid gray; border-radius: 5px;
+                max-width: 500px; min-width: 300px; border: 1px solid gray; border-radius: 5px;
             }
         '''
         style_drop_down ='''
@@ -140,7 +138,7 @@ class ControlButtonsHolder(QWidget):
             }
         '''            
       
-        self.dropdown_play_continously.setStyleSheet(style_box + style_drop_down)
+        self.dropdown_play_continously.setStyleSheet(style_box)
         #self.dropdown_play_continously.addItem("")
         self_layout.addWidget( self.dropdown_play_continously )
 
