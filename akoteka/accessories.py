@@ -543,17 +543,9 @@ def folder_investigation( actual_dir, json_list):
         except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
             card['rating']['rate'] = "0"
         else:
-            if not get_pattern_rate().match( card['general']['rate'] ):
-                card['general']['rate'] = "0"
+            if not get_pattern_rate().match( card['rating']['rate'] ):
+                card['rating']['rate'] = "0"
 
-        # -------------- RATING ----------------------------
-#        try:                                                
-#            card['links']['imdb'] = parser.get("links", "imdb")
-#        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
-#            log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
-#            card['links']['imdb'] = ""
-        import pprint
-        pprint.pprint(card)
         json_list.append(card)
 
     # ----------------------------------

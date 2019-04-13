@@ -72,7 +72,11 @@ class CardPanel(QWidget):
         
         self.set_media_path( card_data["extra"]["media-path"] )
         
-        self.set_title( card_data['title'][config_ini['language']] )
+        # -------------- TITLE -----------------------------
+        
+        title = card_data['title'][config_ini['language']].strip()
+        orig_title = card_data['title']['orig'].strip()       
+        self.set_title( title + (" (" + orig_title + ")" if orig_title and orig_title != title else "" ) )
  
         if card_data["extra"]["media-path"]:
 
@@ -83,23 +87,40 @@ class CardPanel(QWidget):
             self.add_element_to_collector_line( _("title_sub"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sub"] ]) if card_data["general"]["sub"] != [''] else "" )
  
             self.add_separator()
-            if ''.join(card_data["general"]["director"]):
-                self.add_info_line( _("title_director"), ", ".join( [ d for d in card_data["general"]["director"] ] ) )
-                    
+            
+            # -------------- DIRECTOR --------------------------
+            
+            if card_data['general']['category'] == 'movie':
+                if ''.join(card_data["general"]["director"]):
+                    self.add_info_line( _("title_director"), ", ".join( [ d for d in card_data["general"]["director"] ] ) )
+
+            # -------------- ACTOR -----------------------------
+
             if ''.join(card_data["general"]["actor"]):
-                self.add_info_line( _("title_actor"), ", ".join( [ a for a in card_data["general"]["actor"] ] ) )
+                title = _("title_actor_movie") if card_data['general']['category'] == 'movie' else _("title_actor_music") if card_data['general']['category'] == 'music' else _("title_actor_talk") if card_data['general']['category'] == 'talk' else ''                
+                self.add_info_line( title, ", ".join( [ a for a in card_data["general"]["actor"] ] ) )
+
+            # -------------- GENRE -----------------------------
 
             if ''.join(card_data["general"]["genre"]):
-                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+g ) if g else "" for g in card_data["general"]["genre"] ] ) )
-                    
-            if ''.join(card_data["general"]["theme"]):
-                self.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a ) if a else "" for a in card_data["general"]["theme"] ] ) )
+                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+card_data['general']['category']+"_"+g ) if g else "" for g in card_data["general"]["genre"] ] ) )
+
+            # -------------- THEME -----------------------------
+
+            if card_data['general']['category'] == 'movie' or card_data['general']['category'] == 'talk':                    
+                if ''.join(card_data["general"]["theme"]):
+                    self.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a ) if a else "" for a in card_data["general"]["theme"] ] ) )
+
+            # -------------- STORILINE -------------------------
                 
             if card_data['storyline'][config_ini['language']]:
-                self.add_separator()                
-                self.add_info_line( _('title_storyline'), card_data['storyline'][config_ini['language']])
+                self.add_separator()
+                title = _('title_storyline_movie') if card_data['general']['category'] == 'movie' else _('title_storyline_music') if card_data['general']['category'] == 'music' else _('title_storyline_talk') if card_data['general']['category'] == 'talk' else ''                
+                self.add_info_line( title, card_data['storyline'][config_ini['language']])
                    
             self.add_info_line_stretch()
+
+            # -------------- RATING ----------------------------
 
             self.set_rating(card_data['rating'])
             self.set_folder(card_data['extra']['recent-folder'])

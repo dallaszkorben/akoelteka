@@ -19,13 +19,13 @@ class Property(object):
         if self.folder:
             Path(self.folder).mkdir(parents=True, exist_ok=True)
         
-        with open(self.file, 'w') as configfile:
+        with open(self.file, 'w', encoding='utf-8') as configfile:
             self.parser.write(configfile)
 
-    def get(self, section, key, default_value):
+    def get(self, section, key, default_value, writable=True):        
 
         # if not existing file
-        if not os.path.exists(self.file):
+        if not os.path.exists(self.file) and ( writable and self.writable):
             #self.log_msg("MESSAGE: No file found FILE NAME: " + self.file + " OPERATION: get")
             
             self.parser[section]={key: default_value}
@@ -36,11 +36,12 @@ class Property(object):
             result=self.parser.get(section,key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
             #self.log_msg("MESSAGE: " + str(e) + " FILE NAME: " + self.file + " OPERATION: get")
-            if self.writable:
+            if self.writable and writable:
                 self.update(section, key, default_value)
                 result=self.parser.get(section,key)
             else:
                 result = default_value
+        
         return result
 
     def getBoolean(self, section, key, default_value):

@@ -12,7 +12,7 @@ from cardholder.cardholder import CollectCardsThread
 
 from akoteka.gui.pyqt_import import *
 from akoteka.gui.card_panel import CardPanel
-from akoteka.gui.configuration_dialog import ConfigurationDialog
+#from akoteka.gui.configuration_dialog import ConfigurationDialog
 from akoteka.gui.control_buttons_holder import ControlButtonsHolder
 from akoteka.gui.fast_filter_holder import FastFilterHolder
 from akoteka.gui.advanced_filter_holder import AdvancedFilterHolder
