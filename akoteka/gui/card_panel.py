@@ -103,13 +103,15 @@ class CardPanel(QWidget):
             # -------------- GENRE -----------------------------
 
             if ''.join(card_data["general"]["genre"]):
-                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+card_data['general']['category']+"_"+g ) if g else "" for g in card_data["general"]["genre"] ] ) )
+#                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+card_data['general']['category']+"_"+g ) if g else "" for g in card_data["general"]["genre"] ] ) )
+                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_" + g ) if g else "" for g in card_data["general"]["genre"] ] ) )
+
 
             # -------------- THEME -----------------------------
 
             if card_data['general']['category'] == 'movie' or card_data['general']['category'] == 'talk':                    
                 if ''.join(card_data["general"]["theme"]):
-                    self.add_info_line( _("title_theme"), ", ".join( [ _("theme_"+a ) if a else "" for a in card_data["general"]["theme"] ] ) )
+                    self.add_info_line( _("title_theme"), ", ".join( [ _("theme_" + a ) if a else "" for a in card_data["general"]["theme"] ] ) )
 
             # -------------- STORILINE -------------------------
                 
