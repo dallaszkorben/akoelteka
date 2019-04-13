@@ -134,7 +134,7 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PATH = ("media", "media-path", ".")
     DEFAULT_MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
     DEFAULT_MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
-    DEFAULT_MEDIA_PLAYER_VIDEO_EXT = ("media", "player-video-ext", "divx,mkv,avi,mp4")
+    DEFAULT_MEDIA_PLAYER_VIDEO_EXT = ("media", "player-video-ext", "divx,mkv,avi,mp4,webm")
     DEFAULT_MEDIA_PLAYER_AUDIO = ("media", "player-audio", "rhythmbox")
     DEFAULT_MEDIA_PLAYER_AUDIO_PARAM = ("media", "player-audio-param", "")
     DEFAULT_MEDIA_PLAYER_AUDIO_EXT = ("media", "player-audio-ext", "mp3,ogg")

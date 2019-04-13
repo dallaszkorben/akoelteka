@@ -321,6 +321,14 @@ class ControlButtonsHolder(QWidget):
     # -----------------------
     def config_button_on_click(self):
 
+        config_ini_function = get_config_ini()
+        orig_mp = config_ini_function.get_media_path() 
+        orig_l = config_ini_function.get_language()
+        orig_vp = config_ini_function.get_media_player_video()
+        orig_vpp = config_ini_function.get_media_player_video_param()
+        orig_ap = config_ini_function.get_media_player_audio()
+        orig_app = config_ini_function.get_media_player_audio_param()
+
         dialog = ConfigurationDialog()
 
         # if OK was clicked
@@ -334,14 +342,23 @@ class ControlButtonsHolder(QWidget):
             ap = dialog.get_media_player_audio()
             app = dialog.get_media_player_audio_param()
 
-            # Update the config.ini file
+            # Update the config.ini file            
             config_ini_function = get_config_ini()
-            config_ini_function.set_media_path(mp) 
-            config_ini_function.set_language(l)
-            config_ini_function.set_media_player_video(vp)
-            config_ini_function.set_media_player_video_param(vpp)
-            config_ini_function.set_media_player_audio(ap)
-            config_ini_function.set_media_player_audio_param(app)
+            need_to_recollect = False
+            if mp != orig_mp:
+                need_to_recollect = True
+                config_ini_function.set_media_path(mp)
+            if l != orig_l:
+                need_to_recollect = True
+                config_ini_function.set_language(l)
+            if vp != orig_vp:
+                config_ini_function.set_media_player_video(vp)
+            if vpp != orig_vpp:
+                config_ini_function.set_media_player_video_param(vpp)
+            if ap != orig_ap:
+                config_ini_function.set_media_player_audio(ap)
+            if app != orig_app:
+                config_ini_function.set_media_player_audio_param(app)
 
 
 #!!!!!!!!!!!!
@@ -353,23 +370,25 @@ class ControlButtonsHolder(QWidget):
             importlib.reload(mod)
 #!!!!!!!!!!!!
 
-            # remove history
-            for card_holder in self.control_panel.gui.card_holder_history:
-                card_holder.setHidden(True)
-                self.control_panel.gui.card_holder_panel_layout.removeWidget(card_holder)
-                #self.gui.scroll_layout.removeWidget(card_holder)
-            self.control_panel.gui.card_holder_history.clear()
+            if need_to_recollect:
+
+                # remove history
+                for card_holder in self.control_panel.gui.card_holder_history:
+                    card_holder.setHidden(True)
+                    self.control_panel.gui.card_holder_panel_layout.removeWidget(card_holder)
+                    #self.gui.scroll_layout.removeWidget(card_holder)
+                self.control_panel.gui.card_holder_history.clear()
                 
-            # Remove recent CardHolder as well
-            self.control_panel.gui.actual_card_holder.setHidden(True)
-            self.control_panel.gui.card_holder_panel_layout.removeWidget(self.control_panel.gui.actual_card_holder)
-            self.control_panel.gui.actual_card_holder = None
+                # Remove recent CardHolder as well
+                self.control_panel.gui.actual_card_holder.setHidden(True)
+                self.control_panel.gui.card_holder_panel_layout.removeWidget(self.control_panel.gui.actual_card_holder)
+                self.control_panel.gui.actual_card_holder = None
             
-            # reload the cards
-            self.control_panel.gui.startCardHolder()
+                # reload the cards
+                self.control_panel.gui.startCardHolder()
             
-            # refresh the Control Panel
-            self.control_panel.refresh_label()
+                # refresh the Control Panel
+                self.control_panel.refresh_label()
             
         dialog.deleteLater()
         

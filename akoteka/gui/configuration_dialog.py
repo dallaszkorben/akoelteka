@@ -62,7 +62,7 @@ class ConfigurationDialog(QDialog):
         # audio player parameters        
         self.media_player_audio_param = MediaPlayerAudioParam(config_ini['media_player_audio_param'])
         self.content_section.addWidget(self.media_player_audio_param)
-    
+        
     def get_media_path(self):
         return self.media_path_selector.get_media_path()
         
@@ -105,8 +105,7 @@ class ButtonBoxSection(QWidget):
             button_box.button(QDialogButtonBox.Ok).setText(_('button_ok'))
             button_box.button(QDialogButtonBox.Cancel).setText(_('button_cancel'))
             button_box.accepted.connect(parent.accept)
-            button_box.rejected.connect(parent.reject)
-            
+            button_box.rejected.connect(parent.reject)            
 
 class LineTemplate(QWidget):
     def __init__(self, label):
