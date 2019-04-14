@@ -6,8 +6,8 @@ sp=getSetupIni()
 setup(
       name=sp['name'],
       version=sp['version'],
-      description='Videoteka',
-      long_description="Helps to manage your media contents",	#=open('README.md', encoding="utf-8").read(),
+      description='Videoteka: Media Content Manager',
+      long_description="Media Content Manager",	#=open('README.md', encoding="utf-8").read(),
       url='http://github.com/dallaszkorben/akoteka',
       author='dallaszkorben',
       author_email='dallaszkorben@gmail.com',
@@ -23,7 +23,8 @@ setup(
       entry_points = {
         'console_scripts': [
 		'akoteka=akoteka.gui.main_window:main',
-		'inihealthcheck=akoteka.health_check:main'
+		'akotekainicheck=akoteka.tools.tool_ini_check:main',
+		'akotekainicorrection=akoteka.tools.tool_ini_correction:main',
 		]
       },
       package_data={
