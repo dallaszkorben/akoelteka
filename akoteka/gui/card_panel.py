@@ -9,6 +9,8 @@ from akoteka.accessories import filter_key
 from akoteka.accessories import get_pattern_video
 from akoteka.accessories import get_pattern_audio
 from akoteka.accessories import play_media
+from akoteka.accessories import FlowLayout
+
 
 from akoteka.handle_property import _
 from akoteka.handle_property import config_ini
@@ -21,6 +23,8 @@ from akoteka.gui.pyqt_import import *
 from akoteka.constants import *
 
 from cardholder.cardholder import Card
+from PyQt5.Qt import QIcon
+from asyncio.selector_events import ssl
 
 
 # =========================================
@@ -80,6 +84,8 @@ class CardPanel(QWidget):
         self.set_title( title + (" (" + orig_title + ")" if orig_title and orig_title != title else "" ) )
  
         if card_data["extra"]["media-path"]:
+
+            self.set_media( card_data["general"]["media"] )
 
             self.add_element_to_collector_line( _("title_year"), card_data["general"]["year"])
             self.add_element_to_collector_line( _("title_length"), card_data["general"]["length"])
@@ -176,6 +182,9 @@ class CardPanel(QWidget):
         
     def set_title(self, title):
         self.card_information.set_title(title)
+        
+    def set_media(self, media):
+        self.card_information.set_media(media)
 
     def get_title(self):
         return self.card_information.get_title()
@@ -222,32 +231,83 @@ class CardPanel(QWidget):
 # CardInfoTitle
 #
 # ---------------------------------------------------
-class CardInfoTitle(QLabel):
+class CardInfoTitle(QWidget):
+#class CardInfoTitle(QLabel):
     def __init__(self):
         super().__init__()
 
-        self.setWordWrap(True)
+        self.card_info_title_layout = QGridLayout(self)
+        self.card_info_title_layout.setContentsMargins(0,0,0,0)
+        self.card_info_title_layout.setSpacing(0)
+        self.card_info_title_layout.setColumnStretch(1, 2)
+        self.setLayout(self.card_info_title_layout)
+
+        # --- Icons ---
+        self.media_label = QLabel()
+        media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) )
+        media_pixmap = media_pixmap.scaled(0, 0, Qt.KeepAspectRatio, Qt.FastTransformation)
+        self.media_label.setPixmap(media_pixmap)
+        self.media_label.setStyleSheet("background:transparent; border:none") 
+        
+        # --- Title ---
+        self.title = QLabel()
+        self.title.setWordWrap(True)
         
         # border
-        self.setFrameShape(QFrame.Panel)
-        self.setFrameShadow(QFrame.Sunken)
-        self.setLineWidth(0)
+        self.title.setFrameShape(QFrame.Panel)
+        self.title.setFrameShadow(QFrame.Sunken)
+        self.title.setLineWidth(0)
 
         # font, colors
-        self.setFont(QFont( FONT_TYPE, INFO_TITLE_FONT_SIZE, weight=QFont.Bold))
-        self.text = None
+        self.title.setFont(QFont( FONT_TYPE, INFO_TITLE_FONT_SIZE, weight=QFont.Bold))
+        self.title.text = None
                 
-        #self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        #self.setStyleSheet('background-color: yellow')
+        self.card_info_title_layout.addWidget(self.media_label, 0, 0)
+        self.card_info_title_layout.addWidget(self.title, 0, 1)
+
+
+ 
+        
+        
+        
+#        self.setWordWrap(True)
+#        
+#        # border
+#        self.setFrameShape(QFrame.Panel)
+#        self.setFrameShadow(QFrame.Sunken)
+#        self.setLineWidth(0)
+#
+#        # font, colors
+#        self.setFont(QFont( FONT_TYPE, INFO_TITLE_FONT_SIZE, weight=QFont.Bold))
+#        self.text = None
+                
+
+
+    def set_media(self, media):
+        if media == 'video':
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_VIDEO)) )
+        elif media == 'audio':
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_AUDIO)) )
+        elif media == 'image':
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_IMAGE)) )
+        elif media == 'book':
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_BOOK)) )            
+        else:
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) )
+            
+        self.card_info_title_layout.setSpacing(20)
+        media_pixmap = media_pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.FastTransformation)
+        self.media_label.setPixmap(media_pixmap)
     
     def set_title(self, title):
-        self.setText(title)
-        self.text = title
+        self.title.setText(title)
+        self.title.text = title
+#        self.setText(title)
+#        self.text = title
         
     def get_title(self):
-        return self.text
-        
-        
+        return self.title.text
+#        return self.text        
 
 
 class CardInfoLineLabel(QLabel):
@@ -362,6 +422,9 @@ class CardInformation(QWidget):
         self.info_layout.setSpacing(0)
         
         self.card_info_title = CardInfoTitle()
+        
+        
+        
         self.info_layout.addWidget( self.card_info_title )
         #self.card_info_lines_holder = CardInfoLinesHolder()
         self.card_info_lines_holder = CardCollectorLine()
@@ -369,6 +432,9 @@ class CardInformation(QWidget):
 
     def set_title(self, title ):
         self.card_info_title.set_title(title)
+
+    def set_media(self, media ):
+        self.card_info_title.set_media(media)
         
     def get_title(self):
         return self.card_info_title.get_title()
@@ -522,8 +588,8 @@ class CardImage(QWidget):
 # CardRating
 #
 # It contains three elments in vertically ordered:
+# -Rate
 # -Favorite
-# -Best
 # -New
 #
 # ===================================================
@@ -559,19 +625,19 @@ class CardRating(QLabel):
         self.rating_favorite_button.setStyleSheet("background:transparent; border:none") 
         self.rating_layout.addWidget( self.rating_favorite_button )
 
-        # BEST button
-        self.rating_best_button = QPushButton()
-        self.rating_best_button.setFocusPolicy(Qt.NoFocus)
-        self.rating_best_button.setCheckable(True)        
-        rating_best_icon = QIcon()
-        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_ON)) ), QIcon.Normal, QIcon.On)
-        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_OFF)) ), QIcon.Normal, QIcon.Off)
-        self.rating_best_button.clicked.connect(self.rating_best_button_on_click)        
-        self.rating_best_button.setIcon( rating_best_icon )
-        self.rating_best_button.setIconSize(QSize(25,25))
-        self.rating_best_button.setCursor(QCursor(Qt.PointingHandCursor))
-        self.rating_best_button.setStyleSheet("background:transparent; border:none") 
-        self.rating_layout.addWidget( self.rating_best_button )
+#        # BEST button
+#        self.rating_best_button = QPushButton()
+#        self.rating_best_button.setFocusPolicy(Qt.NoFocus)
+#        self.rating_best_button.setCheckable(True)        
+#        rating_best_icon = QIcon()
+#        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_ON)) ), QIcon.Normal, QIcon.On)
+#        rating_best_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_BEST_OFF)) ), QIcon.Normal, QIcon.Off)
+#        self.rating_best_button.clicked.connect(self.rating_best_button_on_click)        
+#        self.rating_best_button.setIcon( rating_best_icon )
+#        self.rating_best_button.setIconSize(QSize(25,25))
+#        self.rating_best_button.setCursor(QCursor(Qt.PointingHandCursor))
+#        self.rating_best_button.setStyleSheet("background:transparent; border:none") 
+#        self.rating_layout.addWidget( self.rating_best_button )
 
         # NEW button
         self.rating_new_button = QPushButton()
@@ -596,7 +662,7 @@ class CardRating(QLabel):
         self.rating = rating
         self.rating_rate_spinbox.setValue(int(rating[RATING_KEY_RATE]))
         self.rating_favorite_button.setChecked(rating[ RATING_KEY_FAVORITE ] == 'y')
-        self.rating_best_button.setChecked(rating[ RATING_KEY_BEST ] == 'y')
+#        self.rating_best_button.setChecked(rating[ RATING_KEY_BEST ] == 'y')
         self.rating_new_button.setChecked(rating[ RATING_KEY_NEW ] == 'y')
 
     # -----------------------
@@ -619,15 +685,15 @@ class CardRating(QLabel):
         card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
         card_ini.update(SECTION_RATING, RATING_KEY_FAVORITE, self.rating[RATING_KEY_FAVORITE])
 
-    # -----------------------
-    #
-    # BEST icon clicked
-    #
-    # -----------------------       
-    def rating_best_button_on_click(self):
-        self.rating[RATING_KEY_BEST] = 'y' if self.rating_best_button.isChecked() else 'n'
-        card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
-        card_ini.update(SECTION_RATING, RATING_KEY_BEST, self.rating[RATING_KEY_BEST])
+#    # -----------------------
+#    #
+#    # BEST icon clicked
+#    #
+#    # -----------------------       
+#    def rating_best_button_on_click(self):
+#        self.rating[RATING_KEY_BEST] = 'y' if self.rating_best_button.isChecked() else 'n'
+#        card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
+#        card_ini.update(SECTION_RATING, RATING_KEY_BEST, self.rating[RATING_KEY_BEST])
 
     # -----------------------
     #

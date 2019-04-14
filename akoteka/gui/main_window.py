@@ -478,7 +478,7 @@ class GuiAkoTeka(QWidget, QObject):
 #            "length": set(),
             "favorite": set(),
             "new": set(),
-            "best": set() 
+            "rate": set() 
         }
 
         generate_fast_filter_list(card_structure)
@@ -725,7 +725,7 @@ class GuiAkoTeka(QWidget, QObject):
             "length": set(),
             "favorite": set(),
             "new": set(),
-            "best": set() }
+            "rate": set() }
 
         # ADVANCED FILTER is visible
         #if not self.control_panel.advanced_filter_holder.isHidden():
@@ -787,31 +787,26 @@ class GuiAkoTeka(QWidget, QObject):
         
         # Fill up SOUND
         self.get_advanced_filter_holder().clear_sound()
-        #self.get_advanced_filter_holder().add_sound("", "")
         for element in sorted([(_("lang_long_" + e), e) for e in unconditional_filter_list['sound']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_advanced_filter_holder().add_sound(element[0], element[1])
 
         # Fill up SUBTITLE
         self.get_advanced_filter_holder().clear_sub()
-        #self.get_advanced_filter_holder().add_sub("", "")
         for element in sorted([(_("lang_long_" + e), e) for e in unconditional_filter_list['sub']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_advanced_filter_holder().add_sub(element[0], element[1])
 
         # Fill up COUNTRY
         self.get_advanced_filter_holder().clear_country()
-        #self.get_advanced_filter_holder().add_country("", "")
         for element in sorted([(_("country_long_" + e), e) for e in unconditional_filter_list['country']], key=lambda t: locale.strxfrm(t[0]) ):            
             self.get_advanced_filter_holder().add_country(element[0], element[1])
        
         # Fill up YEAR from/to
         self.get_advanced_filter_holder().clear_year()
-        #self.get_advanced_filter_holder().add_year("")
         for element in sorted( unconditional_filter_list['year'], key=cmp_to_key(locale.strcoll) ):
             self.get_advanced_filter_holder().add_year(element)
 
         # Fill up LENGTH from/to
         self.get_advanced_filter_holder().clear_length()
-        #self.get_advanced_filter_holder().add_length("")
         for element in sorted( [str(int(spl[-2])).rjust(1) + ":" + str(int(spl[-1])).zfill(2) for spl in [l.split(":") for l in unconditional_filter_list['length'] if ':' in l ] if all(c.isdigit() for c in spl[-1] ) and all(c.isdigit() for c in spl[-2] )], key=cmp_to_key(locale.strcoll) ):
             self.get_advanced_filter_holder().add_length(element)
   

@@ -111,18 +111,18 @@ class FastFilterHolder(QWidget):
         #
         # ----------
         self.filter_cb_favorite = FilterCheckBox(_('title_favorite') + ": ")
-        self.filter_cb_best = FilterCheckBox(_('title_best') + ": ")
+#        self.filter_cb_best = FilterCheckBox(_('title_best') + ": ")
         self.filter_cb_new = FilterCheckBox(_('title_new') + ": ")
                 
         holder_checkbox = FilterCheckBoxHolder()
         
         holder_checkbox.add_checkbox(self.filter_cb_favorite)
-        holder_checkbox.add_checkbox(self.filter_cb_best)
+#        holder_checkbox.add_checkbox(self.filter_cb_best)
         holder_checkbox.add_checkbox(self.filter_cb_new)        
                 
         # Listener
         self.filter_cb_favorite.stateChanged.connect(self.state_changed)
-        self.filter_cb_best.stateChanged.connect(self.state_changed)
+#        self.filter_cb_best.stateChanged.connect(self.state_changed)
         self.filter_cb_new.stateChanged.connect(self.state_changed)
                         
         holder_layout.addWidget(holder_checkbox)
@@ -160,7 +160,7 @@ class FastFilterHolder(QWidget):
         self.filter_dd_actor.refresh_label(_('title_actor'))
         self.filter_cb_favorite.refresh_label(_('title_favorite'))
         self.filter_cb_new.refresh_label(_('title_new'))
-        self.filter_cb_best.refresh_label(_('title_best'))
+#        self.filter_cb_best.refresh_label(_('title_best'))
 
     def clear_title(self):
         self.filter_dd_title.clear_elements()
@@ -221,7 +221,7 @@ class FastFilterHolder(QWidget):
             "theme":    ["theme", self.filter_dd_theme.get_selected_value(), [self.filter_dd_theme.get_selected_id()], "a"],
             "director": ["director", self.filter_dd_director.get_selected_value(), None, "a"],
             "actor":    ["actor", self.filter_dd_actor.get_selected_value(), None, "a"],
-            "best":     ["best", self.filter_cb_best.is_checked(), None, "c"],
+#            "best":     ["best", self.filter_cb_best.is_checked(), None, "c"],
             "new":      ["new", self.filter_cb_new.is_checked(), None, "c"],
             "favorite": ["favorite", self.filter_cb_favorite.is_checked(),None, "c"],
         }
@@ -244,7 +244,7 @@ class FastFilterHolder(QWidget):
         self.clear_title()
         self.filter_cb_favorite.setChecked(False)
         self.filter_cb_new.setChecked(False)
-        self.filter_cb_best.setChecked(False)
+#        self.filter_cb_best.setChecked(False)
 
 
 # ================
