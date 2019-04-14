@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QDialog
 from PyQt5.QtWidgets import QDialogButtonBox
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QSpinBox
+from PyQt5.QtWidgets import QAbstractSpinBox
 
 
 from PyQt5.QtGui import QFont

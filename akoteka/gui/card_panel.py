@@ -15,6 +15,7 @@ from akoteka.handle_property import config_ini
 from akoteka.handle_property import Property
 
 from akoteka.gui.pyqt_import import QHLine
+from akoteka.gui.pyqt_import import QSpinBox
 from akoteka.gui.pyqt_import import *
 
 from akoteka.constants import *
@@ -63,7 +64,7 @@ class CardPanel(QWidget):
         
         self.card_information = CardInformation()
         panel_layout.addWidget( self.card_information )
-        self.card_rating = CardRating()
+        self.card_rating = CardRating(self)
         panel_layout.addWidget( self.card_rating )
  
         self.set_image_path( card_data["extra"]["image-path"] )
@@ -124,8 +125,8 @@ class CardPanel(QWidget):
 
             # -------------- RATING ----------------------------
 
-            self.set_rating(card_data['rating'])
             self.set_folder(card_data['extra']['recent-folder'])
+            self.set_rating(card_data['rating'])
  
         # if it is a direct card to a media
         if self.card_image.get_media_path():
@@ -527,8 +528,10 @@ class CardImage(QWidget):
 #
 # ===================================================
 class CardRating(QLabel):
-    def __init__(self):
+    def __init__(self, card_panel):
         super().__init__()
+        
+        self.card_panel = card_panel
         
         self.rating_layout = QVBoxLayout(self)
         self.setLayout(self.rating_layout)
@@ -537,6 +540,10 @@ class CardRating(QLabel):
         #self.setStyleSheet('background: green')
         self.setMinimumWidth(RATE_WIDTH)
 
+        # RATING QSpinBox
+        self.rating_rate_spinbox = MySpinBox(self.card_panel)
+        self.rating_rate_spinbox.valueChanged.connect(self.rating_rate_spinbox_on_click)
+        self.rating_layout.addWidget(self.rating_rate_spinbox)
 
         # FAVORITE button
         self.rating_favorite_button = QPushButton()
@@ -587,9 +594,20 @@ class CardRating(QLabel):
 
     def set_rating(self, rating):
         self.rating = rating
+        self.rating_rate_spinbox.setValue(int(rating[RATING_KEY_RATE]))
         self.rating_favorite_button.setChecked(rating[ RATING_KEY_FAVORITE ] == 'y')
         self.rating_best_button.setChecked(rating[ RATING_KEY_BEST ] == 'y')
         self.rating_new_button.setChecked(rating[ RATING_KEY_NEW ] == 'y')
+
+    # -----------------------
+    #
+    # RATE button clicked
+    #
+    # -----------------------
+    def rating_rate_spinbox_on_click(self):
+        self.rating[ RATING_KEY_RATE ] = str(self.rating_rate_spinbox.value())
+        card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
+        card_ini.update(SECTION_RATING, RATING_KEY_RATE, self.rating[RATING_KEY_RATE])
 
     # -----------------------
     #
@@ -620,4 +638,47 @@ class CardRating(QLabel):
         self.rating[RATING_KEY_NEW] = 'y' if self.rating_new_button.isChecked() else 'n'
         card_ini = Property( os.path.join(self.folder, FILE_CARD_INI), True )
         card_ini.update(SECTION_RATING, RATING_KEY_NEW, self.rating[RATING_KEY_NEW])
+
+class MySpinBox(QSpinBox):
+    def __init__(self, card_panel):
+        super().__init__()
+        
+        self.card_panel = card_panel
+        
+        self.setButtonSymbols(QAbstractSpinBox.NoButtons) #PlusMinus / NoButtons / UpDownArrows        
+        self.setMaximum(10)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.lineEdit().setReadOnly(True)
+        self.setFont(QFont( FONT_TYPE, RATE_FONT_SIZE, weight=QFont.Bold))
+#        self.lineEdit().setEnabled(False)
+        self.lineEdit().setStyleSheet( "QLineEdit{color:black}")
+        self.setStyleSheet( "QSpinBox{background:'" + COLOR_RAITING_RATE_BACKGROUND + "'}")
+
+    def stepBy(self, steps):
+        """
+        It needs to be override to make deselection after the step.
+        If it it not there, the selection color (blue) will be appear on the field
+        """
+        super().stepBy(steps)
+        self.lineEdit().deselect()
+
+    # Mouse Hover in
+    def enterEvent(self, event):
+        self.update()
+        QApplication.setOverrideCursor(Qt.PointingHandCursor)
+
+        self.setButtonSymbols(QAbstractSpinBox.PlusMinus) #PlusMinus / NoButtons / UpDownArrows        
+
+        self.card_panel.get_card_holder().setFocus()
+        event.ignore()
+
+    # Mouse Hover out
+    def leaveEvent(self, event):
+        self.update()
+        QApplication.restoreOverrideCursor()
+
+        self.setButtonSymbols(QAbstractSpinBox.NoButtons) #PlusMinus / NoButtons / UpDownArrows        
+        
+        self.card_panel.get_card_holder().setFocus()
+        event.ignore()
 
