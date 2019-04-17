@@ -366,7 +366,7 @@ class GuiAkoTeka(QWidget, QObject):
     #
     # Filter the Cards
     #
-    # Filters the Cards and Show them
+    # Filter + Order alphabetically + Show the Cards
     #
     # --------------------------------
     def filter_the_cards(self, card_descriptor_structure=None):
@@ -375,9 +375,17 @@ class GuiAkoTeka(QWidget, QObject):
         
         filtered_card_structure = self.set_up_filters(card_descriptor_structure)
         
-        # Fill up the CardHolder with Cards, alpabetically orderd by title 
-        self.actual_card_holder.fillUpCardHolderByDescriptor(sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False))
-            
+        # Fill up the CardHolder with Cards, 
+        # and order them alphabetically title
+        # grouping the Collectors at the end
+        #  
+        # self.actual_card_holder.fillUpCardHolderByDescriptor(sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False))
+        self.actual_card_holder.fillUpCardHolderByDescriptor(            
+            sorted(
+                filtered_card_structure, key=lambda arg: locale.strxfrm(
+                    arg['title'][config_ini['language']] if arg['extra']['media-path'] else ("zzzz"+arg['title'][config_ini['language']] ) 
+                ), reverse=False)
+        )            
             
     # ----------------
     # Set-up Filters

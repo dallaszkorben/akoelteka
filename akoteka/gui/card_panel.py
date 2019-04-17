@@ -146,6 +146,9 @@ class CardPanel(QWidget):
         # if it is a Collector
         else:
             
+            
+            self.set_media( "" )
+
             # TODO
             #qp.setBrush( QColor(COLOR_CARD_BORDER_CONTAINER ))
             
@@ -244,6 +247,8 @@ class CardInfoTitle(QWidget):
 
         # --- Icons ---
         self.media_label = QLabel()
+        self.media_label.setAlignment(Qt.AlignTop)
+
         media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) )
         media_pixmap = media_pixmap.scaled(0, 0, Qt.KeepAspectRatio, Qt.FastTransformation)
         self.media_label.setPixmap(media_pixmap)
@@ -293,7 +298,7 @@ class CardInfoTitle(QWidget):
         elif media == 'book':
             media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_BOOK)) )            
         else:
-            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) )
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_FOLDER)) )
             
         self.card_info_title_layout.setSpacing(20)
         media_pixmap = media_pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.FastTransformation)

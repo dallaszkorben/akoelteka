@@ -75,6 +75,9 @@ IMG_PLAY_CONTINOUSLY_BUTTON_ON = "play-button-on.png"
 IMG_PLAY_CONTINOUSLY_BUTTON_OFF = "play-button-off.png"
 IMG_STOP_CONTINOUSLY_BUTTON_ON = "stop-button-on.png"
 IMG_STOP_CONTINOUSLY_BUTTON_OFF = "stop-button-off.png"
+
+IMG_MEDIA_FOLDER = "media-folder.png"
 IMG_MEDIA_VIDEO = "media-video.png"
 IMG_MEDIA_AUDIO = "media-audio.png"
 IMG_MEDIA_BOOK = "media-book.png"
+

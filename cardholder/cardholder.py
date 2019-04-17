@@ -391,7 +391,7 @@ class CardHolder( QWidget ):
         """
         for some reason the 2nd parameter is
         False when the animated_move_to_next
-        is connected and emited, so that is
+        is connected and emitted, so that is
         why this intermediary method is needed
         """
         self.animated_move_to_next()
@@ -407,7 +407,7 @@ class CardHolder( QWidget ):
         """
         for some reason the 2nd parameter is
         False when the animated_move_to_next
-        is connected and emited, so that is
+        is connected and emitted, so that is
         why this intermediary method is needed
         """
         self.animated_move_to_previous()
@@ -415,6 +415,8 @@ class CardHolder( QWidget ):
     # ---------------------------------
     #
     # Animated shows the next card
+    #
+    # Click on the Up Arrow button
     #
     # ---------------------------------
     def animated_move_to_next(self, sleep=0.01):
@@ -436,6 +438,8 @@ class CardHolder( QWidget ):
     #
     # Animated shows the previous card
     #
+    # Click on the Down Arrow button
+    #
     # ---------------------------------
     def animated_move_to_previous(self, sleep=0.01):
         rate = self.get_rate_of_movement()
@@ -446,7 +450,7 @@ class CardHolder( QWidget ):
             loop = self.MAX_CARD_ROLLING_RATE + rate
         else:
             loop = self.MAX_CARD_ROLLING_RATE
-            
+        
         self.animate = AnimateRolling.get_instance(int(loop), -1, sleep)
         if self.animate:
             self.animate.positionChanged.connect(self.rolling)
@@ -514,8 +518,9 @@ class CardHolder( QWidget ):
     #
     # Animated moves to the set position Card
     #
+    # Click on a card in the background
     # ------------------------------------------------
-    def animated_move_to(self, position, sleep=0.03):
+    def animated_move_to(self, position, sleep=0.06):
         self.animate = AnimateRolling.get_instance(position * self.MAX_CARD_ROLLING_RATE, 1, sleep)
         if self.animate:
             self.animate.positionChanged.connect(self.rolling)
@@ -693,9 +698,9 @@ class CardHolder( QWidget ):
     def keyPressEvent(self, event):
 
         if event.key() == QtCore.Qt.Key_Up:
-            self.animated_move_to_next(sleep=0.03)
+            self.animated_move_to_next(sleep=0.06)
         elif event.key() == QtCore.Qt.Key_Down:
-            self.animated_move_to_previous(sleep=0.03)
+            self.animated_move_to_previous(sleep=0.06)
         event.ignore()
   
         
