@@ -62,8 +62,7 @@ def folder_investigation( actual_dir, category):
 
         card_ini = Property( card_path_os, True )
 
-# --- title ---
-
+        # --- title ---
         title_orig = card_ini.get('titles', 'title_orig', '')
         title_en = card_ini.get('titles', 'title_en', '')
         title_hu = card_ini.get('titles', 'title_hu', '')
@@ -72,6 +71,11 @@ def folder_investigation( actual_dir, category):
         if not title_orig:
             card_ini.update("titles", 'title_orig', title_en)
         
+        # --- orderby ---
+        orderby = 'title'
+        orderby = card_ini.get("control", 'orderby', 'title', False)
+        card_ini.update("control", 'orderby', orderby)
+        print('.', end='')
 
     # --------------------------------
     #
@@ -86,7 +90,9 @@ def folder_investigation( actual_dir, category):
 #        err = []
         card_ini = Property( card_path_os, True )
 
-# --- title ---
+# === [titles] ===
+
+        # --- title ---
 
         title_orig = card_ini.get('titles', 'title_orig', '')
         title_en = card_ini.get('titles', 'title_en', '')
@@ -96,8 +102,19 @@ def folder_investigation( actual_dir, category):
         if not title_orig:
             card_ini.update("titles", 'title_orig', title_en)
 
-# --- media ---
+# === [general] ===
 
+
+# === [rating] ===
+            
+        # --- Rate ---
+        rate = card_ini.get('rating', 'rate', '0', False)
+        card_ini.update('rating', 'rate', str(int(rate.split('.')[0])))
+        print('.', end='')
+ 
+# === [control] ===
+           
+        # --- media ---
         if get_pattern_audio().match(media_name):
             media = 'audio'
 
@@ -107,40 +124,25 @@ def folder_investigation( actual_dir, category):
         else:
             media = 'video'
 
-        card_ini.update("general", 'media', media)
+        media = card_ini.get("general", 'media', media, False)
+        card_ini.update("control", 'media', media)
         print('.', end='')
 
-
-# --- category ---
-
-        card_ini.update("general", 'category', category)
+        # --- category ---
+        card_ini.update("control", 'category', category)
         print('.', end='')
-
-# --- Links ---
-
-        imdb = card_ini.get("links", 'imdb', "", False)
-        youtube = card_ini.get("links", 'youtube', "", False)
-
-        lst = []
-        imdb = 'imdb>' + imdb if imdb else None
-        if imdb:
-            lst.append(imdb)
-        youtube = 'youtube>' + youtube if youtube else None
-        if youtube:
-            lst.append(youtube)
-        links = ','.join(lst)
-
-        card_ini.update("general", 'links', links)
+        
+        # --- orderby ---
+        orderby = 'title'
+        orderby = card_ini.get("control", 'orderby', 'title', False)
+        card_ini.update("control", 'orderby', orderby)
         print('.', end='')
+        
+# -----------            
+# --- FIX ---
+# -----------
 
-# --- Rate ---
-
-        rate = card_ini.get('rating', 'rate', '0', False)
-        card_ini.update('rating', 'rate', str(int(rate.split('.')[0])))
-        print('.', end='')
-
-# --- music genre ---
-
+        # --- music+talk genre fix ---
         genres = card_ini.get('general', 'genre', '', False)
         genrelist = genres.split(',')
         newgenrelist = []
@@ -155,6 +157,32 @@ def folder_investigation( actual_dir, category):
 
             card_ini.update('general', 'genre', newgenre)
             print('.', end='')
+            
+        # --- remove [general]media
+        card_ini.remove_option('general', 'media')
+        
+        # --- remove [general]category
+        card_ini.remove_option('general', 'category')
+        
+        
+        
+        
+        
+        
+        # --- fix [links] ---
+        # --- Links ---
+
+        #links = card_ini.get("general", 'links', "", False).split(",")
+        #for link in links:
+        #    linkblock = link.split('>')
+        #    if len(linkblock) == 2:
+        #        card_ini.update("links", linkblock[0], linkblock[1])
+        #print('.', end='')
+        #card_ini.remove_option("general", "links")
+
+
+
+    
 
         print('')
     # ----------------------------------

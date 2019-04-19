@@ -298,7 +298,6 @@ def folder_investigation( actual_dir, json_list):
     general_json_list['theme'] = []
     general_json_list['actor'] = []
     general_json_list['country'] = []
-    general_json_list['links'] = []
     card['general'] = general_json_list
                 
     card['rating'] = {}
@@ -308,6 +307,9 @@ def folder_investigation( actual_dir, json_list):
     extra_json_list['sub-cards'] = []
     card['extra'] = extra_json_list
 
+    card['links'] = {}
+    
+    card['control'] = {}
 
     # ----------------------------------
     #
@@ -346,6 +348,12 @@ def folder_investigation( actual_dir, json_list):
         except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
             card['title']['en'] = "Default title en"
 
+        try:
+            card['control']['orderby'] = parser.get('control', 'orderby')
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            card['control']['orderby'] = 'title'
+                    
+
         json_list.append(card)
         
     # --------------------------------
@@ -368,7 +376,7 @@ def folder_investigation( actual_dir, json_list):
         # saves the os path of the media
         card['extra']['media-path'] = media_path_os
 
-        # -------------- TITLES ----------------------------
+        # -------------- [title] ----------------------------
         
         try:
             card['title']['orig'] = parser.get("titles", "title_orig")
@@ -386,21 +394,7 @@ def folder_investigation( actual_dir, json_list):
             card['title']['en'] = "Default title en"
 
 
-        # -------------- MEDIA -----------------------------
-
-        try:
-            card['general']['media'] = parser.get("general", "media")
-        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
-            card['general']['media'] = "video"
-
-        # -------------- CATEGORY --------------------------
-            
-        try:
-            card['general']['category'] = parser.get("general", "category")
-        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
-            card['general']['category'] = "movie"
-
-        # -------------- STORYLINE -------------------------
+        # -------------- [storyline] -------------------------
 
         try:
             card['storyline']['hu'] = parser.get("storyline", "storyline_hu")
@@ -412,6 +406,8 @@ def folder_investigation( actual_dir, json_list):
         except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
             #log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
             card['storyline']['en'] = ""
+
+        # -------------- [general] ----------------------------
 
         # -------------- YEAR ------------------------------
 
@@ -505,20 +501,7 @@ def folder_investigation( actual_dir, json_list):
             #log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
             pass
         
-        # -------------- LINKS -----------------------
-
-        try:
-            links = parser.get("general", "links").split(",")
-            variable={}
-            for link_holder in links:
-                link_elements = link_holder.split(">")                
-                variable[link_elements[0]] = link_elements[1]
-            card['general']['links'].append(variable)
-        except (configparser.NoSectionError, configparser.NoOptionError, IndexError) as nop_err:
-            #log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
-            pass        
-            
-        # -------------- RATING ----------------------------
+        # -------------- [rating] ----------------------------
             
         try:
             card['rating']['best'] = parser.get("rating", "best")
@@ -545,6 +528,40 @@ def folder_investigation( actual_dir, json_list):
         else:
             if not get_pattern_rate().match( card['rating']['rate'] ):
                 card['rating']['rate'] = "0"
+
+        # -------------- [links] -----------------------
+
+        try:
+            link_list = parser.items("links")
+            for link in link_list:
+                card['links'][link[0]] = link[1]
+        except (configparser.NoSectionError, configparser.NoOptionError, IndexError) as nop_err:
+            #log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
+            pass        
+
+        # -------------- [control] -----------------------
+
+        # -------------- MEDIA -----------------------------
+
+        try:
+            card['control']['media'] = parser.get("control", "media")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            card['control']['media'] = "video"
+
+        # -------------- CATEGORY --------------------------
+            
+        try:
+            card['control']['category'] = parser.get("control", "category")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            card['control']['category'] = "movie"
+
+        # -------------- ORDERBY --------------------------
+            
+        try:
+            card['control']['orderby'] = parser.get("control", "orderby")
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            card['control']['orderby'] = "title"
+
 
         json_list.append(card)
 

@@ -8,6 +8,7 @@ from akoteka.gui.pyqt_import import *
 from akoteka.constants import *
 from akoteka.handle_property import _
 from akoteka.handle_property import config_ini
+from PyQt5.Qt import QComboBox
 
 # ====================
 #
@@ -39,6 +40,10 @@ class ConfigurationDialog(QDialog):
         self.language_selector = LanguageSelector(config_ini['language'])
         self.content_section.addWidget(self.language_selector)
         
+        # show original title
+        self.show_original_title_selector = ShowOriginalTitleSelector(config_ini['show_original_title'] == "y")
+        self.content_section.addWidget(self.show_original_title_selector)        
+        
         # media path
         self.media_path_selector = MediaPathSelector(config_ini['media_path'])
         self.content_section.addWidget(self.media_path_selector)
@@ -68,6 +73,9 @@ class ConfigurationDialog(QDialog):
         
     def get_language(self):
         return self.language_selector.get_language()
+
+    def get_show_original_title(self):
+        return self.show_original_title_selector.get_show()
  
     def get_media_player_video(self):
         return self.media_player_video_selector.get_media_player_video() 
@@ -156,6 +164,37 @@ class LanguageSelector(LineTemplate):
         
     def get_language(self):
         return self.language_combo.itemData( self.language_combo.currentIndex() )
+
+# ============================
+#
+# Show Original Title Selector
+#
+# ============================
+class ShowOriginalTitleSelector(LineTemplate):
+    
+    def __init__(self, default_show):
+        super().__init__(_('title_show_original_title') + ':')
+        
+        self.show_checkbox = QCheckBox(self)
+        self.self_layout.addStretch(1)
+        self.self_layout.addWidget(self.show_checkbox)
+        
+        # empty space at the end
+        self.empty_button = QPushButton()
+        self.empty_button.setCheckable(False)
+        empty_icon = QIcon()
+        empty_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.empty_button.setIcon( empty_icon )
+        self.empty_button.setIconSize(QSize(IMG_SIZE,IMG_SIZE))
+        self.self_layout.addWidget(self.empty_button)
+        
+        # select the state from config.ini file
+        self.show_checkbox.setChecked(default_show)
+        
+    def get_show(self):
+        return 'y' if self.show_checkbox.isChecked() else 'n'
+
+
 
 # ====================
 #

@@ -373,6 +373,13 @@ class GuiAkoTeka(QWidget, QObject):
         if card_descriptor_structure is None:
             card_descriptor_structure = self.actual_card_holder.orig_card_descriptor_structure
         
+        
+        card_descriptor_structure = sorted(
+                card_descriptor_structure, key=lambda arg: locale.strxfrm(
+                    (arg['title'][config_ini['language']] if arg['control']['orderby'] == 'title' else arg['extra']['recent-folder']) if arg['extra']['media-path'] else 
+                    ("zzzz"+(arg['title'][config_ini['language']]) if arg['control']['orderby']=='title' else arg['extra']['recent-folder'] ) 
+                ), reverse=False)
+        
         filtered_card_structure = self.set_up_filters(card_descriptor_structure)
         
         # Fill up the CardHolder with Cards, 
@@ -380,12 +387,15 @@ class GuiAkoTeka(QWidget, QObject):
         # grouping the Collectors at the end
         #  
         # self.actual_card_holder.fillUpCardHolderByDescriptor(sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False))
-        self.actual_card_holder.fillUpCardHolderByDescriptor(            
-            sorted(
-                filtered_card_structure, key=lambda arg: locale.strxfrm(
-                    arg['title'][config_ini['language']] if arg['extra']['media-path'] else ("zzzz"+arg['title'][config_ini['language']] ) 
-                ), reverse=False)
-        )            
+        
+        
+#        self.actual_card_holder.fillUpCardHolderByDescriptor(            
+#            sorted(
+#                filtered_card_structure, key=lambda arg: locale.strxfrm(
+#                    (arg['title'][config_ini['language']] if arg['control']['orderby'] == 'title' else arg['extra']['recent-folder']) if arg['extra']['media-path'] else 
+#                    ("zzzz"+(arg['title'][config_ini['language']]) if arg['control']['orderby']=='title' else arg['extra']['recent-folder'] ) 
+#                ), reverse=False)
+#        )
             
     # ----------------
     # Set-up Filters
@@ -409,7 +419,7 @@ class GuiAkoTeka(QWidget, QObject):
         self.fill_up_play_continously_list(filtered_cards)
         
         return filtered_cards
-    
+# 11111111    
         
     
   
@@ -630,7 +640,7 @@ class GuiAkoTeka(QWidget, QObject):
             # through the SORTED list
             #for crd in sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False):
             for crd in sorted(filtered_card_structure, key=lambda arg:  locale.strxfrm(arg['title'][config_ini['language']])    if arg['extra']['media-path'] and arg['extra']['visible'] else "_" + locale.strxfrm(arg['title'][config_ini['language']])            , reverse=False):
-            
+#111            
                 # in case of MEDIA CARD
                 if crd['extra']['media-path'] and crd['extra']['visible']:
 

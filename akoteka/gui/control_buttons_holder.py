@@ -40,6 +40,7 @@ from akoteka.handle_property import get_config_ini
 #
 # Contains:
 #           Back Button
+#           Play Sequentially
 #           Fast Search Button
 #           Advanced Search Button
 # ================================
@@ -321,8 +322,9 @@ class ControlButtonsHolder(QWidget):
     # -----------------------
     def config_button_on_click(self):
 
-        config_ini_function = get_config_ini()
-        orig_mp = config_ini_function.get_media_path() 
+        config_ini_function = get_config_ini()        
+        orig_mp = config_ini_function.get_media_path()
+        orig_sdt = config_ini_function.get_show_original_title() 
         orig_l = config_ini_function.get_language()
         orig_vp = config_ini_function.get_media_player_video()
         orig_vpp = config_ini_function.get_media_player_video_param()
@@ -336,6 +338,7 @@ class ControlButtonsHolder(QWidget):
 
             # get the values from the DIALOG
             l = dialog.get_language()
+            sdt = dialog.get_show_original_title()            
             mp = dialog.get_media_path()
             vp = dialog.get_media_player_video()
             vpp = dialog.get_media_player_video_param()
@@ -351,6 +354,9 @@ class ControlButtonsHolder(QWidget):
             if l != orig_l:
                 need_to_recollect = True
                 config_ini_function.set_language(l)
+            if sdt != orig_sdt:
+                need_to_recollect = True
+                config_ini_function.set_show_original_title(sdt)
             if vp != orig_vp:
                 config_ini_function.set_media_player_video(vp)
             if vpp != orig_vpp:

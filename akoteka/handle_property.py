@@ -104,6 +104,17 @@ class Property(object):
 
         # update
         self.__write_file()
+        
+    def remove_section(self, section):
+        self.parser.remove_section(section)
+
+    def remove_option(self, section, option):
+        self.parser.read(self.file, encoding='utf-8')
+        self.parser.remove_option(section, option)
+        self.__write_file()
+        
+    def get_options(self, section):
+        return self.parser.items(section)
     
     def should_write(self, writable):
         return ((writable is None and self.writable) or (writable))
@@ -158,6 +169,7 @@ class ConfigIni( Property ):
 
     # (section, key, default)
     DEFAULT_LANGUAGE = ("general", "language", "hu")
+    DEFAULT_SHOW_ORIGINAL_TITLE = ("general", "show-original-title", "n")
     DEFAULT_MEDIA_PATH = ("media", "media-path", ".")
     DEFAULT_MEDIA_PLAYER_VIDEO = ("media", "player-video", "mplayer")
     DEFAULT_MEDIA_PLAYER_VIDEO_PARAM = ("media", "player-video-param", "-zoom -fs -framedrop")
@@ -187,6 +199,9 @@ class ConfigIni( Property ):
     def get_language(self):
         return self.get(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], self.DEFAULT_LANGUAGE[2])
 
+    def get_show_original_title(self):
+        return self.get(self.DEFAULT_SHOW_ORIGINAL_TITLE[0], self.DEFAULT_SHOW_ORIGINAL_TITLE[1], self.DEFAULT_SHOW_ORIGINAL_TITLE[2])
+
     def get_media_path(self):
         return self.get(self.DEFAULT_MEDIA_PATH[0], self.DEFAULT_MEDIA_PATH[1], self.DEFAULT_MEDIA_PATH[2])
 
@@ -211,6 +226,9 @@ class ConfigIni( Property ):
 
     def set_language(self, lang):
         self.update(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], lang)
+
+    def set_show_original_title(self, show):
+        self.update(self.DEFAULT_SHOW_ORIGINAL_TITLE[0], self.DEFAULT_SHOW_ORIGINAL_TITLE[1], show)
 
     def set_media_path(self, path):
         self.update(self.DEFAULT_MEDIA_PATH[0], self.DEFAULT_MEDIA_PATH[1], path)
@@ -246,6 +264,7 @@ def re_read_config_ini():
     
     # Read config.ini    
     config_ini['language'] = ci.get_language()
+    config_ini['show_original_title'] = ci.get_show_original_title()
     config_ini['media_path'] = ci.get_media_path()
     config_ini['media_player_video'] = ci.get_media_player_video()
     config_ini['media_player_video_param'] = ci.get_media_player_video_param()
