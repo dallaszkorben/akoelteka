@@ -388,7 +388,7 @@ class GuiAkoTeka(QWidget, QObject):
         #  
         # self.actual_card_holder.fillUpCardHolderByDescriptor(sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False))
         
-        
+        self.actual_card_holder.fillUpCardHolderByDescriptor(filtered_card_structure)
 #        self.actual_card_holder.fillUpCardHolderByDescriptor(            
 #            sorted(
 #                filtered_card_structure, key=lambda arg: locale.strxfrm(
@@ -639,7 +639,8 @@ class GuiAkoTeka(QWidget, QObject):
 
             # through the SORTED list
             #for crd in sorted(filtered_card_structure, key=lambda arg: locale.strxfrm(arg['title'][config_ini['language']]), reverse=False):
-            for crd in sorted(filtered_card_structure, key=lambda arg:  locale.strxfrm(arg['title'][config_ini['language']])    if arg['extra']['media-path'] and arg['extra']['visible'] else "_" + locale.strxfrm(arg['title'][config_ini['language']])            , reverse=False):
+            #for crd in sorted(filtered_card_structure, key=lambda arg:  locale.strxfrm(arg['title'][config_ini['language']])    if arg['extra']['media-path'] and arg['extra']['visible'] else "_" + locale.strxfrm(arg['title'][config_ini['language']])            , reverse=False):
+            for crd in filtered_card_structure:
 #111            
                 # in case of MEDIA CARD
                 if crd['extra']['media-path'] and crd['extra']['visible']:
