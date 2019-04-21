@@ -17,6 +17,7 @@ from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import QRect
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QUrl
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QLayout
@@ -615,8 +616,8 @@ def play_media(media_path):
         param_list.append(media_path)
         param_list += switch_list
 
-        param_list.append("1>/dev/null")
-        param_list.append("2>/dev/null")
+        #aram_list.append("1>/dev/null")
+        #param_list.append("2>/dev/null")
 
     # audio
     elif get_pattern_audio().match(media_path):
@@ -626,22 +627,30 @@ def play_media(media_path):
         #param_list += switch_list
         param_list.append(media_path)
 
-    start_time = datetime.datetime.now().timestamp()
+    import PyQt5.QtMultimedia as M
+    url= QUrl.fromLocalFile(media_path)
+    content= M.QMediaContent(url)
+    player = M.QMediaPlayer()
+#    player.setMedia(content)
+#    player.play()
 
+
+#    start_time = datetime.datetime.now().timestamp()
+#
     pid = None
-
-    if player:
-    
-        # start playing media    
-        thread = Thread(target=run, args=(param_list, ))
-        thread.start()
-        time.sleep(0.2)
-    
-        # get the pid of the player
-        for p in psutil.process_iter():
-            if p.name() == player and (start_time-p.create_time()) <= 1.0:
-                pid = p.pid
-                break
+#
+#    if player:
+#    
+#        # start playing media    
+#        thread = Thread(target=run, args=(param_list, ))
+#        thread.start()
+#        time.sleep(0.2)
+#    
+#        # get the pid of the player
+#        for p in psutil.process_iter():
+#            if p.name() == player and (start_time-p.create_time()) <= 1.0:
+#                pid = p.pid
+#                break
             
     return pid
 

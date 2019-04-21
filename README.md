@@ -164,4 +164,9 @@ imdb=https://www.imdb.com/title/tt1020027/?ref_=nv_sr_1
  
 
 
+## Necesarry fix
 
+### Ubuntu
+
+libgstreamer-opencv
+libgstreamer-ocaml
