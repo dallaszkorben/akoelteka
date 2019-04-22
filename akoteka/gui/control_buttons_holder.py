@@ -19,7 +19,6 @@ from akoteka.gui.card_panel import CardPanel
 from akoteka.gui.configuration_dialog import ConfigurationDialog
 
 from akoteka.accessories import collect_cards
-from akoteka.accessories import filter_key
 from akoteka.accessories import clearLayout
 from akoteka.accessories import FlowLayout
 from akoteka.accessories import play_media

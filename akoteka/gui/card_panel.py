@@ -5,7 +5,6 @@ from pkg_resources import resource_string, resource_filename
 from functools import cmp_to_key
 import locale
 
-from akoteka.accessories import filter_key
 from akoteka.accessories import get_pattern_video
 from akoteka.accessories import get_pattern_audio
 from akoteka.accessories import play_media
@@ -463,7 +462,7 @@ class CardInformation(QWidget):
 #
 # ================
 class CardImage(QWidget):
-    def __init__(self, panel ):
+    def __init__(self, panel):
         super().__init__()
         
         self.panel = panel
@@ -580,7 +579,10 @@ class CardImage(QWidget):
         # Play media
         if media_path:
             
-            play_media(self.media_path)
+#            if get_pattern_audio().match(media_path):            
+#                self.panel.card.get_card_holder().parent.player
+            
+                play_media(self.media_path)
             
         else:
             # go deeper
@@ -615,6 +617,9 @@ class CardRating(QLabel):
         self.rating_rate_spinbox = MySpinBox(self.card_panel)
         self.rating_rate_spinbox.valueChanged.connect(self.rating_rate_spinbox_on_click)
         self.rating_layout.addWidget(self.rating_rate_spinbox)
+        
+        self.rating_layout.addStretch(2)
+
 
         # FAVORITE button
         self.rating_favorite_button = QPushButton()
@@ -629,6 +634,8 @@ class CardRating(QLabel):
         self.rating_favorite_button.setCursor(QCursor(Qt.PointingHandCursor))
         self.rating_favorite_button.setStyleSheet("background:transparent; border:none") 
         self.rating_layout.addWidget( self.rating_favorite_button )
+
+        self.rating_layout.addStretch(2)
 
 #        # BEST button
 #        self.rating_best_button = QPushButton()
@@ -658,7 +665,7 @@ class CardRating(QLabel):
         self.rating_new_button.setStyleSheet("background:transparent; border:none") 
         self.rating_layout.addWidget( self.rating_new_button )
         
-        #self.rating_layout.addStretch(1)
+        self.rating_layout.addStretch(2)
 
     def set_folder(self, folder):
         self.folder = folder

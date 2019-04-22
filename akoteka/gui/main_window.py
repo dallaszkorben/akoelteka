@@ -17,9 +17,10 @@ from akoteka.gui.fast_filter_holder import FastFilterHolder
 from akoteka.gui.advanced_filter_holder import AdvancedFilterHolder
 
 from akoteka.accessories import collect_cards
-from akoteka.accessories import filter_key
 from akoteka.accessories import clearLayout
 from akoteka.accessories import FlowLayout
+from akoteka.accessories import filter_key
+
 
 from akoteka.constants import *
 from akoteka.setup.setup import getSetupIni
@@ -29,6 +30,8 @@ from akoteka.handle_property import re_read_config_ini
 from akoteka.handle_property import config_ini
 from akoteka.handle_property import get_config_ini
 #from builtins import None
+
+#import PyQt5.QtMultimedia as MultiMedia
 
 class GuiAkoTeka(QWidget, QObject):
     
@@ -102,10 +105,23 @@ class GuiAkoTeka(QWidget, QObject):
         self.setWindowTitle(sp['name'] + '-' + sp['version'])
         self.setWindowIcon(QIcon(resource_filename(__name__,os.path.join("img", IMG_WINDOW)))) 
         #self.setGeometry(300, 300, 300, 200)
-        self.resize(900,600)
+        self.resize(950,650)
         self.center()
-        self.show()    
-
+        self.show()
+        
+        
+        # Audio Player
+        #self.media_player = MultiMedia.QMediaPlayer()
+        #import PyQt5.QtCore as C
+        #url= C.QUrl.fromLocalFile("/media/akoel/Movies/Final/02.Music/Audio/Omega/Omega-1976-Idorablo/07-Ejfeli.Koncert/Omega-Idorablo-07-EjfeliKoncert.mp3")
+        #content= MultiMedia.QMediaContent(url)
+        #    #ply = M.QMediaPlayer()
+        #self.player.setMedia(content)
+        #self.player.play()
+        ##time.sleep(30.2)
+        
+        
+            
     def center(self):
         """Aligns the window to middle on the screen"""
         fg=self.frameGeometry()
@@ -489,6 +505,7 @@ class GuiAkoTeka(QWidget, QObject):
             "theme": set(),
             "director": set(),
             "actor": set(),
+            "category": set(),
 #            "sound": set(),
 #            "sub": set(),
 #            "country": set(),
@@ -517,6 +534,8 @@ class GuiAkoTeka(QWidget, QObject):
                 "theme": "",
                 "director": "",
                 "actor": "",
+                "category": "",
+                "rate": ""
 #                "sound": "",
 #                "sub": "",
 #                "country": "",
@@ -561,12 +580,29 @@ class GuiAkoTeka(QWidget, QObject):
         for element in sorted( fast_filter_list['actor'], key=cmp_to_key(locale.strcoll) ):
             self.get_fast_filter_holder().add_actor(element)
 
+        # Fill up CATEGORY 
+        self.get_fast_filter_holder().clear_category()
+        self.get_fast_filter_holder().add_category("", "")
+        for element in sorted([(_("category_" + e),e) for e in fast_filter_list['category']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_fast_filter_holder().add_category(element[0], element[1])
+
+        # Fill up RATE 
+        self.get_fast_filter_holder().clear_rate()
+        self.get_fast_filter_holder().add_rate_element("", "")
+        for element in sorted( fast_filter_list['rate'], key=int ):
+        #for element in sorted([(_("rate_" + e),e) for e in fast_filter_list['rate']], key=lambda t: locale.strxfrm(t[0]) ):            
+            self.get_fast_filter_holder().add_rate_element(element, int(element))
+        
+
         # Recover the contents of the fields
         self.get_fast_filter_holder().select_title_by_text(fast_state_fields["title"])
         self.get_fast_filter_holder().select_genre_by_text(fast_state_fields["genre"])
         self.get_fast_filter_holder().select_theme_by_text(fast_state_fields["theme"])
         self.get_fast_filter_holder().select_director_by_text(fast_state_fields["director"])
-        self.get_fast_filter_holder().select_actor_by_text(fast_state_fields["actor"])        
+        self.get_fast_filter_holder().select_actor_by_text(fast_state_fields["actor"])
+        self.get_fast_filter_holder().select_category_by_text(fast_state_fields["category"])
+        self.get_fast_filter_holder().select_rate_element_by_text(fast_state_fields["rate"])
+        
 
         self.set_fast_filter_listener(self)
         
@@ -614,6 +650,15 @@ class GuiAkoTeka(QWidget, QObject):
         generate_filtered_list(card_structure)
         return card_structure    
     
+
+
+
+
+
+
+
+
+
 
 
 
@@ -732,6 +777,7 @@ class GuiAkoTeka(QWidget, QObject):
             return unconditional_filter_list  
   
         unconditional_filter_list={
+            "category": set(),
             "title": set(),
             "genre": set(),
             "theme": set(),
@@ -760,6 +806,7 @@ class GuiAkoTeka(QWidget, QObject):
         -----------------------------------------------------------------"""
 
         advanced_state_fields = {
+                "category": "",
                 "title": "",
                 "genre": "",
                 "theme": "",
@@ -770,6 +817,8 @@ class GuiAkoTeka(QWidget, QObject):
                 "country": "",
                 "length-from": "",
                 "length-to": "",
+                "rate-from": "",
+                "rate-to": "",
                 "year-from": "",
                 "year-to": "",            
             }        
@@ -778,6 +827,12 @@ class GuiAkoTeka(QWidget, QObject):
         for category, value in self.get_advanced_filter_holder().get_filter_selection().items():
             if value[1] != None and value[1] != "":
                 advanced_state_fields[category] = value[1]
+
+        # Fill up CATEGORY
+        self.get_advanced_filter_holder().clear_category()
+        for element in sorted([(_("category_" + e),e) for e in unconditional_filter_list['category']], key=lambda t: locale.strxfrm(t[0]) ):           
+        #for element in sorted( unconditional_filter_list['category'], key=cmp_to_key(locale.strcoll) ):
+            self.get_advanced_filter_holder().add_category(element[0], element[1])
 
         # Fill up TITLE
         self.get_advanced_filter_holder().clear_title()            
@@ -828,8 +883,17 @@ class GuiAkoTeka(QWidget, QObject):
         self.get_advanced_filter_holder().clear_length()
         for element in sorted( [str(int(spl[-2])).rjust(1) + ":" + str(int(spl[-1])).zfill(2) for spl in [l.split(":") for l in unconditional_filter_list['length'] if ':' in l ] if all(c.isdigit() for c in spl[-1] ) and all(c.isdigit() for c in spl[-2] )], key=cmp_to_key(locale.strcoll) ):
             self.get_advanced_filter_holder().add_length(element)
+
+        # Fill up RATE from/to
+        self.get_advanced_filter_holder().clear_rate()
+        #for element in sorted( unconditional_filter_list['rate'], key=cmp_to_key(locale.strcoll)):
+        #    self.get_advanced_filter_holder().add_rate(element)
+        for i in range(0, 11):
+            self.get_advanced_filter_holder().add_rate(str(i))
+
   
         # Recover the contents of the fields
+        self.get_advanced_filter_holder().set_category(advanced_state_fields['category'])
         self.get_advanced_filter_holder().set_title(advanced_state_fields['title'])
         self.get_advanced_filter_holder().set_genre(advanced_state_fields['genre'])
         self.get_advanced_filter_holder().set_theme(advanced_state_fields['theme'])
@@ -840,6 +904,8 @@ class GuiAkoTeka(QWidget, QObject):
         self.get_advanced_filter_holder().select_country(advanced_state_fields['country'])
         self.get_advanced_filter_holder().select_year_from(advanced_state_fields['year-from'])
         self.get_advanced_filter_holder().select_year_to(advanced_state_fields['year-to'])
+        self.get_advanced_filter_holder().select_rate_from(advanced_state_fields['rate-from'])
+        self.get_advanced_filter_holder().select_rate_to(advanced_state_fields['rate-to'])        
         self.get_advanced_filter_holder().select_length_from(advanced_state_fields['length-from'])
         self.get_advanced_filter_holder().select_length_to(advanced_state_fields['length-to'])
         

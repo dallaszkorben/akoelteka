@@ -16,10 +16,8 @@ from akoteka.gui.configuration_dialog import ConfigurationDialog
 from akoteka.gui.control_buttons_holder import ControlButtonsHolder
 
 from akoteka.accessories import collect_cards
-from akoteka.accessories import filter_key
 from akoteka.accessories import clearLayout
 from akoteka.accessories import FlowLayout
-
 
 from akoteka.constants import *
 from akoteka.setup.setup import getSetupIni
@@ -95,11 +93,13 @@ class FastFilterHolder(QWidget):
         # Dropdown - genre+theme
         #
         # ----------------------
+        self.filter_dd_category = FilterDropDownSimple(_('title_category') + ": ")
         self.filter_dd_genre = FilterDropDownSimple(_('title_genre') + ": ")
         self.filter_dd_theme = FilterDropDownSimple(_('title_theme') + ": ")
         
         holder_dropdown_gt = FilterDropDownHolder()
-        
+
+        holder_dropdown_gt.add_dropdown(self.filter_dd_category)        
         holder_dropdown_gt.add_dropdown(self.filter_dd_genre)
         holder_dropdown_gt.add_dropdown(self.filter_dd_theme)
         
@@ -107,25 +107,37 @@ class FastFilterHolder(QWidget):
  
         # ----------
         #
-        # Checkboxes
+        # Ratings
         #
         # ----------
-        self.filter_cb_favorite = FilterCheckBox(_('title_favorite') + ": ")
-#        self.filter_cb_best = FilterCheckBox(_('title_best') + ": ")
-        self.filter_cb_new = FilterCheckBox(_('title_new') + ": ")
-                
-        holder_checkbox = FilterCheckBoxHolder()
+        self.filter_section_rating = RatingSection(_('title_favorite') + ": ", _('title_new') + ": ", _('title_rate') + ": ")
+        self.filter_section_rating.favorite_cb.stateChanged.connect(self.state_changed)
+        self.filter_section_rating.new_cb.stateChanged.connect(self.state_changed)
+        self.filter_section_rating.rate_cb.currentIndexChanged.connect(self.state_changed)
         
-        holder_checkbox.add_checkbox(self.filter_cb_favorite)
-#        holder_checkbox.add_checkbox(self.filter_cb_best)
-        holder_checkbox.add_checkbox(self.filter_cb_new)        
+        
+        
+#        self.filter_cb_favorite = FilterCheckBox(_('title_favorite') + ": ")
+##        self.filter_cb_best = FilterCheckBox(_('title_best') + ": ")
+#        self.filter_cb_new = FilterCheckBox(_('title_new') + ": ")
+#        self.filter_dd_rate = FilterDropDownSimple(_('title_rate') + ": ")
+#                        
+#        holder_checkbox = FilterCheckBoxHolder()
+#        
+#        holder_checkbox.add_checkbox(self.filter_cb_favorite)
+##        holder_checkbox.add_checkbox(self.filter_cb_best)
+#        holder_checkbox.add_checkbox(self.filter_cb_new)
+#        holder_checkbox.add_checkbox(self.filter_dd_rate)
+#
+
+
+
                 
-        # Listener
-        self.filter_cb_favorite.stateChanged.connect(self.state_changed)
-#        self.filter_cb_best.stateChanged.connect(self.state_changed)
-        self.filter_cb_new.stateChanged.connect(self.state_changed)
-                        
-        holder_layout.addWidget(holder_checkbox)
+#        # Listener
+#        self.filter_cb_favorite.stateChanged.connect(self.state_changed)
+#        self.filter_cb_new.stateChanged.connect(self.state_changed)
+#                        
+        holder_layout.addWidget(self.filter_section_rating)
  
         # ----------
         #
@@ -147,6 +159,7 @@ class FastFilterHolder(QWidget):
 
         # Listeners
         self.filter_dd_title.state_changed.connect(self.state_changed)
+        self.filter_dd_category.state_changed.connect(self.state_changed)
         self.filter_dd_genre.state_changed.connect(self.state_changed)
         self.filter_dd_theme.state_changed.connect(self.state_changed)
         self.filter_dd_director.state_changed.connect(self.state_changed)
@@ -154,13 +167,14 @@ class FastFilterHolder(QWidget):
 
     def refresh_label(self):
         self.filter_dd_title.refresh_label(_('title_title'))
+        self.filter_dd_category.refresh_label(_('title_category'))
         self.filter_dd_genre.refresh_label(_('title_genre'))
         self.filter_dd_theme.refresh_label(_('title_theme'))
         self.filter_dd_director.refresh_label(_('title_director'))
         self.filter_dd_actor.refresh_label(_('title_actor'))
-        self.filter_cb_favorite.refresh_label(_('title_favorite'))
-        self.filter_cb_new.refresh_label(_('title_new'))
-#        self.filter_cb_best.refresh_label(_('title_best'))
+        self.filter_section_rating.refresh_favorite_label(_('title_favorite'))
+        self.filter_section_rating.refresh_new_label(_('title_new'))
+        self.filter_section_rating.refresh_rate_label(_('title_rate'))
 
     def clear_title(self):
         self.filter_dd_title.clear_elements()
@@ -170,7 +184,21 @@ class FastFilterHolder(QWidget):
 
     def select_title_by_text(self, text):
         self.filter_dd_title.select_element_by_text(text)
+    
     # ---
+    def clear_category(self):
+        self.filter_dd_category.clear_elements()
+        
+    def add_category(self, value, id):
+        self.filter_dd_category.add_element(value, id)
+        
+    def select_category_by_id(self, id):
+        self.filter_dd_category.select_element_by_id(id)
+        
+    def select_category_by_text(self, text):
+        self.filter_dd_category.select_element_by_text(text)    
+            
+    # ---    
     def clear_genre(self):
         self.filter_dd_genre.clear_elements()
         
@@ -212,18 +240,39 @@ class FastFilterHolder(QWidget):
         self.filter_dd_actor.add_element(actor, actor)
         
     def select_actor_by_text(self, text):
-        self.filter_dd_actor.select_element_by_text(text)        
+        self.filter_dd_actor.select_element_by_text(text)
+
+    # ---
+    def add_rate_element(self, value, id):
+        self.filter_section_rating.add_rate_element(value, id)
+        
+    def select_rate_element_by_text(self, text):
+        self.filter_section_rating.select_rate_element_by_text(text)
+        
+    # ---
+    def clear_rate(self):
+        self.filter_section_rating.clear_rate()
+    
+    def clear_favorite(self):
+        self.filter_section_rating.clear_favorite()
+        
+    def clear_new(self):
+        self.filter_section_rating.clear_new()
+        
+        
     # ---
     def get_filter_selection(self):
         filter_selection = {
             "title":    ["title", self.filter_dd_title.get_selected_value(), None, "a"],
+            "category": ["category", self.filter_dd_category.get_selected_value(), [self.filter_dd_category.get_selected_id()], "v"],
             "genre":    ["genre", self.filter_dd_genre.get_selected_value(), [self.filter_dd_genre.get_selected_id()], "a"],
             "theme":    ["theme", self.filter_dd_theme.get_selected_value(), [self.filter_dd_theme.get_selected_id()], "a"],
             "director": ["director", self.filter_dd_director.get_selected_value(), None, "a"],
             "actor":    ["actor", self.filter_dd_actor.get_selected_value(), None, "a"],
 #            "best":     ["best", self.filter_cb_best.is_checked(), None, "c"],
-            "new":      ["new", self.filter_cb_new.is_checked(), None, "c"],
-            "favorite": ["favorite", self.filter_cb_favorite.is_checked(),None, "c"],
+            "new":      ["new", self.filter_section_rating.is_new_checked(), None, "c"],
+            "favorite": ["favorite", self.filter_section_rating.is_favorite_checked(),None, "c"],
+            "rate":     ["rate", self.filter_section_rating.get_rate_selected_value(),None, "a"],
         }
         return filter_selection
     
@@ -239,11 +288,13 @@ class FastFilterHolder(QWidget):
     def clear_fields(self):
         self.clear_actor()
         self.clear_director()
+        self.clear_category()
         self.clear_genre()
         self.clear_theme()
         self.clear_title()
-        self.filter_cb_favorite.setChecked(False)
-        self.filter_cb_new.setChecked(False)
+        self.clear_favorite()
+        self.clear_new()
+        self.clear_rate()
 #        self.filter_cb_best.setChecked(False)
 
 
@@ -343,52 +394,103 @@ class FilterDropDownSimple(QWidget):
         self.label_widget.setText(new_label)
 
 
+
+
+
+
+
+
+
+
 # ==========
 #
-# CheckBox
+# Rating
 #
 # ==========
-class FilterCheckBox(QCheckBox):
-    def __init__(self, label):
-        super().__init__(label)
-
-        self.setLayoutDirection( Qt.RightToLeft )
-        style_checkbox = '''
-            QCheckBox { 
-                min-height: 15px; max-height: 15px; border: 0px solid gray;
-            }
-        '''
-        self.setStyleSheet( style_checkbox )
-#        self.setFocusPolicy(Qt.NoFocus)
-
-    def is_checked(self):
-        return 'y' if self.isChecked() else None        
- 
-    def refresh_label(self, new_label):
-        self.setText(new_label)
-
-
-# ================
-#
-# Checkbox HOLDER
-#
-# ================
-class FilterCheckBoxHolder(QWidget):
-    
-    def __init__(self):
+class RatingSection(QWidget):
+    def __init__(self, favorite_title, new_title, rate_title):
         super().__init__()
 
-        self.self_layout = QVBoxLayout(self)
+        style_checkbox = 'QCheckBox {min-height: 15px; max-height: 15px; border: 0px solid gray;}'
+        style_combobox = 'QComboBox {max-width: 50px; min-width: 50px; border: 1px solid gray; border-radius: 5px;}'
+
+        self.self_layout = QGridLayout(self)
         self.setLayout( self.self_layout )
         self.self_layout.setContentsMargins(0, 0, 0, 0)
-        self.self_layout.setSpacing(1)
+        self.self_layout.setSpacing(0)    
 
-        #self.setStyleSheet( 'background: green')
+        # favorite
+        self.favorite_label = QLabel(favorite_title)
+        self.self_layout.addWidget( self.favorite_label, 0, 0 )
+        self.favorite_cb = QCheckBox(self)
+        self.favorite_cb.setFocusPolicy(Qt.NoFocus)
+        self.favorite_cb.setLayoutDirection( Qt.RightToLeft )
+        self.favorite_cb.setStyleSheet( style_checkbox )
+        self.self_layout.addWidget( self.favorite_cb, 0, 1 )        
         
-    def add_checkbox(self, filter_checkbox):
-        self.self_layout.addWidget(filter_checkbox)
+        # new
+        self.new_label = QLabel(new_title)
+        self.self_layout.addWidget( self.new_label, 1, 0 )
+        self.new_cb = QCheckBox(self)
+        self.new_cb.setFocusPolicy(Qt.NoFocus)
+        self.new_cb.setLayoutDirection( Qt.RightToLeft )
+        self.new_cb.setStyleSheet( style_checkbox )
+        self.self_layout.addWidget( self.new_cb, 1, 1 )
         
+        # rate
+        self.rate_label = QLabel(rate_title)
+        self.self_layout.addWidget( self.rate_label, 2, 0 )
+        self.rate_cb = QComboBox(self)
+        self.rate_cb.setFocusPolicy(Qt.NoFocus)
+#        self.rate_cb.setLayoutDirection( Qt.RightToLeft )
+        self.rate_cb.setStyleSheet( style_combobox )
+#        self.rate_cb.currentIndexChanged.connect(self.rate_index_changed)
+        self.self_layout.addWidget( self.rate_cb, 2, 1 )
+    
+    # --- favorite ---    
+    def is_favorite_checked(self):
+        return 'y' if self.favorite_cb.isChecked() else None        
+ 
+    def refresh_favorite_label(self, new_label):
+        self.favorite_label.setText(new_label)
 
+    # --- new ---
+    def is_new_checked(self):
+        return 'y' if self.new_cb.isChecked() else None        
+ 
+    def refresh_new_label(self, new_label):
+        self.new_label.setText(new_label)
 
+    # --- rate ---
+    def refresh_rate_label(self, new_label):
+        self.rate_label.setText(new_label)
+        
+    def clear_rate_elements(self):
+        self.rate_cb.clear()
+
+    def add_rate_element(self, value, id):
+        self.rate_cb.addItem(value, id)
+
+    def get_rate_selected_id(self):
+        return self.rate_cb.itemData( self.rate_cb.currentIndex() )
+
+    def get_rate_selected_value(self):
+        return self.rate_cb.itemText( self.rate_cb.currentIndex() )
+    
+    def select_rate_element_by_id(self, id):
+        self.rate_cb.setCurrentIndex( self.rate_cb.findData(id) )
+
+    def select_rate_element_by_text(self, text):
+        self.rate_cb.setCurrentIndex( self.rate_cb.findText(text) )
+
+    def clear_rate(self):
+        self.rate_cb.clear()
+
+    def clear_favorite(self):        
+        self.favorite_cb.setChecked(False)        
+
+    def clear_new(self):        
+        self.new_cb.setChecked(False)        
+   
 
 

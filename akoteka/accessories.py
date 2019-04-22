@@ -17,7 +17,9 @@ from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import QRect
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QUrl
+
+#from PyQt5.QtCore import QUrl
+#from PyQt5.QtMultimedia import QMediaContent
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QLayout
@@ -29,91 +31,6 @@ from akoteka.handle_property import Config
 from akoteka.handle_property import config_ini
 #from akoteka.logger import logger
 
-filter_key = {
-    "title":{
-        "store-mode": "t",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "title"
-    },
-    "best":{
-        "store-mode": "v",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "rating"
-    },
-    "new":{
-        "store-mode": "v",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "rating"
-    },
-    "favorite":{
-        "store-mode": "v",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "rating"
-    },
-    "director":{
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "general"
-    },
-    "actor": {
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "general"
-    },
-    "theme":{
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": True,
-        "value-dict-prefix": "theme_",
-        "section": "general"
-    },
-    "genre":{        
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": True,
-        "value-dict-prefix": "genre_",
-        "section": "general"
-    },
-    "sound":{
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": True,
-        "value-dict-prefix": "sound_",
-        "section": "general"
-    },
-    "sub":{
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": True,
-        "value-dict-prefix": "sub_",
-        "section": "general"
-    },
-    "country":{
-        "store-mode": "a",
-        "key-dict-prefix": "title_",
-        "value-dict": True,
-        "value-dict-prefix": "country_",
-        "section": "general"
-    },
-    "year":{
-        "store-mode": "v",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "general"
-    },    
-    "length":{        
-        "store-mode": "v",
-        "key-dict-prefix": "title_",
-        "value-dict": False,
-        "section": "general"
-    },
-}
 
 logger = None
 def initialize_log():
@@ -482,7 +399,7 @@ def folder_investigation( actual_dir, json_list):
             #log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
             pass
 
-        # -------------- ACTORG ----------------------------
+        # -------------- ACTOR ----------------------------
             
         try:
             actors = parser.get("general", "actor").split(",")
@@ -627,30 +544,122 @@ def play_media(media_path):
         #param_list += switch_list
         param_list.append(media_path)
 
-    import PyQt5.QtMultimedia as M
-    url= QUrl.fromLocalFile(media_path)
-    content= M.QMediaContent(url)
-    player = M.QMediaPlayer()
-#    player.setMedia(content)
-#    player.play()
 
+    start_time = datetime.datetime.now().timestamp()
 
-#    start_time = datetime.datetime.now().timestamp()
-#
     pid = None
-#
-#    if player:
-#    
-#        # start playing media    
-#        thread = Thread(target=run, args=(param_list, ))
-#        thread.start()
-#        time.sleep(0.2)
-#    
-#        # get the pid of the player
-#        for p in psutil.process_iter():
-#            if p.name() == player and (start_time-p.create_time()) <= 1.0:
-#                pid = p.pid
-#                break
+
+    if player:
+    
+        # start playing media    
+        thread = Thread(target=run, args=(param_list, ))
+        thread.start()
+        time.sleep(0.2)
+    
+        # get the pid of the player
+        for p in psutil.process_iter():
+            if p.name() == player and (start_time-p.create_time()) <= 1.0:
+                pid = p.pid
+                break
             
     return pid
 
+
+filter_key = {
+    "category":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "category_",
+        "section": "control"
+    },
+    "title":{
+        "store-mode": "t",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "title"
+    },
+#    "best":{
+#        "store-mode": "v",
+#        "key-dict-prefix": "title_",
+#        "value-dict": False,
+#        "section": "rating"
+#    },
+    "new":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "rating"
+    },
+    "favorite":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "rating"
+    },
+    "director":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "general"
+    },
+    "actor": {
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "general"
+    },
+    "theme":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "theme_",
+        "section": "general"
+    },
+    "genre":{        
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "genre_",
+        "section": "general"
+    },
+    "sound":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "sound_",
+        "section": "general"
+    },
+    "sub":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "sub_",
+        "section": "general"
+    },
+    "country":{
+        "store-mode": "a",
+        "key-dict-prefix": "title_",
+        "value-dict": True,
+        "value-dict-prefix": "country_",
+        "section": "general"
+    },
+    "year":{
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "general"
+    },    
+    "length":{        
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "general"
+    },    
+    "rate":{        
+        "store-mode": "v",
+        "key-dict-prefix": "title_",
+        "value-dict": False,
+        "section": "rating"
+    },
+}
