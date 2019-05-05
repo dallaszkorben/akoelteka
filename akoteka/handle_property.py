@@ -36,6 +36,10 @@ class Property(object):
         # try to read the key
         try:
             result=self.parser.get(section,key)
+            
+            # if it is EMPTY
+            if not result:
+                result = default_value
 
         # if does not exist the key
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
@@ -47,7 +51,7 @@ class Property(object):
                 result=self.parser.get(section,key)
             else:
                 result = default_value
-        
+
         return result
 
     def getBoolean(self, section, key, default_value, writable=None):

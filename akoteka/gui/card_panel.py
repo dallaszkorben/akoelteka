@@ -7,9 +7,11 @@ import locale
 
 from akoteka.accessories import get_pattern_video
 from akoteka.accessories import get_pattern_audio
+from akoteka.accessories import get_storyline_title
+from akoteka.accessories import get_director_title
+from akoteka.accessories import get_actor_title
 from akoteka.accessories import play_media
 from akoteka.accessories import FlowLayout
-
 
 from akoteka.handle_property import _
 from akoteka.handle_property import config_ini
@@ -85,6 +87,7 @@ class CardPanel(QWidget):
         if card_data["extra"]["media-path"]:
 
             self.set_media( card_data["control"]["media"] )
+            self.set_category( card_data["control"]["category"] )
 
             self.add_element_to_collector_line( _("title_year"), card_data["general"]["year"])
             self.add_element_to_collector_line( _("title_length"), card_data["general"]["length"])
@@ -96,35 +99,40 @@ class CardPanel(QWidget):
             
             # -------------- DIRECTOR --------------------------
             
-            if card_data['control']['category'] == 'movie':
-                if ''.join(card_data["general"]["director"]):
-                    self.add_info_line( _("title_director"), ", ".join( [ d for d in card_data["general"]["director"] ] ) )
+            #if card_data['control']['category'] == 'movie':
+            if ''.join(card_data["general"]["director"]):
+                    self.add_info_line( 
+                        get_director_title(card_data["control"]["media"], card_data["control"]["category"]),
+                        ", ".join( [ d for d in card_data["general"]["director"] ] ) )
 
             # -------------- ACTOR -----------------------------
 
             if ''.join(card_data["general"]["actor"]):
-                title = _("title_actor_movie") if card_data['control']['category'] == 'movie' else _("title_actor_music") if card_data['control']['category'] == 'music' else _("title_actor_talk") if card_data['control']['category'] == 'talk' else ''                
-                self.add_info_line( title, ", ".join( [ a for a in card_data["general"]["actor"] ] ) )
+                #title = _("title_actor_movie") if card_data['control']['category'] == 'movie' else _("title_actor_music") if card_data['control']['category'] == 'music' else _("title_actor_talk") if card_data['control']['category'] == 'talk' else ''                
+                self.add_info_line( 
+                    get_actor_title(card_data["control"]["media"], card_data["control"]["category"]), 
+                    ", ".join( [ a for a in card_data["general"]["actor"] ] ) )
 
             # -------------- GENRE -----------------------------
 
             if ''.join(card_data["general"]["genre"]):
-#                self.add_info_line( _("title_genre"), ", ".join( [ _("genre_"+card_data['general']['category']+"_"+g ) if g else "" for g in card_data["general"]["genre"] ] ) )
                 self.add_info_line( _("title_genre"), ", ".join( [ _("genre_" + g ) if g else "" for g in card_data["general"]["genre"] ] ) )
 
 
             # -------------- THEME -----------------------------
 
-            if card_data['control']['category'] == 'movie' or card_data['control']['category'] == 'talk':                    
-                if ''.join(card_data["general"]["theme"]):
+            #if card_data['control']['category'] == 'movie' or card_data['control']['category'] == 'talk':                    
+            if ''.join(card_data["general"]["theme"]):
                     self.add_info_line( _("title_theme"), ", ".join( [ _("theme_" + a ) if a else "" for a in card_data["general"]["theme"] ] ) )
 
             # -------------- STORILINE -------------------------
                 
             if card_data['storyline'][config_ini['language']]:
                 self.add_separator()
-                title = _('title_storyline_movie') if card_data['control']['category'] == 'movie' else _('title_storyline_music') if card_data['control']['category'] == 'music' else _('title_storyline_talk') if card_data['control']['category'] == 'talk' else ''                
-                self.add_info_line( title, card_data['storyline'][config_ini['language']])
+                #title = _('title_storyline_movie') if card_data['control']['category'] == 'movie' else _('title_storyline_music') if card_data['control']['category'] == 'music' else _('title_storyline_talk') if card_data['control']['category'] == 'talk' else ''                
+                self.add_info_line( 
+                    get_storyline_title(card_data["control"]["media"], card_data["control"]["category"]), 
+                    card_data['storyline'][config_ini['language']])
                    
             self.add_info_line_stretch()
 
@@ -187,6 +195,9 @@ class CardPanel(QWidget):
         
     def set_media(self, media):
         self.card_information.set_media(media)
+        
+    def set_category(self, category):
+        self.card_information.set_category(category)
 
     def get_title(self):
         return self.card_information.get_title()
@@ -285,8 +296,6 @@ class CardInfoTitle(QWidget):
 #        self.setFont(QFont( FONT_TYPE, INFO_TITLE_FONT_SIZE, weight=QFont.Bold))
 #        self.text = None
                 
-
-
     def set_media(self, media):
         if media == 'video':
             media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_VIDEO)) )
@@ -302,6 +311,9 @@ class CardInfoTitle(QWidget):
         self.card_info_title_layout.setSpacing(20)
         media_pixmap = media_pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.FastTransformation)
         self.media_label.setPixmap(media_pixmap)
+
+    def set_category(self, category):
+        pass
     
     def set_title(self, title):
         self.title.setText(title)
@@ -427,18 +439,19 @@ class CardInformation(QWidget):
         
         self.card_info_title = CardInfoTitle()
         
-        
-        
         self.info_layout.addWidget( self.card_info_title )
         #self.card_info_lines_holder = CardInfoLinesHolder()
         self.card_info_lines_holder = CardCollectorLine()
         self.info_layout.addWidget( self.card_info_lines_holder )
 
-    def set_title(self, title ):
+    def set_title(self, title):
         self.card_info_title.set_title(title)
 
-    def set_media(self, media ):
+    def set_media(self, media):
         self.card_info_title.set_media(media)
+        
+    def set_category(self, category):
+        self.card_info_title.set_category(category)
         
     def get_title(self):
         return self.card_info_title.get_title()

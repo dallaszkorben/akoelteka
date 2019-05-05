@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import QWidget
 
 from akoteka.handle_property import Config
 from akoteka.handle_property import config_ini
+from akoteka.handle_property import _
 #from akoteka.logger import logger
 
 
@@ -561,9 +562,92 @@ def play_media(media_path):
             if p.name() == player and (start_time-p.create_time()) <= 1.0:
                 pid = p.pid
                 break
-            
     return pid
 
+def get_storyline_title(media, category):
+    ret = storyline_title_key[media][category]
+    return _(ret)
+
+storyline_title_key = {
+    "video": {
+        "movie" : "title_storyline_movie",
+        "music" : "title_storyline_music",
+        "show" : "title_storyline_show",
+        "presentation": "title_storyline_presentation",
+        "alternative" : "title_storyline_alternative",
+        "miscellaneous": "title_storyline_miscellaneous"
+        },
+    "audio": {
+        "radioplay": "title_storyline_radioplay",
+        "music": "title_storyline_music",
+        "show": "title_storyline_show",
+        "presentation": "title_storyline_presentation"
+        }
+    }
+
+def get_director_title(media, category):
+    ret = director_title_key[media][category]
+    return _(ret)
+
+director_title_key = {
+    "video": {
+        "movie" : "title_director_movie",
+        "music" : "title_director_music",
+        "show" : "title_director_show",
+        "presentation": "title_director_presentation",
+        "alternative" : "title_director_alternative",
+        "miscellaneous": "title_director_miscellaneous"
+        },
+    "audio": {
+        "radioplay": "title_director_radioplay",
+        "music": "title_director_music",
+        "show": "title_director_show",
+        "presentation": "title_director_presentation"
+        }
+    }
+
+def get_actor_title(media, category):
+    ret = actor_title_key[media][category]
+    return _(ret)
+    
+actor_title_key = {
+    "video": {
+        "movie" : "title_actor_movie",
+        "music" : "title_actor_music",
+        "show" : "title_actor_show",
+        "presentation": "title_actor_presentation",
+        "alternative" : "title_actor_alternative",
+        "miscellaneous": "title_actor_miscellaneous"
+        },
+    "audio": {
+        "radioplay": "title_actor_radioplay",
+        "music": "title_actor_music",
+        "show": "title_actor_show",
+        "presentation": "title_actor_presentation"
+        }
+    }
+
+def get_genre_prefix(media, media_category):
+    ret = genre_prefix(media, media_category)
+    return ret
+
+genre_prefix = {
+    "video":{
+        "movie": "genre_",
+        "music": "genre_music_",
+        "show": "genre_show_",
+        "presentation": "genre_presentation_",
+        "alternative": "genre_analysis_",
+        "miscellaneous": "genre_miscellaneous_"
+        
+        },
+    "audio":{
+        "radioplay": "genre_",
+        "music": "genre_music_",
+        "show": "genre_show_",
+        "presentation": "genre_presentation_"
+        }
+}
 
 filter_key = {
     "category":{
