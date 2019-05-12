@@ -565,7 +565,7 @@ def play_media(media_path):
     return pid
 
 def get_storyline_title(media, category):
-    ret = storyline_title_key[media][category]
+    ret = storyline_title_key.get(media,{}).get(category,'')
     return _(ret)
 
 storyline_title_key = {
@@ -586,7 +586,7 @@ storyline_title_key = {
     }
 
 def get_director_title(media, category):
-    ret = director_title_key[media][category]
+    ret = director_title_key.get(media,{}).get(category,'')
     return _(ret)
 
 director_title_key = {
@@ -607,7 +607,7 @@ director_title_key = {
     }
 
 def get_actor_title(media, category):
-    ret = actor_title_key[media][category]
+    ret = actor_title_key.get(media,{}).get(category,'')
     return _(ret)
     
 actor_title_key = {
@@ -628,24 +628,24 @@ actor_title_key = {
     }
 
 def get_genre_prefix(media, media_category):
-    ret = genre_prefix(media, media_category)
+    ret = genre_prefix.get(media,{}).get(category,'')
     return ret
 
 genre_prefix = {
     "video":{
         "movie": "genre_",
         "music": "genre_music_",
-        "show": "genre_show_",
-        "presentation": "genre_presentation_",
-        "alternative": "genre_analysis_",
-        "miscellaneous": "genre_miscellaneous_"
+        "show": "genre_",
+        "presentation": "genre_",
+        "alternative": "genre_",
+        "miscellaneous": "genre_"
         
         },
     "audio":{
         "radioplay": "genre_",
         "music": "genre_music_",
-        "show": "genre_show_",
-        "presentation": "genre_presentation_"
+        "show": "genre_",
+        "presentation": "genre_"
         }
 }
 

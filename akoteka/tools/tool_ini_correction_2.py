@@ -127,16 +127,6 @@ def folder_investigation( actual_dir, media, category   ):
 # === [control] ===
            
         # --- media ---
-#        if get_pattern_audio().match(media_name):
-#            media = 'audio'
-#
-#        elif get_pattern_video().match(media_name):
-#            media = 'video'
-#
-#        else:
-#            media = 'video'
-#
-#        media = card_ini.get("general", 'media', media, False)
         card_ini.update("control", 'media', media)
         print('.', end='')
 
@@ -155,10 +145,10 @@ def folder_investigation( actual_dir, media, category   ):
 # -----------
 
         # --- actor fix ---
-        actor = card_ini.get("general", 'actor', None, False)
-        if actor == 'Puzsér Róbert,Farka Attila Márton':
-            card_ini.update("general", 'actor', 'Puzsér Róbert,Farkas Attila Márton')
-        print('.', end='')
+        #actor = card_ini.get("general", 'actor', None, False)
+        #if actor == 'Puzsér Róbert,Farka Attila Márton':
+        #    card_ini.update("general", 'actor', 'Puzsér Róbert,Farkas Attila Márton')
+        #print('.', end='')
 
         # --- genre - preentation - fix ---
         # --- genre - talk - fix ---
@@ -167,20 +157,20 @@ def folder_investigation( actual_dir, media, category   ):
         newgenrelist = []
 
         for genre in genrelist:
-#            if genre == 'talk_talk':
-#                genre = 'show_talk'
-#            elif genre == 'talk_analysis':
-#                genre = 'show_analysis'
-#            elif genre == 'standup':
-#                genre = 'show_standup'
-#            elif genre == 'skit':
-#                genre = 'show_skit'
-#            elif genre == 'talk_lecture':
-#                genre = 'presentation_lecture'
-            if genre == 'talk_talk':
-                genre = 'alternative_talk'
-            elif genre == 'talk_analysis':
-                genre = 'alternative_analysis'
+            if genre == 'show_talk':
+                genre = 'talk'
+            elif genre == 'show_analysis':
+                genre = 'analysis'
+            elif genre == 'show_standup':
+                genre = 'standup'
+            elif genre == 'show_skit':
+                genre = 'skit'
+            elif genre == 'presentation_lecture':
+                genre = 'lecture'
+            elif genre == 'alternative_analysis':
+                genre = 'analysis'
+            elif genre == 'alternative_talk':
+                genre = 'talk'
                 
             newgenrelist.append(genre)
         newgenre = ",".join(newgenrelist)
@@ -189,10 +179,10 @@ def folder_investigation( actual_dir, media, category   ):
         print('.', end='')
 
         # --- remove [general]media
-        card_ini.remove_option('general', 'media')
+#        card_ini.remove_option('general', 'media')
         
         # --- remove [general]category
-        card_ini.remove_option('general', 'category')
+#        card_ini.remove_option('general', 'category')
         
         
         
@@ -223,8 +213,8 @@ def folder_investigation( actual_dir, media, category   ):
     return
 
 def main():
-#    paths = "/media/akoel/Movies/Final/02.Audio/01.Radio.Play"
-#    folder_investigation(paths, 'audio', 'radioplay')
+ #   paths = "/media/akoel/Movies/Final/02.Audio/01.Radio.Play"
+ #   folder_investigation(paths, 'audio', 'radioplay')
 #
 #    paths = "/media/akoel/Movies/Final/02.Audio/02.Music"
 #    folder_investigation(paths, 'audio', 'music')
@@ -247,6 +237,4 @@ def main():
 #    paths = "/media/akoel/Movies/Final/01.Video/07.Miscellaneous"
 #    folder_investigation(paths, 'video', 'miscellaneous')
 #    
-    paths = "/media/akoel/Movies/Final/02.Audio/03.Show/02.Apu.Azert.Iszik.Mert.Te.Sirsz"
-    folder_investigation(paths, 'audio', 'show')
 
