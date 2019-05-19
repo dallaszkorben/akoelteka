@@ -134,10 +134,9 @@ class GuiAkoTeka(QWidget, QObject):
         
         """
         # Create the first Card Holder - 
-        #self.go_down_in_hierarchy( [], "" )
         self.go_down_in_hierarchy() 
 
-        # Retreive the media path
+        # Retrieve the media path
         paths = [config_ini['media_path']]
         
         # Start to collect the Cards from the media path
@@ -151,8 +150,8 @@ class GuiAkoTeka(QWidget, QObject):
 
          card_descriptor_structure The NOT Filtered card hierarchy list
                                    on the recent level
-         title                     The title what whould be shown above
-                               the CardHolder
+         title                     The title what would be shown above
+                                   the CardHolder
          save                      It controls to save the CardHolder
                                    into the history list
                                    collecting_finish uses it with False
@@ -194,7 +193,7 @@ class GuiAkoTeka(QWidget, QObject):
         self.actual_card_holder.set_border_radius(RADIUS_CARDHOLDER)
         self.actual_card_holder.set_border_width(15)        
                 
-        # Save the original card desctiptor structure into the CardHolder
+        # Save the original card descriptor structure into the CardHolder
         self.actual_card_holder.orig_card_descriptor_structure = card_descriptor_structure
         
         # Make the CardHolder to be in Focus

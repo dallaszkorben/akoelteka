@@ -152,6 +152,10 @@ def get_pattern_audio():
     ptrn = '|'.join( config_ini['media_player_audio_ext'].split(",") )
     return re.compile( '^.+[.](' + ptrn + ')$' )    
 
+def get_pattern_odt():
+    ptrn = '|'.join( config_ini['media_player_odt_ext'].split(",") )
+    return re.compile( '^.+[.](' + ptrn + ')$' )    
+
 def get_pattern_image():
     return re.compile( '^image[.]jp(eg|g)$' )
     
@@ -194,14 +198,13 @@ def folder_investigation( actual_dir, json_list):
             card_path_os = os.path.join(actual_dir, file_name)
             
         # find the Media (video or audio)
-        if get_pattern_audio().match(file_name) or get_pattern_video().match(file_name):
+        if get_pattern_audio().match(file_name) or get_pattern_video().match(file_name) or get_pattern_odt().match(file_name):
             media_path_os = os.path.join(actual_dir, file_name)
             media_name = file_name
             
         # find the Image
         if get_pattern_image().match( file_name ):
            image_path_os = os.path.join(actual_dir, file_name)
-
 
     card = {}
     
@@ -210,6 +213,7 @@ def folder_investigation( actual_dir, json_list):
     card['storyline'] = {}
                 
     general_json_list = {}
+    general_json_list['writer'] = []
     general_json_list['director'] = []
     general_json_list['sound'] = []
     general_json_list['sub'] = [] 
@@ -338,6 +342,16 @@ def folder_investigation( actual_dir, json_list):
         else:
             if not get_pattern_year().match( card['general']['year'] ):
                 card['general']['year'] = "1900"
+
+        # -------------- WRITER---------------------------
+            
+        try:
+            writers = parser.get("general", "writer").split(",")            
+            for writer in writers:
+                card['general']['writer'].append(writer.strip())
+        except (configparser.NoSectionError, configparser.NoOptionError) as nop_err:
+            #log_msg("MESSAGE: " + str(nop_err) + " FILE NAME: " + card_path_os)
+            pass
 
         # -------------- DIRECTOR---------------------------
             
@@ -544,6 +558,14 @@ def play_media(media_path):
         param_list.append(player)
         #param_list += switch_list
         param_list.append(media_path)
+        
+    # odt
+    elif get_pattern_odt().match(media_path):
+        switch_list = config_ini['media_player_odt_param'].split(" ")
+        player = config_ini['media_player_odt']
+        param_list.append(player)
+        param_list += switch_list
+        param_list.append(media_path)        
 
 
     start_time = datetime.datetime.now().timestamp()
@@ -552,7 +574,7 @@ def play_media(media_path):
 
     if player:
     
-        # start playing media    
+        # start playing media  
         thread = Thread(target=run, args=(param_list, ))
         thread.start()
         time.sleep(0.2)
@@ -585,29 +607,38 @@ storyline_title_key = {
         }
     }
 
+def get_writer_title(media, category):
+    ret = writer_title_key.get(media,{}).get(category,'')
+    ret = 'title_writer' if not ret else ret    
+    return _(ret)
+
+writer_title_key = {
+    "video": {
+        },
+    "audio": {
+        "music": "title_writer_music",
+        },
+    "doc": {
+        "book": "title_writer_book"
+        }
+    }
+
 def get_director_title(media, category):
     ret = director_title_key.get(media,{}).get(category,'')
+    ret = 'title_director' if not ret else ret
     return _(ret)
 
 director_title_key = {
     "video": {
-        "movie" : "title_director_movie",
-        "music" : "title_director_music",
-        "show" : "title_director_show",
-        "presentation": "title_director_presentation",
         "alternative" : "title_director_alternative",
-        "miscellaneous": "title_director_miscellaneous"
         },
     "audio": {
-        "radioplay": "title_director_radioplay",
-        "music": "title_director_music",
-        "show": "title_director_show",
-        "presentation": "title_director_presentation"
         }
     }
 
 def get_actor_title(media, category):
     ret = actor_title_key.get(media,{}).get(category,'')
+    ret = 'title_actor' if not ret else ret    
     return _(ret)
     
 actor_title_key = {
@@ -624,6 +655,22 @@ actor_title_key = {
         "music": "title_actor_music",
         "show": "title_actor_show",
         "presentation": "title_actor_presentation"
+        }
+    }
+
+def get_sound_title(media, category):
+    ret = sound_title_key.get(media,{}).get(category,'')
+    ret = 'title_sound' if not ret else ret
+    return _(ret)
+
+sound_title_key = {
+    "video": {
+        },
+    "audio": {
+        },
+    "doc": {
+        "presentation": "title_sound_doc",
+        "book": "title_sound_book"
         }
     }
 

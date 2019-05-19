@@ -8,8 +8,10 @@ import locale
 from akoteka.accessories import get_pattern_video
 from akoteka.accessories import get_pattern_audio
 from akoteka.accessories import get_storyline_title
+from akoteka.accessories import get_writer_title
 from akoteka.accessories import get_director_title
 from akoteka.accessories import get_actor_title
+from akoteka.accessories import get_sound_title
 from akoteka.accessories import play_media
 from akoteka.accessories import FlowLayout
 
@@ -92,14 +94,26 @@ class CardPanel(QWidget):
             self.add_element_to_collector_line( _("title_year"), card_data["general"]["year"])
             self.add_element_to_collector_line( _("title_length"), card_data["general"]["length"])
             self.add_element_to_collector_line( _("title_country"), ", ".join( [ _("country_" + a) for a in card_data["general"]["country"] ]) )
-            self.add_element_to_collector_line( _("title_sound"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sound"] ]) if card_data["general"]["sound"] != [''] else "")
-            self.add_element_to_collector_line( _("title_sub"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sub"] ]) if card_data["general"]["sub"] != [''] else "" )
+            
+            if ''.join(card_data["general"]["sound"]):
+                self.add_element_to_collector_line(
+                    get_sound_title(card_data["control"]["media"], card_data["control"]["category"]),
+                    ", ".join( [ _("lang_" + a) for a in card_data["general"]["sound"] ]) if card_data["general"]["sound"] != [''] else "")
+
+            if ''.join(card_data["general"]["sub"]):            
+                self.add_element_to_collector_line( _("title_sub"), ", ".join( [ _("lang_" + a) for a in card_data["general"]["sub"] ]) if card_data["general"]["sub"] != [''] else "" )
  
             self.add_separator()
+
+            # -------------- WRITER --------------------------
+            
+            if ''.join(card_data["general"]["writer"]):
+                self.add_info_line( 
+                    get_writer_title(card_data["control"]["media"], card_data["control"]["category"]),
+                    ", ".join( [ d for d in card_data["general"]["writer"] ] ) )
             
             # -------------- DIRECTOR --------------------------
             
-            #if card_data['control']['category'] == 'movie':
             if ''.join(card_data["general"]["director"]):
                     self.add_info_line( 
                         get_director_title(card_data["control"]["media"], card_data["control"]["category"]),
@@ -108,7 +122,6 @@ class CardPanel(QWidget):
             # -------------- ACTOR -----------------------------
 
             if ''.join(card_data["general"]["actor"]):
-                #title = _("title_actor_movie") if card_data['control']['category'] == 'movie' else _("title_actor_music") if card_data['control']['category'] == 'music' else _("title_actor_talk") if card_data['control']['category'] == 'talk' else ''                
                 self.add_info_line( 
                     get_actor_title(card_data["control"]["media"], card_data["control"]["category"]), 
                     ", ".join( [ a for a in card_data["general"]["actor"] ] ) )
@@ -304,7 +317,9 @@ class CardInfoTitle(QWidget):
         elif media == 'image':
             media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_IMAGE)) )
         elif media == 'book':
-            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_BOOK)) )            
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_BOOK)) )
+        elif media == 'doc':
+            media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_DOC)) )
         else:
             media_pixmap = QPixmap( resource_filename(__name__,os.path.join("img", IMG_MEDIA_FOLDER)) )
             
@@ -591,11 +606,10 @@ class CardImage(QWidget):
             
         # Play media
         if media_path:
-            
 #            if get_pattern_audio().match(media_path):            
 #                self.panel.card.get_card_holder().parent.player
             
-                play_media(self.media_path)
+            play_media(self.media_path)
             
         else:
             # go deeper

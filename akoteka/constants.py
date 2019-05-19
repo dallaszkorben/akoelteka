@@ -80,4 +80,5 @@ IMG_MEDIA_FOLDER = "media-folder.png"
 IMG_MEDIA_VIDEO = "media-video.png"
 IMG_MEDIA_AUDIO = "media-audio.png"
 IMG_MEDIA_BOOK = "media-book.png"
+IMG_MEDIA_DOC = "media-doc.png"
 

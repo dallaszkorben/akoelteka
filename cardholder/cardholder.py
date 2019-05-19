@@ -189,8 +189,8 @@ class CardHolder( QWidget ):
     def startCardCollection(self, parameters):
         """
         This method should be called from outside when you want a totally new collection of cards
-        Usualy that happens only once, at the beginning.
-        The process could take lot of time, so a Spinner will indicate that the loding is in-process
+        Usually that happens only once, at the beginning.
+        The process could take lot of time, so a Spinner will indicate that the loading is in-process
         """
 
         self.cc = CollectCardsThread.get_instance( self, self.get_collected_cards_method, parameters )

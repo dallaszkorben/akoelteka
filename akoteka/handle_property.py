@@ -181,6 +181,10 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PLAYER_AUDIO = ("media", "player-audio", "rhythmbox")
     DEFAULT_MEDIA_PLAYER_AUDIO_PARAM = ("media", "player-audio-param", "")
     DEFAULT_MEDIA_PLAYER_AUDIO_EXT = ("media", "player-audio-ext", "mp3,ogg")
+
+    DEFAULT_MEDIA_PLAYER_ODT = ("media", "player-odt", "libreoffice")
+    DEFAULT_MEDIA_PLAYER_ODT_PARAM = ("media", "player-odt-param", "--writer --quickstart --nofirststartwizard --view")
+    DEFAULT_MEDIA_PLAYER_ODT_EXT = ("media", "player-odt-ext", "odt")
     
     __instance = None    
 
@@ -226,6 +230,16 @@ class ConfigIni( Property ):
 
     def get_media_player_audio_ext(self):
         return self.get(self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[0], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[1], self.DEFAULT_MEDIA_PLAYER_AUDIO_EXT[2])
+
+
+    def get_media_player_odt(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_ODT[0], self.DEFAULT_MEDIA_PLAYER_ODT[1], self.DEFAULT_MEDIA_PLAYER_ODT[2])
+
+    def get_media_player_odt_param(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_ODT_PARAM[0], self.DEFAULT_MEDIA_PLAYER_ODT_PARAM[1], self.DEFAULT_MEDIA_PLAYER_ODT_PARAM[2])
+
+    def get_media_player_odt_ext(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_ODT_EXT[0], self.DEFAULT_MEDIA_PLAYER_ODT_EXT[1], self.DEFAULT_MEDIA_PLAYER_ODT_EXT[2])
 
 
     def set_language(self, lang):
@@ -276,6 +290,10 @@ def re_read_config_ini():
     config_ini['media_player_audio'] = ci.get_media_player_audio()
     config_ini['media_player_audio_param'] = ci.get_media_player_audio_param()
     config_ini['media_player_audio_ext'] = ci.get_media_player_audio_ext()
+
+    config_ini['media_player_odt'] = ci.get_media_player_odt()
+    config_ini['media_player_odt_param'] = ci.get_media_player_odt_param()
+    config_ini['media_player_odt_ext'] = ci.get_media_player_odt_ext()
 
     # Get the dictionary
     dic = Dict.get_instance( config_ini['language'] )
