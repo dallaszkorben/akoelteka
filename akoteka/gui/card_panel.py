@@ -555,12 +555,13 @@ class CardImage(QWidget):
         #super().paintEvent(event)
         
     def set_image_path( self, image_path ):
-        pixmap = QPixmap( image_path )
-        if pixmap.width() >= pixmap.height():
-            smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
-        else:
-            smaller_pixmap = pixmap.scaledToHeight(PICTURE_WIDTH)
-        self.image_panel.setPixmap(smaller_pixmap)        
+        if image_path is not None:
+            pixmap = QPixmap( image_path )
+            if pixmap.width() >= pixmap.height():
+                smaller_pixmap = pixmap.scaledToWidth(PICTURE_WIDTH)
+            else:
+                smaller_pixmap = pixmap.scaledToHeight(PICTURE_WIDTH)
+            self.image_panel.setPixmap(smaller_pixmap)        
 
     def set_media_path( self, media_path ):
         self.media_path = media_path

@@ -185,6 +185,10 @@ class ConfigIni( Property ):
     DEFAULT_MEDIA_PLAYER_ODT = ("media", "player-odt", "libreoffice")
     DEFAULT_MEDIA_PLAYER_ODT_PARAM = ("media", "player-odt-param", "--writer --quickstart --nofirststartwizard --view")
     DEFAULT_MEDIA_PLAYER_ODT_EXT = ("media", "player-odt-ext", "odt")
+
+    DEFAULT_MEDIA_PLAYER_PDF = ("media", "player-pdf", "okular")
+    DEFAULT_MEDIA_PLAYER_PDF_PARAM = ("media", "player-pdf-param", "--presentation --page 1 --unique")
+    DEFAULT_MEDIA_PLAYER_PDF_EXT = ("media", "player-pdf-ext", "pdf")
     
     __instance = None    
 
@@ -241,6 +245,15 @@ class ConfigIni( Property ):
     def get_media_player_odt_ext(self):
         return self.get(self.DEFAULT_MEDIA_PLAYER_ODT_EXT[0], self.DEFAULT_MEDIA_PLAYER_ODT_EXT[1], self.DEFAULT_MEDIA_PLAYER_ODT_EXT[2])
 
+    def get_media_player_pdf(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_PDF[0], self.DEFAULT_MEDIA_PLAYER_PDF[1], self.DEFAULT_MEDIA_PLAYER_PDF[2])
+
+    def get_media_player_pdf_param(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_PDF_PARAM[0], self.DEFAULT_MEDIA_PLAYER_PDF_PARAM[1], self.DEFAULT_MEDIA_PLAYER_PDF_PARAM[2])
+
+    def get_media_player_pdf_ext(self):
+        return self.get(self.DEFAULT_MEDIA_PLAYER_PDF_EXT[0], self.DEFAULT_MEDIA_PLAYER_PDF_EXT[1], self.DEFAULT_MEDIA_PLAYER_PDF_EXT[2])
+
 
     def set_language(self, lang):
         self.update(self.DEFAULT_LANGUAGE[0], self.DEFAULT_LANGUAGE[1], lang)
@@ -294,6 +307,10 @@ def re_read_config_ini():
     config_ini['media_player_odt'] = ci.get_media_player_odt()
     config_ini['media_player_odt_param'] = ci.get_media_player_odt_param()
     config_ini['media_player_odt_ext'] = ci.get_media_player_odt_ext()
+
+    config_ini['media_player_pdf'] = ci.get_media_player_pdf()
+    config_ini['media_player_pdf_param'] = ci.get_media_player_pdf_param()
+    config_ini['media_player_pdf_ext'] = ci.get_media_player_pdf_ext()
 
     # Get the dictionary
     dic = Dict.get_instance( config_ini['language'] )

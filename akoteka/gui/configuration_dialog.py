@@ -50,6 +50,8 @@ class ConfigurationDialog(QDialog):
         
         self.content_section.addWidget(QHLine())
 
+        # --- Video Player ---
+        
         # video player 
         self.media_player_video_selector = MediaPlayerVideoSelector(config_ini['media_player_video'])
         self.content_section.addWidget(self.media_player_video_selector)
@@ -60,6 +62,8 @@ class ConfigurationDialog(QDialog):
 
         self.content_section.addWidget(QHLine())
 
+        # --- Audio Player ---
+        
         # audio player 
         self.media_player_audio_selector = MediaPlayerAudioSelector(config_ini['media_player_audio'])
         self.content_section.addWidget(self.media_player_audio_selector)
@@ -67,7 +71,31 @@ class ConfigurationDialog(QDialog):
         # audio player parameters        
         self.media_player_audio_param = MediaPlayerAudioParam(config_ini['media_player_audio_param'])
         self.content_section.addWidget(self.media_player_audio_param)
+
+        self.content_section.addWidget(QHLine())
+
+        # --- odt Player ---
         
+        # odt player 
+        self.media_player_odt_selector = MediaPlayerOdtSelector(config_ini['media_player_odt'])
+        self.content_section.addWidget(self.media_player_odt_selector)
+        
+        # odt player parameters        
+        self.media_player_odt_param = MediaPlayerOdtParam(config_ini['media_player_odt_param'])
+        self.content_section.addWidget(self.media_player_odt_param)
+
+        self.content_section.addWidget(QHLine())
+
+        # --- pdf Player ---
+        
+        # pdf player 
+        self.media_player_pdf_selector = MediaPlayerPdfSelector(config_ini['media_player_pdf'])
+        self.content_section.addWidget(self.media_player_pdf_selector)
+        
+        # pdf player parameters        
+        self.media_player_pdf_param = MediaPlayerPdfParam(config_ini['media_player_pdf_param'])
+        self.content_section.addWidget(self.media_player_pdf_param)
+
     def get_media_path(self):
         return self.media_path_selector.get_media_path()
         
@@ -88,6 +116,18 @@ class ConfigurationDialog(QDialog):
     
     def get_media_player_audio_param(self):
         return self.media_player_audio_param.get_media_player_audio_param()
+
+    def get_media_player_odt(self):
+        return self.media_player_odt_selector.get_media_player_odt() 
+    
+    def get_media_player_odt_param(self):
+        return self.media_player_odt_param.get_media_player_odt_param()
+
+    def get_media_player_pdf(self):
+        return self.media_player_pdf_selector.get_media_player_pdf() 
+    
+    def get_media_player_odt_pdf(self):
+        return self.media_player_pdf_param.get_media_player_pdf_param()
 
 class ContentSection(QWidget):
         def __init__(self):
@@ -365,6 +405,133 @@ class MediaPlayerAudioParam(LineTemplate):
     def get_media_player_audio_param(self):
         return self.folder_field.text()
 
+# ====================
+#
+# Media Player odt
+#
+# ====================
+class MediaPlayerOdtSelector(LineTemplate):
     
+    def __init__(self, default_media_player_odt_path):
+        super().__init__(_('title_media_player_odt') + ':')
+
+        # Text Field
+        self.file_field = QLineEdit(self)
+        self.file_field.setText(default_media_player_odt_path)
+        self.self_layout.addWidget(self.file_field)
+        
+        # Button
+        self.folder_selector_button = QPushButton()
+        self.folder_selector_button.setCheckable(False)
+        selector_icon = QIcon()
+        selector_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_FOLDER_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.folder_selector_button.setIcon( selector_icon )
+        self.folder_selector_button.setIconSize(QSize(IMG_SIZE,IMG_SIZE))
+        self.folder_selector_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.folder_selector_button.setStyleSheet("background:transparent; border:none") 
+        self.folder_selector_button.clicked.connect(self.select_folder_button_on_click)
+
+        self.self_layout.addWidget(self.folder_selector_button)
+
+    def get_media_player_odt(self):
+        return self.file_field.text()
     
+    def select_folder_button_on_click(self):        
+        file, valami = QFileDialog.getOpenFileName(self, _('title_select_media_player_odt'), os.path.abspath(os.sep))
+        
+        if file:
+            self.file_field.setText(file)
+
+
+# ========================
+#
+# Media Player odt Param
+#
+# ========================
+class MediaPlayerOdtParam(LineTemplate):
+    
+    def __init__(self, default_media_player_odt_param):
+        super().__init__( _('title_media_player_odt_param') + ':' )
+    
+        # Text Field
+        self.folder_field = QLineEdit(self)
+        self.folder_field.setText(default_media_player_odt_param)
+        self.self_layout.addWidget(self.folder_field)
+        
+        self.empty_button = QPushButton()
+        self.empty_button.setCheckable(False)
+        empty_icon = QIcon()
+        empty_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.empty_button.setIcon( empty_icon )
+        self.empty_button.setIconSize(QSize(IMG_SIZE,IMG_SIZE))
+        self.self_layout.addWidget(self.empty_button)
+
+        
+    def get_media_player_odt_param(self):
+        return self.folder_field.text()    
+    
+# ====================
+#
+# Media Player pdf
+#
+# ====================
+class MediaPlayerPdfSelector(LineTemplate):
+    
+    def __init__(self, default_media_player_pdf_path):
+        super().__init__(_('title_media_player_pdf') + ':')
+
+        # Text Field
+        self.file_field = QLineEdit(self)
+        self.file_field.setText(default_media_player_pdf_path)
+        self.self_layout.addWidget(self.file_field)
+        
+        # Button
+        self.folder_selector_button = QPushButton()
+        self.folder_selector_button.setCheckable(False)
+        selector_icon = QIcon()
+        selector_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_FOLDER_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.folder_selector_button.setIcon( selector_icon )
+        self.folder_selector_button.setIconSize(QSize(IMG_SIZE,IMG_SIZE))
+        self.folder_selector_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.folder_selector_button.setStyleSheet("background:transparent; border:none") 
+        self.folder_selector_button.clicked.connect(self.select_folder_button_on_click)
+
+        self.self_layout.addWidget(self.folder_selector_button)
+
+    def get_media_player_pdf(self):
+        return self.file_field.text()
+    
+    def select_folder_button_on_click(self):        
+        file, valami = QFileDialog.getOpenFileName(self, _('title_select_media_player_pdf'), os.path.abspath(os.sep))
+        
+        if file:
+            self.file_field.setText(file)
+
+
+# ========================
+#
+# Media Player pdf Param
+#
+# ========================
+class MediaPlayerPdfParam(LineTemplate):
+    
+    def __init__(self, default_media_player_odt_param):
+        super().__init__( _('title_media_player_odt_param') + ':' )
+    
+        # Text Field
+        self.folder_field = QLineEdit(self)
+        self.folder_field.setText(default_media_player_odt_param)
+        self.self_layout.addWidget(self.folder_field)
+        
+        self.empty_button = QPushButton()
+        self.empty_button.setCheckable(False)
+        empty_icon = QIcon()
+        empty_icon.addPixmap(QPixmap( resource_filename(__name__,os.path.join("img", IMG_EMPTY_BUTTON)) ), QIcon.Normal, QIcon.On)
+        self.empty_button.setIcon( empty_icon )
+        self.empty_button.setIconSize(QSize(IMG_SIZE,IMG_SIZE))
+        self.self_layout.addWidget(self.empty_button)
+
+        
+    def get_media_player_odt_param(self):
+        return self.folder_field.text()    
     

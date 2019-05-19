@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import QWidget
 from akoteka.handle_property import Config
 from akoteka.handle_property import config_ini
 from akoteka.handle_property import _
+from _ast import Or
 #from akoteka.logger import logger
 
 
@@ -156,6 +157,10 @@ def get_pattern_odt():
     ptrn = '|'.join( config_ini['media_player_odt_ext'].split(",") )
     return re.compile( '^.+[.](' + ptrn + ')$' )    
 
+def get_pattern_pdf():
+    ptrn = '|'.join( config_ini['media_player_pdf_ext'].split(",") )
+    return re.compile( '^.+[.](' + ptrn + ')$' )    
+
 def get_pattern_image():
     return re.compile( '^image[.]jp(eg|g)$' )
     
@@ -197,8 +202,8 @@ def folder_investigation( actual_dir, json_list):
         if get_pattern_card().match( file_name ):
             card_path_os = os.path.join(actual_dir, file_name)
             
-        # find the Media (video or audio)
-        if get_pattern_audio().match(file_name) or get_pattern_video().match(file_name) or get_pattern_odt().match(file_name):
+        # find the Media (video or audio or odt or pdf)
+        if get_pattern_audio().match(file_name) or get_pattern_video().match(file_name) or get_pattern_odt().match(file_name) or get_pattern_pdf().match(file_name):
             media_path_os = os.path.join(actual_dir, file_name)
             media_name = file_name
             
@@ -567,6 +572,13 @@ def play_media(media_path):
         param_list += switch_list
         param_list.append(media_path)        
 
+    # pdf
+    elif get_pattern_pdf().match(media_path):
+        switch_list = config_ini['media_player_pdf_param'].split(" ")
+        player = config_ini['media_player_pdf']
+        param_list.append(player)
+        param_list += switch_list
+        param_list.append(media_path)        
 
     start_time = datetime.datetime.now().timestamp()
 
@@ -574,7 +586,7 @@ def play_media(media_path):
 
     if player:
     
-        # start playing media  
+        # start playing media
         thread = Thread(target=run, args=(param_list, ))
         thread.start()
         time.sleep(0.2)
