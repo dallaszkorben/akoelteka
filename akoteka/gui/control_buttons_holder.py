@@ -23,8 +23,6 @@ from akoteka.accessories import clearLayout
 from akoteka.accessories import FlowLayout
 from akoteka.accessories import play_media
 
-
-
 from akoteka.constants import *
 from akoteka.setup.setup import getSetupIni
 

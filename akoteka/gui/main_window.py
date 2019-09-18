@@ -276,9 +276,13 @@ class GuiAkoTeka(QWidget, QObject):
             -Show the title
             -Set up the filters
         """        
+#        card_holder.spinner_movie.start()
+#        card_holder.collecting_spinner.setHidden(False)        
         
-        if card_descriptor_structure:
-          
+        import time 
+        time.sleep(10)
+        
+        if card_descriptor_structure:          
             # Show the title of the CardHolder (the certain level)        
             self.hierarchy_title.setHidden(False)       
         
@@ -296,12 +300,16 @@ class GuiAkoTeka(QWidget, QObject):
         # if there is only ONE Card and the status of the presentation is "initialize"
         if len(card_holder.card_descriptor_list) == 1 and self.initialize:
             # then I go down ONE level
-#            self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["orig-sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
             self.go_down_in_hierarchy(card_holder.card_descriptor_list[0]['extra']["sub-cards"], card_holder.card_descriptor_list[0]['title'][config_ini['language']], save=False )
 
         # Enable the buttons to search
         self.control_panel.control_buttons_holder.enableSearchIcons(True)
         self.control_panel.control_buttons_holder.enablePlayContinously(True)
+        
+                # Stop the Spinner
+#        card_holder.collecting_spinner.setHidden(True)
+#        card_holder.spinner_movie.stop()
+
         
     def get_y_coordinate_by_reverse_index(self, reverse_index, diff_to_max):
         """
@@ -1428,5 +1436,3 @@ def main():
     ex = GuiAkoTeka()
     ex.startCardHolder()
     sys.exit(app.exec_())
-    
-    

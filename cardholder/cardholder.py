@@ -51,6 +51,8 @@ from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import QByteArray
 
 from pkg_resources import resource_string, resource_filename
+
+from akoteka.accessories import CardListJson
  
 # =========================
 #
@@ -237,8 +239,8 @@ class CardHolder( QWidget ):
 
         # Inform the parent if it is necessary
         if self.collecting_finish_method:
-           self.collecting_finish_method(self, card_descriptor_structure) 
-
+           self.collecting_finish_method(self, card_descriptor_structure)
+           
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
     #
@@ -429,6 +431,7 @@ class CardHolder( QWidget ):
         else:
             loop = self.MAX_CARD_ROLLING_RATE
             
+#        self.animate = spinner.get_instance(int(loop), 1, sleep)
         self.animate = AnimateRolling.get_instance(int(loop), 1, sleep)
         if self.animate:
             self.animate.positionChanged.connect(self.rolling)
@@ -1104,12 +1107,24 @@ class CollectCardsThread(QtCore.QThread):
         self.collectionStarted.emit()
 
         #### for TEST reason
-        #time.sleep(5)
+        #time.sleep(1)
         ####
         
+        #
         # Here Collects the Cards Info
-        card_list = self.collect_cards_method(self.paths)
-        
+        #
+#        CardListJson.get_instance().write('path', card_descriptor_structure)
+#        card_list = CardListJson.get_instance().read(self.paths)
+        card_list = CardListJson.get_instance().read()
+        if card_list is None:
+            
+            # ---
+            card_list = self.collect_cards_method(self.paths)
+            # ---
+            
+            #CardListJson.get_instance().write(self.paths, card_list)            
+            CardListJson.get_instance().write(card_list)
+
         # Emits the collectionFinished Event
         self.collectionFinished.emit(card_list)
 
